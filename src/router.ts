@@ -1,11 +1,9 @@
-import Wtf from './components/test.vue'
-import Kek from './components/kek.vue'
-import Login from './pages/login.vue'
+import login from './pages/login.vue'
+import home from './pages/home.vue'
 
 const routes = [
-  { path: '/', component: Wtf },
-  { path: '/about', component: Kek },
-  { path: '/login', component: Login },
+  { path: '/', component: home },
+  { path: '/login', component: login },
 ]
 
 export { routes }
