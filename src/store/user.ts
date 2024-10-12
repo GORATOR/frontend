@@ -1,15 +1,24 @@
 import { ref } from "vue"
 import { defineStore } from "pinia"
 
-const sleepNow = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
+const SESSIONID_LOCAL_STORAGE_KEY = 'sessionId'
 
-// TODO localstorage
+function saveSessionId(sessionId: string) {
+    localStorage.setItem(SESSIONID_LOCAL_STORAGE_KEY, sessionId)
+}
+
+function loadSessionId(): string | null {
+    return localStorage.getItem(SESSIONID_LOCAL_STORAGE_KEY)
+}
 
 export const useUserStore = defineStore('user', () => {
-    const logined = ref(false)
+    console.log("USER STORE LOADED")
+
+    const storedSessionId = loadSessionId()
+    const logined = ref(storedSessionId !== null)
     const loading = ref(false)
     const username = ref<string | null>(null)
-    const sessionId = ref<string | null>(null)
+    const sessionId = ref<string | null>(storedSessionId)
 
     async function login(user: string, password: string): Promise<boolean> {
         loading.value = true
@@ -37,6 +46,8 @@ export const useUserStore = defineStore('user', () => {
 
             username.value = data.user.Email
             logined.value = true
+            sessionId.value = data.session_id
+            saveSessionId(data.session_id)
             return true
         }
         catch (err) {
