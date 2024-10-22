@@ -1,5 +1,6 @@
 import { ref } from "vue"
 import { defineStore } from "pinia"
+import { BASE_URL } from "../constants"
 
 const SESSIONID_LOCAL_STORAGE_KEY = 'sessionId'
 
@@ -25,7 +26,7 @@ export const useUserStore = defineStore('user', () => {
 
         try {
             const response = await fetch(
-                "http://localhost:8080/login",
+                BASE_URL + "/login",
                 {
                     method: 'POST',
                     headers: {
