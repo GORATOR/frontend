@@ -1,25 +1,27 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { useUserStore } from '../store/user.ts'
 
+const router = useRouter()
 const store = useUserStore()
+
+const gotoHome = () => router.push({ path: "/" })
+const gotoTeams = () => router.push({ path: "/teams" })
 </script>
 
 <template>
-    <div class="row" style="height: 100vh;">
-        <div class="col-md-3" style="background-color: indigo;">
-            <div class="p-3 m-0 border-0">
-                <div class="account-login">
-                    {{ store.username }}
-                </div>
+    <div class="sidebar">
+        <div class="sidebar-menu">
+            <div class="account-login" @click="gotoHome">
+                {{ store.username }}
             </div>
-            <div class="p-3 m-0 border-0">
-                <div class="d-grid gap-2">
-                    <button class="btn btn-outline-light btn-sm text-start" type="button">Issues</button>
-                    <button class="btn btn-outline-light btn-sm text-start" type="button">Projects</button>
-                </div>
+            <div class="menu-items">
+                <button class="menu-item">Users</button>
+                <button class="menu-item" @click="gotoTeams">Teams</button>
+                <button class="menu-item">Orgs</button>
             </div>
         </div>
-        <div class="col-md-9">
+        <div class="sidebar-container">
             <slot></slot>
         </div>
     </div>
@@ -28,5 +30,41 @@ const store = useUserStore()
 <style scoped>
 .account-login {
     color: rgb(248, 249, 250);
+}
+
+.sidebar {
+    height: 100vh;
+    display: flex;
+}
+
+.sidebar-menu {
+    width: 200px;
+    padding: 1rem;
+    background-color: #371e40;
+}
+
+.sidebar-container {
+    flex-grow: 1;
+    padding: 1rem;
+}
+
+.menu-items {
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-item {
+    padding: 0.3rem;
+    border: 0;
+    border-radius: 0.3rem;
+    color: #9586a5;
+    background-color: #371e40;
+    text-align: left;
+}
+
+.menu-item:hover {
+    color: white;
+    background-color: #543c5c;
 }
 </style>

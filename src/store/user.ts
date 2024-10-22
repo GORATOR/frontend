@@ -12,12 +12,12 @@ function loadSessionId(): string | null {
 }
 
 export const useUserStore = defineStore('user', () => {
-    console.log("USER STORE LOADED")
-
     const storedSessionId = loadSessionId()
-    const logined = ref(storedSessionId !== null)
+    const sessinLoaded = storedSessionId !== null
+
+    const logined = ref(sessinLoaded)
     const loading = ref(false)
-    const username = ref<string | null>(null)
+    const username = ref<string | null>(sessinLoaded ? "NOT_LOADED" : null)
     const sessionId = ref<string | null>(storedSessionId)
 
     async function login(user: string, password: string): Promise<boolean> {
