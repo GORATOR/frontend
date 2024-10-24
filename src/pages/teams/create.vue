@@ -5,14 +5,15 @@ import Sidebar from '../../components/sidebar.vue'
 import { BASE_URL } from '../../constants'
 
 const store = useUserStore()
+const teamName = ref<string>("")
 const loading = ref<boolean>(false)
 
 async function createTeam() {
     loading.value = true
 
     const newTeam = {
-        Name: "new name",
-        Avatar: "new avatar"
+        Name: teamName.value,
+        Avatar: ""
     }
 
     try {
@@ -22,6 +23,7 @@ async function createTeam() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Session-Id': `${store.sessionId}`
                 },
                 body: JSON.stringify(newTeam),
             })
@@ -48,7 +50,7 @@ async function createTeam() {
     <Sidebar>
         <h1>Create new Team</h1>
         <div>
-            FORM
+            <input type="text" v-model="teamName" />
             <span v-if="loading">WAIT...</span>
             <button v-else @click="createTeam">SUBMIT</button>
         </div>
