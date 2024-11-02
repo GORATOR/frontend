@@ -1,6 +1,6 @@
 import { ref } from "vue"
 import { defineStore } from "pinia"
-import { BASE_URL } from "../constants"
+import { sendPost } from "../utils/requests"
 
 const SESSIONID_LOCAL_STORAGE_KEY = 'sessionId'
 
@@ -25,17 +25,11 @@ export const useUserStore = defineStore('user', () => {
         loading.value = true
 
         try {
-            const response = await fetch(
-                BASE_URL + "/login",
+            const response = await sendPost(
+                "/login",
                 {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: user,
-                        password: password
-                    }),
+                    username: user,
+                    password: password
                 })
 
             if (response.status != 200) {

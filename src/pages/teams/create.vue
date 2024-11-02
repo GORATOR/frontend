@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useUserStore } from '../../store/user.ts'
 import Sidebar from '../../components/sidebar.vue'
-import { BASE_URL } from '../../constants'
+import { sendPost } from '../../utils/requests'
 
-const store = useUserStore()
 const teamName = ref<string>("")
 const loading = ref<boolean>(false)
 
@@ -17,16 +15,7 @@ async function createTeam() {
     }
 
     try {
-        const response = await fetch(
-            BASE_URL + "/team",
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Session-Id': `${store.sessionId}`
-                },
-                body: JSON.stringify(newTeam),
-            })
+        const response = await sendPost("/team", newTeam)
 
         if (response.status != 200) {
             console.error('Invalid response:', response)
