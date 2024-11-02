@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import Sidebar from '../../components/sidebar.vue'
 import { sendPost } from '../../utils/requests'
 import { gotoTeamsList } from '../../utils/redirects'
 
-const router = useRouter()
 const teamName = ref<string>("")
 const loading = ref<boolean>(false)
 
@@ -26,7 +24,7 @@ async function createTeam() {
             return false
         }
 
-        gotoTeamsList(router)
+        gotoTeamsList()
         return true
     }
     catch (err) {

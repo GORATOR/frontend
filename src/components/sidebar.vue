@@ -1,23 +1,19 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import { useUserStore } from '../store/user.ts'
 import { gotoHome, gotoTeamsList } from '../utils/redirects.ts'
 
-const router = useRouter()
 const store = useUserStore()
-const home = () => gotoHome(router)
-const teams = () => gotoTeamsList(router)
 </script>
 
 <template>
     <div class="sidebar">
         <div class="sidebar-menu">
-            <div class="account-login" @click="home">
+            <div class="account-login" @click="gotoHome">
                 {{ store.username }}
             </div>
             <div class="menu-items">
                 <button class="menu-item">Users</button>
-                <button class="menu-item" @click="teams">Teams</button>
+                <button class="menu-item" @click="gotoTeamsList">Teams</button>
                 <button class="menu-item">Orgs</button>
             </div>
         </div>

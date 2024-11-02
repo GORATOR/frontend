@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { sendGet } from '../../utils/requests'
 import Sidebar from '../../components/sidebar.vue'
 import { Team } from '../../models/team'
 import { gotoTeamsNew } from '../../utils/redirects.ts'
 
-const router = useRouter()
 const list = ref<Team[]>([])
 const loading = ref(false)
-const create = () => gotoTeamsNew(router)
 
 async function loadList() {
     loading.value = true
@@ -35,6 +32,6 @@ loadList()
             </li>
         </ul>
 
-        <button @click="create">CREATE</button>
+        <button @click="gotoTeamsNew">CREATE</button>
     </Sidebar>
 </template>
