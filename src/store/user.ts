@@ -32,7 +32,7 @@ export const useUserStore = defineStore('user', () => {
             loading.value = true
 
             try {
-                var response = await sendGet("/user/current")
+                const response = await sendGet("/user/current")
 
                 if (response.status != 200) {
                     console.error('Invalid response:', response)
