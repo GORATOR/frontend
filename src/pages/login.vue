@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../store/user.ts'
+import { gotoHome } from '../utils/redirects.ts'
 
 const router = useRouter()
 const store = useUserStore()
@@ -12,7 +13,7 @@ async function goLogin() {
     const success = await store.login(username.value, password.value)
 
     if (success) {
-        router.push({ path: "/" })
+        gotoHome(router)
     }
 }
 </script>

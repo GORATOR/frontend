@@ -3,12 +3,11 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '../../components/sidebar.vue'
 import { sendPost } from '../../utils/requests'
+import { gotoTeamsList } from '../../utils/redirects'
 
 const router = useRouter()
 const teamName = ref<string>("")
 const loading = ref<boolean>(false)
-
-const gotoList = () => router.push({ path: "/teams" })
 
 async function createTeam() {
     loading.value = true
@@ -27,7 +26,7 @@ async function createTeam() {
             return false
         }
 
-        gotoList()
+        gotoTeamsList(router)
         return true
     }
     catch (err) {
