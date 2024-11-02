@@ -18,4 +18,20 @@ function sendPost(url: string, body: any): Promise<Response> {
         })
 }
 
-export { sendPost }
+function sendGet(url: string): Promise<Response> {
+    const auth = useUserStore()
+
+    return fetch(
+        BASE_URL + url,
+        {
+            method: 'GET',
+            headers: auth.sessionId
+                ? {
+                    'Content-Type': 'application/json',
+                    'X-Session-Id': `${auth.sessionId}`
+                }
+                : { 'Content-Type': 'application/json' }
+        })
+}
+
+export { sendPost, sendGet }
