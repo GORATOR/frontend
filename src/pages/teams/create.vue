@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import Sidebar from '../../components/sidebar.vue'
 import { sendPost } from '../../utils/requests'
 import { gotoTeamsList } from '../../utils/redirects'
+import TextBox from '../../components/textbox.vue'
 
 const teamName = ref<string>("")
 const loading = ref<boolean>(false)
@@ -42,7 +43,7 @@ async function createTeam() {
     <Sidebar>
         <h1>Create new Team</h1>
         <div>
-            <input type="text" v-model="teamName" />
+            <TextBox label="Name" v-model="teamName" />
             <span v-if="loading">WAIT...</span>
             <button v-else @click="createTeam">SUBMIT</button>
         </div>

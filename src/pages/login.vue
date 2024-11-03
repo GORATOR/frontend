@@ -23,7 +23,7 @@ async function goLogin() {
         </option>
     </select>
 
-    <div>
+    <div class="container">
         <div>
             <TextBox :label="$t('login.login_field')" v-model="username" />
         </div>
@@ -38,3 +38,10 @@ async function goLogin() {
         </div>
     </div>
 </template>
+
+<style scoped>
+.container {
+    justify-items: center;
+    padding: 2rem;
+}
+</style>

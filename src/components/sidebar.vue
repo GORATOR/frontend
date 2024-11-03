@@ -52,9 +52,9 @@ const store = useUserStore()
 }
 
 .menu-item {
-    padding: 0.3rem;
+    padding: .3rem;
     border: 0;
-    border-radius: 0.3rem;
+    border-radius: .3rem;
     color: #9586a5;
     background-color: #371e40;
     text-align: left;
