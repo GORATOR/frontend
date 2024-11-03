@@ -26,6 +26,7 @@ const store = useUserStore()
 <style scoped>
 .account-login {
     color: rgb(248, 249, 250);
+    cursor: pointer;
 }
 
 .sidebar {
@@ -57,6 +58,7 @@ const store = useUserStore()
     color: #9586a5;
     background-color: #371e40;
     text-align: left;
+    cursor: pointer;
 }
 
 .menu-item:hover {

@@ -26,6 +26,8 @@ loadList()
 
 <template>
     <Sidebar>
+        <h2>Teams</h2>
+
         <ul>
             <li v-for="item in list">
                 {{ item.Name }}
