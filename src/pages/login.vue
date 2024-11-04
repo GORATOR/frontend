@@ -37,7 +37,7 @@ async function goLogin() {
 </template>
 
 <style scoped lang="scss">
-@use '../assets/_variables.scss' as *;
+@use '../assets/variables.scss' as *;
 
 .container {
     justify-items: center;

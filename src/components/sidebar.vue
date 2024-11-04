@@ -24,14 +24,27 @@ const store = useUserStore()
 </template>
 
 <style scoped lang="scss">
+@use '../assets/variables' as *;
+
 .sidebar {
     height: 100vh;
     display: flex;
 
     .sidebar-menu {
-        width: 200px;
+        display: none;
         padding: 20px 10px;
         background-color: #371e40;
+        flex-shrink: 0;
+
+        @media (min-width: $sm) {
+            display: block;
+            width: 200px;
+        }
+
+        @media (min-width: $lg) {
+            display: block;
+            width: 250px;
+        }
 
         .account-login {
             color: rgb(248, 249, 250);
