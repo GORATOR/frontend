@@ -23,46 +23,46 @@ const store = useUserStore()
     </div>
 </template>
 
-<style scoped>
-.account-login {
-    color: rgb(248, 249, 250);
-    cursor: pointer;
-}
-
+<style scoped lang="scss">
 .sidebar {
     height: 100vh;
     display: flex;
-}
 
-.sidebar-menu {
-    width: 200px;
-    padding: 1rem;
-    background-color: #371e40;
-}
+    .sidebar-menu {
+        width: 200px;
+        padding: 20px 10px;
+        background-color: #371e40;
 
-.sidebar-container {
-    flex-grow: 1;
-    padding: 1rem;
-}
+        .account-login {
+            color: rgb(248, 249, 250);
+            cursor: pointer;
+        }
 
-.menu-items {
-    padding-top: 1rem;
-    display: flex;
-    flex-direction: column;
-}
+        .menu-items {
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
 
-.menu-item {
-    padding: .3rem;
-    border: 0;
-    border-radius: .3rem;
-    color: #9586a5;
-    background-color: #371e40;
-    text-align: left;
-    cursor: pointer;
-}
+            .menu-item {
+                padding: 7px;
+                border: 0;
+                border-radius: 7px;
+                color: #9586a5;
+                background-color: #371e40;
+                text-align: left;
+                cursor: pointer;
+            }
 
-.menu-item:hover {
-    color: white;
-    background-color: #543c5c;
+            .menu-item:hover {
+                color: white;
+                background-color: #543c5c;
+            }
+        }
+    }
+
+    .sidebar-container {
+        flex-grow: 1;
+        padding: 20px;
+    }
 }
 </style>
