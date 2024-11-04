@@ -1,3 +1,5 @@
+// main part
+
 html,
 body {
     padding: 0;
@@ -7,4 +9,20 @@ body {
 * {
     font-family: "Montserrat", serif;
     font-optical-sizing: auto;
+}
+
+
+
+
+
+// box sizing
+
+html {
+    box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
 }

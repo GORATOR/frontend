@@ -26,6 +26,7 @@ const props = defineProps<{
 
 .textbox {
     display: block;
+    width: 100%;
     padding: .4rem;
     border-radius: .2rem;
     border-style: solid;

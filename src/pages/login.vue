@@ -22,26 +22,33 @@ async function goLogin() {
             {{ locale }}
         </option>
     </select>
-
     <div class="container">
-        <div>
+        <div class="content-form">
             <TextBox :label="$t('login.login_field')" v-model="username" />
-        </div>
-        <div>
             <TextBox :label="$t('login.password_field')" type="password" v-model="password" />
-        </div>
-        <div v-if="store.loading">
-            <button disabled>{{ $t('login.submit') }}</button>
-        </div>
-        <div v-else>
-            <button @click="goLogin">{{ $t('login.submit') }}</button>
+            <div v-if="store.loading">
+                <button disabled>{{ $t('login.submit') }}</button>
+            </div>
+            <div v-else>
+                <button @click="goLogin">{{ $t('login.submit') }}</button>
+            </div>
         </div>
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '../assets/_variables.scss' as *;
+
 .container {
     justify-items: center;
-    padding: 2rem;
+    padding: 100px 50px;
+
+    .content-form {
+        width: 200px;
+
+        @media (min-width: $sm) {
+            width: 300px;
+        }
+    }
 }
 </style>
