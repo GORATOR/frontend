@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { useUserStore } from '../store/user.ts'
-import { redirectHome, redirectTeamsList, redirectOrganizationsList } from '../utils/redirects.ts'
+import {
+    redirectHome,
+    redirectTeamsList,
+    redirectOrganizationsList,
+    redirectUsersList
+} from '../utils/redirects.ts'
 
 const store = useUserStore()
 </script>
@@ -12,7 +17,7 @@ const store = useUserStore()
                 {{ store.username }}
             </div>
             <div class="menu-items">
-                <button class="menu-item">Users</button>
+                <button class="menu-item" @click="redirectUsersList">Users</button>
                 <button class="menu-item" @click="redirectTeamsList">Teams</button>
                 <button class="menu-item" @click="redirectOrganizationsList">Orgs</button>
             </div>

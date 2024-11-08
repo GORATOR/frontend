@@ -1,12 +1,12 @@
 import { router } from "../router"
 
 const redirectHome = () => router.push({ path: "/" })
-
 const redirectTeamsList = () => router.push({ path: "/teams" })
 const redirectTeamsNew = () => router.push({ path: "/teams/new" })
-
 const redirectOrganizationsList = () => router.push({ path: "/organizations" })
 const redirectOrganizationsNew = () => router.push({ path: "/organizations/new" })
+const redirectUsersList = () => router.push({ path: "/users" })
+const redirectUsersNew = () => router.push({ path: "/users/new" })
 
 export {
     redirectHome,
@@ -15,5 +15,8 @@ export {
     redirectTeamsNew,
 
     redirectOrganizationsList,
-    redirectOrganizationsNew
+    redirectOrganizationsNew,
+
+    redirectUsersList,
+    redirectUsersNew,
 }
