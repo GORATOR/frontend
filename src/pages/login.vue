@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useUserStore } from '../store/user.ts'
-import { gotoHome } from '../utils/redirects.ts'
+import { redirectHome } from '../utils/redirects.ts'
 import TextBox from '../components/textbox.vue'
 
 const store = useUserStore()
@@ -11,7 +11,7 @@ const password = ref<string>("")
 async function goLogin() {
     const success = await store.login(username.value, password.value)
     if (success) {
-        gotoHome()
+        redirectHome()
     }
 }
 </script>

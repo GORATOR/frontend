@@ -2,16 +2,16 @@
 import { ref } from 'vue'
 import { sendGet } from '../../utils/requests'
 import Sidebar from '../../components/sidebar.vue'
-import { Team } from '../../models/team'
-import { redirectTeamsNew } from '../../utils/redirects.ts'
+import { Organization } from '../../models/organization'
+import { redirectOrganizationsNew } from '../../utils/redirects.ts'
 
-const list = ref<Team[]>([])
+const list = ref<Organization[]>([])
 const loading = ref(false)
 
 async function loadList() {
     loading.value = true
     try {
-        const response = await sendGet("/teams")
+        const response = await sendGet("/organizations")
         if (response.status == 200) {
             const data = await response.json()
             list.value = data
@@ -26,7 +26,7 @@ loadList()
 
 <template>
     <Sidebar>
-        <h2>Teams</h2>
+        <h2>Organizations</h2>
 
         <ul>
             <li v-for="item in list">
@@ -34,6 +34,6 @@ loadList()
             </li>
         </ul>
 
-        <button @click="redirectTeamsNew">CREATE</button>
+        <button @click="redirectOrganizationsNew">CREATE</button>
     </Sidebar>
 </template>

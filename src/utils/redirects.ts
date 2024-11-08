@@ -1,11 +1,19 @@
 import { router } from "../router"
 
-const gotoHome = () => router.push({ path: "/" })
-const gotoTeamsList = () => router.push({ path: "/teams" })
-const gotoTeamsNew = () => router.push({ path: "/teams/new" })
+const redirectHome = () => router.push({ path: "/" })
 
-export { 
-    gotoHome,
-    gotoTeamsList,
-    gotoTeamsNew
- }
+const redirectTeamsList = () => router.push({ path: "/teams" })
+const redirectTeamsNew = () => router.push({ path: "/teams/new" })
+
+const redirectOrganizationsList = () => router.push({ path: "/organizations" })
+const redirectOrganizationsNew = () => router.push({ path: "/organizations/new" })
+
+export {
+    redirectHome,
+
+    redirectTeamsList,
+    redirectTeamsNew,
+
+    redirectOrganizationsList,
+    redirectOrganizationsNew
+}

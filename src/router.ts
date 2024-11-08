@@ -5,6 +5,8 @@ import login from './pages/login.vue'
 import home from './pages/home.vue'
 import teams from './pages/teams/list.vue'
 import teamCreate from './pages/teams/create.vue'
+import organizations from './pages/organizations/list.vue'
+import organizationCreate from './pages/organizations/create.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -13,6 +15,8 @@ export const router = createRouter({
     { path: '/login', component: login },
     { path: '/teams', component: teams },
     { path: '/teams/new', component: teamCreate },
+    { path: '/organizations', component: organizations },
+    { path: '/organizations/new', component: organizationCreate },
   ]
 })
 
