@@ -6,18 +6,18 @@ import { redirectUsersNew } from '../../utils/redirects.ts'
 import { User } from '../../models/user.ts'
 
 const list = ref<User[]>([])
-const loading = ref(false)
+const loaded = ref(false)
 
 async function loadList() {
-    loading.value = true
     try {
         const response = await sendGet("/users")
         if (response.status == 200) {
             const data = await response.json()
             list.value = data
+            loaded.value = true
         }
-    } finally {
-        loading.value = false
+    } catch (err) {
+        console.error('Error:', err)
     }
 }
 
@@ -26,14 +26,16 @@ loadList()
 
 <template>
     <Sidebar>
-        <h2>Users</h2>
+        <template v-if="loaded">
+            <h2>Users</h2>
 
-        <ul>
-            <li v-for="item in list">
-                {{ item.Username }}
-            </li>
-        </ul>
+            <ul>
+                <li v-for="item in list">
+                    {{ item.Username }}
+                </li>
+            </ul>
 
-        <button @click="redirectUsersNew">CREATE</button>
+            <button @click="redirectUsersNew">CREATE</button>
+        </template>
     </Sidebar>
 </template>

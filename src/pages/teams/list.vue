@@ -6,18 +6,18 @@ import { Team } from '../../models/team'
 import { redirectTeamsNew } from '../../utils/redirects.ts'
 
 const list = ref<Team[]>([])
-const loading = ref(false)
+const loaded = ref(false)
 
 async function loadList() {
-    loading.value = true
     try {
         const response = await sendGet("/teams")
         if (response.status == 200) {
             const data = await response.json()
             list.value = data
+            loaded.value = true
         }
-    } finally {
-        loading.value = false
+    } catch (err) {
+        console.error('Error:', err)
     }
 }
 
@@ -26,14 +26,16 @@ loadList()
 
 <template>
     <Sidebar>
-        <h2>Teams</h2>
+        <template v-if="loaded">
+            <h2>Teams</h2>
 
-        <ul>
-            <li v-for="item in list">
-                {{ item.Name }}
-            </li>
-        </ul>
+            <ul>
+                <li v-for="item in list">
+                    {{ item.Name }}
+                </li>
+            </ul>
 
-        <button @click="redirectTeamsNew">CREATE</button>
+            <button @click="redirectTeamsNew">CREATE</button>
+        </template>
     </Sidebar>
 </template>
