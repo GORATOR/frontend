@@ -25,11 +25,14 @@ export const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  const publicPages = ['/login']
-  const authRequired = !publicPages.includes(to.path)
+  const isLoginPage = to.path == '/login'
   const auth = useUserStore()
 
-  if (authRequired && !auth.sessionId) {
+  if (!isLoginPage && !auth.sessionId) {
     return '/login'
+  }
+
+  if (isLoginPage && auth.sessionId) {
+    return '/'
   }
 })
