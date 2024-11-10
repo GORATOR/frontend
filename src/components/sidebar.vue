@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useUserStore } from '../store/user.ts'
 import {
     redirectHome,
@@ -8,11 +9,16 @@ import {
 } from '../utils/redirects.ts'
 
 const store = useUserStore()
+const isMenuVisible = ref(false)
+
+function showMenu() {
+    isMenuVisible.value = !isMenuVisible.value
+}
 </script>
 
 <template>
     <div class="sidebar">
-        <div class="sidebar-menu">
+        <div class="sidebar-menu" :class="{ show: isMenuVisible }">
             <div class="account-login" @click="redirectHome">
                 {{ store.username }}
             </div>
@@ -23,6 +29,9 @@ const store = useUserStore()
             </div>
         </div>
         <div class="sidebar-container">
+            <div class="sidebar-container-menu">
+                <button @click="showMenu">SHOW MENU</button>
+            </div>
             <slot></slot>
         </div>
     </div>
@@ -33,20 +42,39 @@ const store = useUserStore()
 
 .sidebar {
     height: 100vh;
-    display: flex;
+
+    @media (width < $sm) {
+        display: block;
+    }
+
+    @media ($sm <=width) {
+        display: flex;
+    }
 
     .sidebar-menu {
-        display: none;
         padding: 20px 10px;
         background-color: #371e40;
         flex-shrink: 0;
 
-        @media (min-width: $sm) {
+        @media (width < $sm) {
+            display: none;
+
+            &.show {
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        @media ($sm <=width < $lg) {
             display: block;
             width: 200px;
         }
 
-        @media (min-width: $lg) {
+        @media ($lg <=width) {
             display: block;
             width: 250px;
         }
@@ -81,6 +109,14 @@ const store = useUserStore()
     .sidebar-container {
         flex-grow: 1;
         padding: 20px;
+
+        .sidebar-container-menu {
+            display: none;
+
+            @media (width < $sm) {
+                display: block;
+            }
+        }
     }
 }
 </style>

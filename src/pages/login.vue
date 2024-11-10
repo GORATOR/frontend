@@ -46,7 +46,7 @@ async function goLogin() {
     .content-form {
         width: 200px;
 
-        @media (min-width: $sm) {
+        @media ($sm <= width) {
             width: 300px;
         }
     }
