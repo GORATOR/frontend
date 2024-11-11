@@ -7,6 +7,7 @@ import {
     redirectOrganizationsList,
     redirectUsersList
 } from '../utils/redirects.ts'
+import MenuIcon from '../icons/menu-icon.vue'
 
 const store = useUserStore()
 const isMenuVisible = ref(false)
@@ -30,7 +31,7 @@ function showMenu() {
         </div>
         <div class="sidebar-container">
             <div class="sidebar-container-menu">
-                <button @click="showMenu">SHOW MENU</button>
+                <MenuIcon @click="showMenu" />
             </div>
             <slot></slot>
         </div>
@@ -53,7 +54,7 @@ function showMenu() {
 
     .sidebar-menu {
         padding: 20px 10px;
-        background-color: #371e40;
+        background-color: $main_theme_background;
         flex-shrink: 0;
 
         @media (width < $sm) {
@@ -93,15 +94,15 @@ function showMenu() {
                 padding: 7px;
                 border: 0;
                 border-radius: 7px;
-                color: #9586a5;
-                background-color: #371e40;
+                color: $main_theme_text;
+                background-color: $main_theme_background;
                 text-align: left;
                 cursor: pointer;
             }
 
             .menu-item:hover {
                 color: white;
-                background-color: #543c5c;
+                background-color: $main_theme_hover;
             }
         }
     }
