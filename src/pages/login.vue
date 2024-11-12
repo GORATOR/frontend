@@ -44,6 +44,7 @@ async function goLogin() {
     padding: 100px 50px;
 
     .content-form {
+        margin: auto;
         width: 200px;
 
         @media ($sm <= width) {
