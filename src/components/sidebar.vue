@@ -23,6 +23,11 @@ function showMenu() {
             <div class="account-login" @click="redirectHome">
                 {{ store.username }}
             </div>
+            <div class="close-menu">
+                <button @click="showMenu">
+                    X
+                </button>
+            </div>
             <div class="menu-items">
                 <button class="menu-item" @click="redirectUsersList">Users</button>
                 <button class="menu-item" @click="redirectTeamsList">Teams</button>
@@ -57,6 +62,21 @@ function showMenu() {
         background-color: $main_theme_background;
         flex-shrink: 0;
 
+        .close-menu {
+            display: none;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            
+            button {
+                color: white;
+                border: none;
+                background-color: transparent;
+                padding: 5px;
+                cursor: pointer;
+            }
+        }
+
         @media (width < $sm) {
             display: none;
 
@@ -67,6 +87,10 @@ function showMenu() {
                 left: 0;
                 width: 100%;
                 height: 100%;
+            }
+
+            .close-menu {
+                display: block;
             }
         }
 
