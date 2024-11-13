@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useUserStore } from '../store/user.ts'
 import { redirectHome } from '../utils/redirects.ts'
 import TextBox from '../components/textbox.vue'
+import Button from '../components/button.vue'
 
 const store = useUserStore()
 const username = ref<string>("")
@@ -26,11 +27,9 @@ async function goLogin() {
         <div class="content-form">
             <TextBox :label="$t('login.login_field')" v-model="username" />
             <TextBox :label="$t('login.password_field')" type="password" v-model="password" />
-            <div v-if="store.loading">
-                <button disabled>{{ $t('login.submit') }}</button>
-            </div>
-            <div v-else>
-                <button @click="goLogin">{{ $t('login.submit') }}</button>
+            <div class="form-buttons">
+                <Button v-if="store.loading" disabled>{{ $t('login.submit') }}</Button>
+                <Button v-else @click="goLogin">{{ $t('login.submit') }}</Button>
             </div>
         </div>
     </div>
@@ -47,8 +46,14 @@ async function goLogin() {
         margin: auto;
         width: 200px;
 
-        @media ($sm <= width) {
+        @media ($sm <=width) {
             width: 300px;
+        }
+
+        .form-buttons {
+            padding-top: 14px;
+            display: flex;
+            justify-content: end;
         }
     }
 }
