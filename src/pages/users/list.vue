@@ -33,7 +33,9 @@ loadList()
 
             <Table :rows="list.map(x => x.Username)" />
 
-            <Button @click="redirectUsersNew">CREATE</Button>
+            <div class="padding-small">
+                <Button @click="redirectUsersNew">CREATE</Button>
+            </div>
         </template>
     </Sidebar>
 </template>

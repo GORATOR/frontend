@@ -27,7 +27,7 @@ async function goLogin() {
         <div class="content-form">
             <TextBox :label="$t('login.login_field')" v-model="username" />
             <TextBox :label="$t('login.password_field')" type="password" v-model="password" />
-            <div class="form-buttons">
+            <div class="form-buttons padding-small">
                 <Button v-if="store.loading" disabled>{{ $t('login.submit') }}</Button>
                 <Button v-else @click="goLogin">{{ $t('login.submit') }}</Button>
             </div>
@@ -51,7 +51,6 @@ async function goLogin() {
         }
 
         .form-buttons {
-            padding-top: 14px;
             display: flex;
             justify-content: end;
         }

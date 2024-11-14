@@ -25,6 +25,7 @@
     }
 
     &:hover {
+        border-color: $main_theme;
         background-color: $main_theme;
     }
 }

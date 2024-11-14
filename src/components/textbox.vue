@@ -16,6 +16,8 @@ const props = defineProps<{
 </template>
 
 <style scoped lang="scss">
+@use '../assets/variables' as *;
+
 .textbox-container {
     padding: 5px 0;
 
@@ -29,7 +31,7 @@ const props = defineProps<{
         padding: 7px;
         border-radius: 7px;
         border-style: solid;
-        border-color: #333;
+        border-color: $main_theme_dark;
     }
 
     .textbox:focus {
