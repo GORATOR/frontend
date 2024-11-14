@@ -59,7 +59,7 @@ function showMenu() {
 
     .sidebar-menu {
         padding: 20px 10px;
-        background-color: $main_theme_background;
+        background-color: $main_theme_dark;
         flex-shrink: 0;
 
         .close-menu {
@@ -118,15 +118,15 @@ function showMenu() {
                 padding: 7px;
                 border: 0;
                 border-radius: 7px;
-                color: $main_theme_text;
-                background-color: $main_theme_background;
+                color: $main_theme_light;
+                background-color: $main_theme_dark;
                 text-align: left;
                 cursor: pointer;
             }
 
             .menu-item:hover {
                 color: white;
-                background-color: $main_theme_hover;
+                background-color: $main_theme;
             }
         }
     }
@@ -137,7 +137,7 @@ function showMenu() {
 
         .sidebar-container-menu {
             display: none;
-            border-bottom: 3px solid $main_theme_background;
+            border-bottom: 3px solid $main_theme_dark;
 
             @media (width < $sm) {
                 display: block;
@@ -150,11 +150,11 @@ function showMenu() {
                 cursor: pointer;
 
                 * {
-                    fill: $main_theme_background;
+                    fill: $main_theme_dark;
                 }
 
                 &:hover {
-                    outline: 3px solid $main_theme_background;
+                    outline: 3px solid $main_theme_dark;
                 }
             }
         }

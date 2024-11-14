@@ -5,6 +5,7 @@ import Sidebar from '../../components/sidebar.vue'
 import { redirectUsersNew } from '../../utils/redirects.ts'
 import { User } from '../../models/user.ts'
 import Button from '../../components/button.vue'
+import Table from '../../components/table.vue'
 
 const list = ref<User[]>([])
 const loaded = ref(false)
@@ -30,11 +31,7 @@ loadList()
         <template v-if="loaded">
             <h2>Users</h2>
 
-            <ul>
-                <li v-for="item in list">
-                    {{ item.Username }}
-                </li>
-            </ul>
+            <Table :rows="list.map(x => x.Username)" />
 
             <Button @click="redirectUsersNew">CREATE</Button>
         </template>
