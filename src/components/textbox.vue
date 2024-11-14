@@ -31,13 +31,13 @@ const props = defineProps<{
         padding: 7px;
         border-radius: 7px;
         border-style: solid;
-        border-color: $main_theme_dark;
+        border-color: $element_border_color;
     }
 
     .textbox:focus {
         outline: none;
-        border-color: #0085f2;
-        outline: medium solid #0085f26e;
+        border-color: $element_active_border;
+        outline: medium solid $element_active_outline;
         outline-width: 3px;
     }
 }

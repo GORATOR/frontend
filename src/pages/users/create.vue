@@ -48,8 +48,10 @@ async function create() {
         <div>
             <TextBox label="Name" v-model="name" />
             <TextBox label="Email" v-model="email" />
-            <Button v-if="loading" disabled>SUBMIT</Button>
-            <Button v-else @click="create">SUBMIT</Button>
+            <div class="padding-small">
+                <Button v-if="loading" disabled>SUBMIT</Button>
+                <Button v-else @click="create">SUBMIT</Button>
+            </div>
         </div>
     </Sidebar>
 </template>

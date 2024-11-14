@@ -45,8 +45,10 @@ async function create() {
         <h1>Create new Organization</h1>
         <div>
             <TextBox label="Name" v-model="name" />
-            <Button v-if="loading" disabled>SUBMIT</Button>
-            <Button v-else @click="create">SUBMIT</Button>
+            <div class="padding-small">
+                <Button v-if="loading" disabled>SUBMIT</Button>
+                <Button v-else @click="create">SUBMIT</Button>
+            </div>
         </div>
     </Sidebar>
 </template>
