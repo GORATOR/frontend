@@ -4,6 +4,7 @@ import { sendGet } from '../../utils/requests'
 import Sidebar from '../../components/sidebar.vue'
 import { redirectUsersNew } from '../../utils/redirects.ts'
 import { User } from '../../models/user.ts'
+import Button from '../../components/button.vue'
 
 const list = ref<User[]>([])
 const loaded = ref(false)
@@ -35,7 +36,7 @@ loadList()
                 </li>
             </ul>
 
-            <button @click="redirectUsersNew">CREATE</button>
+            <Button @click="redirectUsersNew">CREATE</Button>
         </template>
     </Sidebar>
 </template>

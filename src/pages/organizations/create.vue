@@ -4,6 +4,7 @@ import Sidebar from '../../components/sidebar.vue'
 import { sendPost } from '../../utils/requests'
 import { redirectOrganizationsList } from '../../utils/redirects'
 import TextBox from '../../components/textbox.vue'
+import Button from '../../components/button.vue'
 
 const name = ref<string>("")
 const loading = ref<boolean>(false)
@@ -44,8 +45,8 @@ async function create() {
         <h1>Create new Organization</h1>
         <div>
             <TextBox label="Name" v-model="name" />
-            <span v-if="loading">WAIT...</span>
-            <button v-else @click="create">SUBMIT</button>
+            <Button v-if="loading" disabled>SUBMIT</Button>
+            <Button v-else @click="create">SUBMIT</Button>
         </div>
     </Sidebar>
 </template>
