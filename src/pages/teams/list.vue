@@ -5,6 +5,7 @@ import Sidebar from '../../components/sidebar.vue'
 import { Team } from '../../models/team'
 import { redirectTeamsNew } from '../../utils/redirects.ts'
 import Button from '../../components/button.vue'
+import Table from '../../components/table.vue'
 
 const list = ref<Team[]>([])
 const loaded = ref(false)
@@ -30,13 +31,11 @@ loadList()
         <template v-if="loaded">
             <h2>Teams</h2>
 
-            <ul>
-                <li v-for="item in list">
-                    {{ item.Name }}
-                </li>
-            </ul>
+            <Table :rows="list.map(x => x.Name)" />
 
-            <Button @click="redirectTeamsNew">CREATE</Button>
+            <div class="padding-small">
+                <Button @click="redirectTeamsNew">CREATE</Button>
+            </div>
         </template>
     </Sidebar>
 </template>

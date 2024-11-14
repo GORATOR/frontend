@@ -12,21 +12,21 @@
 
 .btn {
     padding: 7px;
-    border: 3px solid $main_theme_dark;
+    border: 3px solid $element_background;
     border-radius: 7px;
-    background-color: $main_theme_dark;
-    color: $main_theme_text_light;
+    background-color: $element_background;
+    color: $element_color;
     cursor: pointer;
 
     &:focus {
         outline: none;
-        outline: medium solid #0085f26e;
+        outline: medium solid $element_active_outline;
         outline-width: 3px;
     }
 
     &:hover {
-        border-color: $main_theme;
-        background-color: $main_theme;
+        border-color: $element_hover_background;
+        background-color: $element_hover_background;
     }
 }
 </style>

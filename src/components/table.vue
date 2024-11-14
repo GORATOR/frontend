@@ -46,6 +46,10 @@ const props = defineProps<{
         .cell {
             display: table-cell;
             padding: 10px;
+
+            &:first-child {
+                width: 20px;
+            }
         }
     }
 }
