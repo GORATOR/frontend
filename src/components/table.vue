@@ -23,28 +23,30 @@ const props = defineProps<{
 .table {
     display: table;
     width: 100%;
-    border: 1px solid $main_theme_dark;
+    border: 1px solid $main_theme_table_border;
     border-radius: 5px;
     overflow: hidden;
 
     .row {
         display: table-row;
 
-        &:nth-child(2n+1) {
-            background-color: $main_theme_text_light;
-        }
+        // &:nth-child(2n+1) {
+        //     background-color: $main_theme_text_light;
+        // }
 
         &.header {
-            color: $main_theme_text;
-            background-color: $main_theme_dark;
+            color: $main_theme_table_header_color;
+            background-color: $main_theme_table_header_background;
 
             .cell {
+                border-top: none;
                 padding: 15px 10px;
             }
         }
 
         .cell {
             display: table-cell;
+            border-top: 1px solid $main_theme_table_border;
             padding: 10px;
 
             &:first-child {

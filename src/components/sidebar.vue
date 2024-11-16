@@ -153,8 +153,8 @@ function showMenu() {
                     fill: $main_theme_dark;
                 }
 
-                &:hover {
-                    outline: 3px solid $main_theme_dark;
+                &:hover * {
+                    fill: $main_theme_light;
                 }
             }
         }
