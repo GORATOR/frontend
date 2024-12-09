@@ -6,7 +6,9 @@ import { Team } from '../../models/team'
 import { redirectTeamsNew } from '../../utils/redirects.ts'
 import Button from '../../components/button.vue'
 import Table from '../../components/table.vue'
+import Paging from '../../components/paging.vue'
 import { EntityCount } from '../../models/count.ts'
+import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 
 const count = ref<EntityCount>()
 const list = ref<Team[]>([])
@@ -46,6 +48,11 @@ async function loadData() {
     loaded.value = true
 }
 
+async function pageSelect(e: PageSelectEvent)
+{
+    console.log(e)
+}
+
 loadData()
 </script>
 
@@ -56,7 +63,7 @@ loadData()
 
             <Table :rows="list.map(x => x.Name)" />
 
-            <p>COUNT {{ count?.count }}</p>
+            <Paging :page=1 :limit=2 :count=3 v-on:page-select="pageSelect" />
 
             <div class="padding-small">
                 <Button @click="redirectTeamsNew">CREATE</Button>
