@@ -7,14 +7,17 @@ const props = defineProps<{
     count: number
 }>()
 const emit = defineEmits<{
-  (e: 'pageSelect', { page, offset } : PageSelectEvent): void
+    (e: 'pageSelect', { page, offset }: PageSelectEvent): void
 }>()
 
-function test() {
-    emit('pageSelect', { page: 4, offset: 55 })
+const pagesCount = Math.ceil(props.count / props.limit)
+
+function pageSelect(page: number) {
+    emit('pageSelect', { page: page, offset: (page - 1) * props.limit })
 }
 </script>
 <template>
-    <p>PROPS: {{ props.count }}</p>
-    <button v-on:click="test">TEST</button>
+    <button v-for="i in pagesCount" v-on:click="() => pageSelect(i)" :key="i" :style="{ color: i == props.page ? 'red' : undefined }">
+        {{ i }}
+    </button>
 </template>

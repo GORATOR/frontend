@@ -13,6 +13,8 @@ import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 const count = ref<EntityCount>()
 const list = ref<Team[]>([])
 const loaded = ref(false)
+const page = ref(1)
+const offset = ref(0)
 
 async function loadCount() {
     try {
@@ -30,7 +32,7 @@ async function loadCount() {
 
 async function loadList() {
     try {
-        const response = await sendGet("/teams?limit=10")
+        const response = await sendGet("/teams?limit=10&offset=" + offset.value)
         if (response.status == 200) {
             const data = await response.json()
             list.value = data
@@ -50,7 +52,11 @@ async function loadData() {
 
 async function pageSelect(e: PageSelectEvent)
 {
-    console.log(e)
+    page.value = e.page
+    offset.value = e.offset
+    loaded.value = false
+    await loadList()
+    loaded.value = true
 }
 
 loadData()
@@ -63,7 +69,7 @@ loadData()
 
             <Table :rows="list.map(x => x.Name)" />
 
-            <Paging :page=1 :limit=2 :count=3 v-on:page-select="pageSelect" />
+            <Paging :page=page :limit=10 :count="count?.count ?? 0" v-on:page-select="pageSelect" />
 
             <div class="padding-small">
                 <Button @click="redirectTeamsNew">CREATE</Button>
