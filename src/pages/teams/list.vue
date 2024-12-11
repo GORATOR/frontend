@@ -6,7 +6,7 @@ import { Team } from '../../models/team'
 import { redirectTeamsNew } from '../../utils/redirects.ts'
 import Button from '../../components/button.vue'
 import Table from '../../components/table.vue'
-import Paging from '../../components/paging.vue'
+import Paging from '../../components/paging/Paging.vue'
 import { EntityCount } from '../../models/count.ts'
 import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 
@@ -69,7 +69,7 @@ loadData()
 
             <Table :rows="list.map(x => x.Name)" />
 
-            <Paging :page=page :limit=10 :count="count?.count ?? 0" v-on:page-select="pageSelect" />
+            <Paging :page=page :limit=10 :count="count!.count" v-on:page-select="pageSelect" />
 
             <div class="padding-small">
                 <Button @click="redirectTeamsNew">CREATE</Button>
