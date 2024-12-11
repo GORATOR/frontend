@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
     rows: string[],
+    indexOffset?: number
 }>()
 </script>
 
@@ -11,7 +12,7 @@ const props = defineProps<{
             <div class="cell">Name</div>
         </div>
         <div v-for="(item, index) in props.rows" class="row">
-            <div class="cell">{{ index + 1 }}</div>
+            <div class="cell">{{ (props.indexOffset ?? 0) + index + 1 }}</div>
             <div class="cell">{{ item }}</div>
         </div>
     </div>
@@ -51,6 +52,7 @@ const props = defineProps<{
 
             &:first-child {
                 width: 20px;
+                color: $main_theme_table_header_color;
             }
         }
     }
