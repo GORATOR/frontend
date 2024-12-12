@@ -13,9 +13,7 @@ async function create() {
     loading.value = true
 
     const newEntity = {
-        Name: name.value,
-        Avatar: "",
-        Active: true
+        Name: name.value
     }
 
     try {

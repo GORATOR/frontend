@@ -15,9 +15,7 @@ async function create() {
 
     const newEntity = {
         Username: name.value,
-        Email: email.value,
-        Avatar: "",
-        Active: true
+        Email: email.value
     }
 
     try {
