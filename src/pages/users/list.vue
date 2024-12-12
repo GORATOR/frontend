@@ -6,13 +6,33 @@ import { redirectUsersNew } from '../../utils/redirects.ts'
 import { User } from '../../models/user.ts'
 import Button from '../../components/button.vue'
 import Table from '../../components/table.vue'
+import Paging from '../../components/paging/Paging.vue'
+import { EntityCount } from '../../models/count.ts'
+import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 
 const list = ref<User[]>([])
 const loaded = ref(false)
 
-async function loadList() {
+const count = ref<EntityCount>({ count: 0 })
+const page = ref(1)
+const offset = ref(0)
+
+async function loadCount() {
     try {
-        const response = await sendGet("/users")
+        const response = await sendGet("/users/count")
+        if (response.status == 200) {
+            const data = await response.json()
+            count.value = data
+        }
+    } catch (err) {
+        console.error('Error:', err)
+    }
+}
+
+async function loadList() {
+    loaded.value = false
+    try {
+        const response = await sendGet("/users?limit=10&offset=" + offset.value)
         if (response.status == 200) {
             const data = await response.json()
             list.value = data
@@ -23,7 +43,19 @@ async function loadList() {
     }
 }
 
-loadList()
+async function pageSelect(e: PageSelectEvent)
+{
+    page.value = e.page
+    offset.value = e.offset
+    await loadList()
+}
+
+async function initLoad() {
+    await loadCount()
+    await loadList()
+}
+
+initLoad()
 </script>
 
 <template>
@@ -31,7 +63,9 @@ loadList()
         <template v-if="loaded">
             <h2>Users</h2>
 
-            <Table :rows="list.map(x => x.Username)" />
+            <Table :rows="list.map(x => x.Username)" :indexOffset="offset" />
+
+            <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
 
             <div class="padding-small">
                 <Button @click="redirectUsersNew">CREATE</Button>
