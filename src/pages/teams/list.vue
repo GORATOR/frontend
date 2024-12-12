@@ -10,9 +10,10 @@ import Paging from '../../components/paging/Paging.vue'
 import { EntityCount } from '../../models/count.ts'
 import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 
-const count = ref<EntityCount>({ count: 0 })
 const list = ref<Team[]>([])
 const loaded = ref(false)
+
+const count = ref<EntityCount>({ count: 0 })
 const page = ref(1)
 const offset = ref(0)
 
@@ -23,10 +24,8 @@ async function loadCount() {
             const data = await response.json()
             count.value = data
         }
-        return true
     } catch (err) {
         console.error('Error:', err)
-        return false
     }
 }
 
@@ -39,10 +38,8 @@ async function loadList() {
             list.value = data
             loaded.value = true
         }
-        return true
     } catch (err) {
         console.error('Error:', err)
-        return false
     }
 }
 
@@ -54,8 +51,8 @@ async function pageSelect(e: PageSelectEvent)
 }
 
 async function initLoad() {
-    if (!await loadCount()) return
-    if (!await loadList()) return
+    await loadCount()
+    await loadList()
 }
 
 initLoad()
