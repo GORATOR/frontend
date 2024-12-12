@@ -20,13 +20,13 @@ function showMenu() {
 <template>
     <div class="sidebar">
         <div class="sidebar-menu" :class="{ show: isMenuVisible }">
-            <div class="account-login" @click="redirectHome">
-                {{ store.username }}
-            </div>
-            <div class="close-menu">
-                <button @click="showMenu">
-                    X
-                </button>
+            <div class="sidebar-menu-header">
+                <div class="account-login" @click="redirectHome">
+                    {{ store.username }}
+                </div>
+                <div class="close-menu">
+                    <button @click="showMenu">🗙</button>
+                </div>
             </div>
             <div class="menu-items">
                 <button class="menu-item" @click="redirectUsersList">Users</button>
@@ -62,18 +62,13 @@ function showMenu() {
         background-color: $main_theme_dark;
         flex-shrink: 0;
 
-        .close-menu {
-            display: none;
-            position: absolute;
-            right: 15px;
-            top: 10px;
-            
-            button {
-                color: white;
-                border: none;
-                background-color: transparent;
-                padding: 5px;
-                cursor: pointer;
+        .sidebar-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .close-menu {
+                display: none;
             }
         }
 
@@ -89,7 +84,7 @@ function showMenu() {
                 height: 100%;
             }
 
-            .close-menu {
+            .sidebar-menu-header .close-menu {
                 display: block;
             }
         }
@@ -138,6 +133,7 @@ function showMenu() {
         .sidebar-container-menu {
             display: none;
             border-bottom: 3px solid $main_theme_dark;
+            margin-bottom: 20px;
 
             @media (width < $sm) {
                 display: block;
