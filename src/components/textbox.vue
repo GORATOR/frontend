@@ -38,7 +38,6 @@ const props = defineProps<{
         outline: none;
         border-color: $element_active_border;
         outline: medium solid $element_active_outline;
-        outline-width: 3px;
     }
 }
 </style>
