@@ -19,7 +19,7 @@
     cursor: pointer;
 
     &:hover {
-        background-color: $main_theme_active_color_hover;
+        outline: medium solid $element_active_outline;
     }
 
     &:disabled {
