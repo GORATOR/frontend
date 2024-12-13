@@ -8,6 +8,7 @@ import {
     redirectUsersList
 } from '../utils/redirects.ts'
 import MenuIcon from '../icons/menu-icon.vue'
+import MenuIconFold from '../icons/menu-icon-fold.vue'
 
 const store = useUserStore()
 const isMenuVisible = ref(false)
@@ -25,7 +26,7 @@ function showMenu() {
                     {{ store.username }}
                 </div>
                 <div class="close-menu">
-                    <button @click="showMenu">🗙</button>
+                    <MenuIconFold class="menu-icon-fold" @click="showMenu" />
                 </div>
             </div>
             <div class="menu-items">
@@ -138,13 +139,24 @@ function showMenu() {
             @media (width < $sm) {
                 display: block;
             }
+        }
+    }
 
-            .menu-icon {
-                fill: $main_theme_dark;
-                &:hover {
-                    fill: $main_theme_light;
-                }
-            }
+    .menu-icon {
+        fill: $main_theme_dark;
+        color: $main_theme_dark;
+        &:hover {
+            fill: $main_theme;
+            color: $main_theme;
+        }
+    }
+
+    .menu-icon-fold {
+        fill: $main_theme;
+        color: $main_theme;
+        &:hover {
+            fill: $main_theme_light;
+            color: $main_theme_light;
         }
     }
 }
