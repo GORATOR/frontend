@@ -17,10 +17,8 @@
     height: 38px;
     cursor: pointer;
 
-    fill: green;
-
-    &:hover {
-        fill: red;
+    * {
+        fill: inherit;
     }
 }
 </style>
