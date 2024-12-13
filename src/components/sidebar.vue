@@ -36,7 +36,7 @@ function showMenu() {
         </div>
         <div class="sidebar-container">
             <div class="sidebar-container-menu">
-                <MenuIcon class="menu-icon" @click="showMenu" />
+                <MenuIcon @click="showMenu" />
             </div>
             <slot></slot>
         </div>
@@ -137,21 +137,6 @@ function showMenu() {
 
             @media (width < $sm) {
                 display: block;
-            }
-
-            .menu-icon {
-                border-radius: 5px;
-                width: 38px;
-                height: 38px;
-                cursor: pointer;
-
-                * {
-                    fill: $main_theme_dark;
-                }
-
-                &:hover * {
-                    fill: $main_theme_light;
-                }
             }
         }
     }
