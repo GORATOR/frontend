@@ -9,5 +9,13 @@ export default defineConfig({
     alias: [
       { find: '@', replacement: path.resolve(__dirname, '/src') }
     ]
-  }
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'esnext'
+    }
+  },
+  build: {
+    target: 'esnext'
+  },
 })
