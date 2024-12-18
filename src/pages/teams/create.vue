@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Sidebar from '../../components/sidebar.vue'
+import Sidebar from '../../components/Sidebar.vue'
 import { sendPost } from '../../utils/requests'
 import { redirectTeamsList } from '../../utils/redirects'
-import TextBox from '../../components/textbox.vue'
-import Button from '../../components/button.vue'
+import TextBox from '../../components/TextBox.vue'
+import Button from '../../components/Button.vue'
 
 const name = ref<string>("")
 const loading = ref<boolean>(false)

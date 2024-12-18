@@ -1,26 +1,13 @@
+@use 'sass:color';
+
 $sm: 576px;
 $md: 768px;
 $lg: 992px;
 $xl: 1200px;
 $xxl: 1400px;
 
-$main_theme_dark: #371e40;
-$main_theme: #543c5c;
-$main_theme_light: #9586a5;
-$main_theme_text: #cbbadc;
-$main_theme_text_light: #f3eff8;
-
-$element_color: #f3eff8;
-$element_border_color: #371e40;
-$element_background: #371e40;
-$element_hover_background: #543c5c;
-$element_active_border: #543c5c;
-$element_active_outline: #cbbadc;
-
-$main_theme_active_color: #6c5fc7;
-$main_theme_active_color_hover: #988fd8;
-$main_theme_active_color_disabled: #aca2b6;
-
-$main_theme_table_border: #e0dce5;
-$main_theme_table_header_background: #faf9fb;
-$main_theme_table_header_color: #80708f;
+$main_theme_background: #371e40;
+$main_theme_background_lighter1: color.mix($main_theme_background, white, $weight: 80%);
+$main_theme_background_lighter2: color.mix($main_theme_background, white, $weight: 50%);
+$main_theme_background_lighter3: color.mix($main_theme_background, white, $weight: 20%);
+$main_theme_background_lighter4: color.mix($main_theme_background, white, $weight: 10%);

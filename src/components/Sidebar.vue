@@ -7,8 +7,8 @@ import {
     redirectOrganizationsList,
     redirectUsersList
 } from '../utils/redirects.ts'
-import MenuIcon from '../icons/menu-icon.vue'
-import MenuIconFold from '../icons/menu-icon-fold.vue'
+import MenuIcon from '../icons/MenuIcon.vue'
+import MenuIconFold from '../icons/MenuIconFold.vue'
 
 const store = useUserStore()
 const isMenuVisible = ref(false)
@@ -60,7 +60,7 @@ function showMenu() {
 
     .sidebar-menu {
         padding: 20px 10px;
-        background-color: $main_theme_dark;
+        background-color: $main_theme_background;
         flex-shrink: 0;
 
         .sidebar-menu-header {
@@ -101,7 +101,7 @@ function showMenu() {
         }
 
         .account-login {
-            color: rgb(248, 249, 250);
+            color: rgba(255, 255, 255, 0.9);
             cursor: pointer;
         }
 
@@ -114,15 +114,15 @@ function showMenu() {
                 padding: 7px;
                 border: 0;
                 border-radius: 7px;
-                color: $main_theme_light;
-                background-color: $main_theme_dark;
+                color: $main_theme_background_lighter2;
+                background-color: transparent;
                 text-align: left;
                 cursor: pointer;
             }
 
             .menu-item:hover {
                 color: white;
-                background-color: $main_theme;
+                background-color: $main_theme_background_lighter1;
             }
         }
     }
@@ -133,7 +133,7 @@ function showMenu() {
 
         .sidebar-container-menu {
             display: none;
-            border-bottom: 3px solid $main_theme_dark;
+            border-bottom: 3px solid $main_theme_background;
             margin-bottom: 20px;
 
             @media (width < $sm) {
@@ -143,20 +143,20 @@ function showMenu() {
     }
 
     .menu-icon {
-        fill: $main_theme_dark;
-        color: $main_theme_dark;
+        fill: $main_theme_background;
+        color: $main_theme_background;
         &:hover {
-            fill: $main_theme;
-            color: $main_theme;
+            fill: $main_theme_background_lighter2;
+            color: $main_theme_background_lighter2;
         }
     }
 
     .menu-icon-fold {
-        fill: $main_theme;
-        color: $main_theme;
+        fill: $main_theme_background_lighter1;
+        color: $main_theme_background_lighter1;
         &:hover {
-            fill: $main_theme_light;
-            color: $main_theme_light;
+            fill: $main_theme_background_lighter2;
+            color: $main_theme_background_lighter2;
         }
     }
 }

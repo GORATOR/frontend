@@ -14,8 +14,9 @@ const props = defineProps<{
 
 .page-button {
     display: inline-block;
-    border: 1px solid $main_theme_table_border;
+    border: 1px solid $main_theme_background_lighter4;
     border-radius: 5px;
+    color: $main_theme_background_lighter1;
     width: 30px;
     height: 30px;
     text-align: center;
@@ -23,8 +24,8 @@ const props = defineProps<{
     cursor: pointer;
 
     &.selected {
-        border-color: $main_theme_active_color;
-        color: $main_theme_active_color;
+        border-color: $main_theme_background;
+        color: $main_theme_background;
     }
 }
 </style>

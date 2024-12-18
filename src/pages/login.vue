@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { useUserStore } from '../store/user.ts'
 import { redirectHome } from '../utils/redirects.ts'
-import TextBox from '../components/textbox.vue'
-import Button from '../components/button.vue'
+import TextBox from '../components/TextBox.vue'
+import Button from '../components/Button.vue'
 
 const store = useUserStore()
 const username = ref<string>("")

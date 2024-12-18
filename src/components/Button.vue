@@ -12,20 +12,22 @@
 
 .btn {
     padding: 7px;
-    border: 1px solid $main_theme_active_color;
+    border: 1px solid $main_theme_background;
     border-radius: 7px;
-    background-color: $main_theme_active_color;
+    background-color: $main_theme_background;
     color: white;
     cursor: pointer;
 
     &:hover {
-        outline: medium solid $element_active_outline;
+        border: 1px solid $main_theme_background_lighter1;
+        background-color: $main_theme_background_lighter1;
+        outline: medium solid $main_theme_background_lighter3;
     }
 
     &:disabled {
-        border: 1px solid $main_theme_active_color_disabled;
+        border: 1px solid $main_theme_background;
         background-color: transparent;
-        color: $main_theme_active_color_disabled;
+        color: $main_theme_background;
     }
 }
 </style>
