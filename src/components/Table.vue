@@ -12,7 +12,7 @@ const props = defineProps<{
             <div class="cell">Name</div>
         </div>
         <div v-for="(item, index) in props.rows" class="row">
-            <div class="cell">{{ (props.indexOffset ?? 0) + index + 1 }}</div>
+            <div class="cell index">{{ (props.indexOffset ?? 0) + index + 1 }}</div>
             <div class="cell">{{ item }}</div>
         </div>
     </div>
@@ -24,7 +24,7 @@ const props = defineProps<{
 .table {
     display: table;
     width: 100%;
-    border: 1px solid $main_theme_table_border;
+    border: 1px solid $main_theme_background;
     border-radius: 5px;
     overflow: hidden;
 
@@ -32,12 +32,12 @@ const props = defineProps<{
         display: table-row;
 
         // &:nth-child(2n+1) {
-        //     background-color: $main_theme_text_light;
+        //     background-color: red;
         // }
 
         &.header {
-            color: $main_theme_table_header_color;
-            background-color: $main_theme_table_header_background;
+            color: $main_theme_background_lighter3;
+            background-color: $main_theme_background;
 
             .cell {
                 border-top: none;
@@ -47,12 +47,15 @@ const props = defineProps<{
 
         .cell {
             display: table-cell;
-            border-top: 1px solid $main_theme_table_border;
+            border-top: 1px solid $main_theme_background_lighter1;
             padding: 10px;
 
             &:first-child {
                 width: 20px;
-                color: $main_theme_table_header_color;
+            }
+
+            &.index {
+                color: $main_theme_background_lighter2;
             }
         }
     }
