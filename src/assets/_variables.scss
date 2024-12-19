@@ -17,3 +17,7 @@ $main_theme_active_color_lighter1: color.mix($main_theme_active_color, white, $w
 $main_theme_active_color_lighter2: color.mix($main_theme_active_color, white, $weight: 50%);
 $main_theme_active_color_lighter3: color.mix($main_theme_active_color, white, $weight: 20%);
 $main_theme_active_color_lighter4: color.mix($main_theme_active_color, white, $weight: 10%);
+
+$main_theme_border_color: #e0dce5;
+$main_theme_border_color_darker1: color.mix($main_theme_border_color, $main_theme_background, $weight: 20%);
+$main_theme_border_color_lighter1: color.mix($main_theme_border_color, white, $weight: 20%);
