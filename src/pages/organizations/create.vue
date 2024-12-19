@@ -50,3 +50,9 @@ async function create() {
         </div>
     </Sidebar>
 </template>
+
+<style scoped lang="scss">
+.padding-small {
+    padding-top: 14px;
+}
+</style>

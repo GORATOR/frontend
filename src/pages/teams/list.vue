@@ -73,3 +73,9 @@ initLoad()
         </template>
     </Sidebar>
 </template>
+
+<style scoped lang="scss">
+.padding-small {
+    padding-top: 14px;
+}
+</style>
