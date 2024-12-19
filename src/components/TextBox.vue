@@ -31,12 +31,12 @@ const props = defineProps<{
         padding: 7px;
         border-radius: 7px;
         border-style: solid;
-        border-color: $main_theme_background;
+        border-color: $main_theme_background_lighter1;
     }
 
     .textbox:focus {
-        border-color: $main_theme_background_lighter1;
-        outline: medium solid $main_theme_background_lighter3;
+        border-color: $main_theme_active_color;
+        outline: medium solid $main_theme_active_color_lighter3;
     }
 }
 </style>
