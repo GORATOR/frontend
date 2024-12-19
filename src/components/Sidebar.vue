@@ -39,7 +39,9 @@ function showMenu() {
             <div class="sidebar-container-menu">
                 <MenuIcon class="menu-icon" @click="showMenu" />
             </div>
-            <slot></slot>
+            <div class="inner-container">
+                <slot></slot>
+            </div>
         </div>
     </div>
 </template>
@@ -130,6 +132,13 @@ function showMenu() {
     .sidebar-container {
         flex-grow: 1;
         padding: 20px;
+
+        @media (width > $lg) {
+            .inner-container {
+                margin: 0 auto;
+                max-width: $md;
+            }
+        }
 
         .sidebar-container-menu {
             display: none;
