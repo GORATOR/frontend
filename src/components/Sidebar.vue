@@ -5,7 +5,8 @@ import {
     redirectHome,
     redirectTeamsList,
     redirectOrganizationsList,
-    redirectUsersList
+    redirectUsersList,
+    redirectProjectsList
 } from '../utils/redirects.ts'
 import MenuIcon from '../icons/MenuIcon.vue'
 import MenuIconFold from '../icons/MenuIconFold.vue'
@@ -33,6 +34,7 @@ function showMenu() {
                 <button class="menu-item" @click="redirectUsersList">Users</button>
                 <button class="menu-item" @click="redirectTeamsList">Teams</button>
                 <button class="menu-item" @click="redirectOrganizationsList">Orgs</button>
+                <button class="menu-item" @click="redirectProjectsList">Projects</button>
             </div>
         </div>
         <div class="sidebar-container">

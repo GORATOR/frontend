@@ -9,6 +9,8 @@ import organizations from './pages/organizations/list.vue'
 import organizationCreate from './pages/organizations/create.vue'
 import users from './pages/users/list.vue'
 import userCreate from './pages/users/create.vue'
+import projects from './pages/projects/list.vue'
+import projectCreate from './pages/projects/create.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -21,6 +23,8 @@ export const router = createRouter({
     { path: '/organizations/new', component: organizationCreate },
     { path: '/users', component: users },
     { path: '/users/new', component: userCreate },
+    { path: '/projects', component: projects },
+    { path: '/projects/new', component: projectCreate },
   ]
 })
 

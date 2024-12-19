@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
 import { sendPost } from '../../utils/requests'
-import { redirectTeamsList } from '../../utils/redirects'
+import { redirectProjectsList } from '../../utils/redirects'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
 
@@ -13,18 +13,19 @@ async function create() {
     loading.value = true
 
     const newEntity = {
-        Name: name.value
+        Name: name.value,
+        TeamId: 1 // for test
     }
 
     try {
-        const response = await sendPost("/team", newEntity)
+        const response = await sendPost("/project", newEntity)
 
         if (response.status != 200) {
             console.error('Invalid response:', response)
             return false
         }
 
-        redirectTeamsList()
+        redirectProjectsList()
         return true
     }
     catch (err) {
@@ -40,7 +41,7 @@ async function create() {
 
 <template>
     <Sidebar>
-        <h1>Create new Team</h1>
+        <h1>Create new Project</h1>
         <div>
             <TextBox label="Name" v-model="name" />
             <div class="padding-small">

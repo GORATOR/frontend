@@ -2,15 +2,15 @@
 import { ref } from 'vue'
 import { sendGet } from '../../utils/requests'
 import Sidebar from '../../components/Sidebar.vue'
-import { Organization } from '../../models/organization'
-import { redirectOrganizationsNew } from '../../utils/redirects.ts'
+import { Project } from '../../models/project'
+import { redirectProjectsNew } from '../../utils/redirects.ts'
 import Button from '../../components/Button.vue'
 import Table from '../../components/Table.vue'
 import Paging from '../../components/paging/Paging.vue'
 import { EntityCount } from '../../models/count.ts'
 import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 
-const list = ref<Organization[]>([])
+const list = ref<Project[]>([])
 const loaded = ref(false)
 
 const count = ref<EntityCount>({ count: 0 })
@@ -19,7 +19,7 @@ const offset = ref(0)
 
 async function loadCount() {
     try {
-        const response = await sendGet("/organizations/count")
+        const response = await sendGet("/projects/count")
         if (response.status == 200) {
             const data = await response.json()
             count.value = data
@@ -32,7 +32,7 @@ async function loadCount() {
 async function loadList() {
     loaded.value = false
     try {
-        const response = await sendGet("/organizations?limit=10&offset=" + offset.value)
+        const response = await sendGet("/projects?limit=10&offset=" + offset.value)
         if (response.status == 200) {
             const data = await response.json()
             list.value = data
@@ -61,14 +61,14 @@ initLoad()
 <template>
     <Sidebar>
         <template v-if="loaded">
-            <h2>Organizations</h2>
+            <h2>Projects</h2>
 
             <Table :rows="list.map(x => x.Name)" :indexOffset="offset" />
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
 
             <div class="padding-small">
-                <Button @click="redirectOrganizationsNew">CREATE</Button>
+                <Button @click="redirectProjectsNew">CREATE</Button>
             </div>
         </template>
     </Sidebar>
