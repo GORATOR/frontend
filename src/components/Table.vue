@@ -24,7 +24,7 @@ const props = defineProps<{
 .table {
     display: table;
     width: 100%;
-    border: 1px solid $main_theme_background;
+    border: 1px solid $main_theme_border_color;
     border-radius: 5px;
     overflow: hidden;
 
@@ -36,8 +36,8 @@ const props = defineProps<{
         // }
 
         &.header {
-            color: $main_theme_background_lighter3;
-            background-color: $main_theme_background;
+            color: $main_theme_border_color_darker1;
+            background-color: $main_theme_border_color_lighter1;
 
             .cell {
                 border-top: none;
@@ -47,7 +47,7 @@ const props = defineProps<{
 
         .cell {
             display: table-cell;
-            border-top: 1px solid $main_theme_background_lighter1;
+            border-top: 1px solid $main_theme_border_color;
             padding: 10px;
 
             &:first-child {
@@ -55,7 +55,7 @@ const props = defineProps<{
             }
 
             &.index {
-                color: $main_theme_background_lighter2;
+                color: $main_theme_border_color_darker1;
             }
         }
     }
