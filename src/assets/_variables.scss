@@ -11,3 +11,9 @@ $main_theme_background_lighter1: color.mix($main_theme_background, white, $weigh
 $main_theme_background_lighter2: color.mix($main_theme_background, white, $weight: 50%);
 $main_theme_background_lighter3: color.mix($main_theme_background, white, $weight: 20%);
 $main_theme_background_lighter4: color.mix($main_theme_background, white, $weight: 10%);
+
+$main_theme_active_color: #6c5fc7;
+$main_theme_active_color_lighter1: color.mix($main_theme_active_color, white, $weight: 80%);
+$main_theme_active_color_lighter2: color.mix($main_theme_active_color, white, $weight: 50%);
+$main_theme_active_color_lighter3: color.mix($main_theme_active_color, white, $weight: 20%);
+$main_theme_active_color_lighter4: color.mix($main_theme_active_color, white, $weight: 10%);
