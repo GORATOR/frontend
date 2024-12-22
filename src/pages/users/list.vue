@@ -43,8 +43,7 @@ async function loadList() {
     }
 }
 
-async function pageSelect(e: PageSelectEvent)
-{
+async function pageSelect(e: PageSelectEvent) {
     page.value = e.page
     offset.value = e.offset
     await loadList()
@@ -63,7 +62,10 @@ initLoad()
         <template v-if="loaded">
             <h2>Users</h2>
 
-            <Table :rows="list.map(x => x.Username)" :indexOffset="offset" />
+            <Table
+                :headers="['Name', 'Email']"
+                :rows="list.map(x => ({ Name: x.Username, Email: x.Email }))"
+                :indexOffset="offset" />
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
 

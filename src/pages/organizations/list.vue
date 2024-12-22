@@ -63,7 +63,10 @@ initLoad()
         <template v-if="loaded">
             <h2>Organizations</h2>
 
-            <Table :rows="list.map(x => x.Name)" :indexOffset="offset" />
+            <Table
+                :headers="['Name']"
+                :rows="list.map(x => ({ Name: x.Name }))"
+                :indexOffset="offset" />
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
 
