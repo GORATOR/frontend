@@ -11,7 +11,7 @@ const props = defineProps<{
             <div class="cell">#</div>
             <div class="cell">Name</div>
         </div>
-        <div v-for="(item, index) in props.rows" class="row">
+        <div v-for="(item, index) in props.rows" class="row data">
             <div class="cell index">{{ (props.indexOffset ?? 0) + index + 1 }}</div>
             <div class="cell">{{ item }}</div>
         </div>
@@ -43,6 +43,10 @@ const props = defineProps<{
                 border-top: none;
                 padding: 15px 10px;
             }
+        }
+
+        &.data .cell {
+            font-weight: normal;
         }
 
         .cell {
