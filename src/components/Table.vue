@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
-    rows: string[],
+    headers: string[],
+    rows: any[],
     indexOffset?: number
 }>()
 </script>
@@ -8,12 +9,10 @@ const props = defineProps<{
 <template>
     <div class="table">
         <div class="row header">
-            <div class="cell">#</div>
-            <div class="cell">Name</div>
+            <div class="cell" v-for="header in props.headers">{{ header }}</div>
         </div>
-        <div v-for="(item, index) in props.rows" class="row data">
-            <div class="cell index">{{ (props.indexOffset ?? 0) + index + 1 }}</div>
-            <div class="cell">{{ item }}</div>
+        <div v-for="item in props.rows" class="row data">
+            <div class="cell" v-for="header in props.headers">{{ item[header] }}</div>
         </div>
     </div>
 </template>
@@ -40,27 +39,25 @@ const props = defineProps<{
             background-color: $main_theme_border_color_lighter1;
 
             .cell {
+                display: table-cell;
                 border-top: none;
                 padding: 15px 10px;
             }
         }
 
         &.data .cell {
-            font-weight: normal;
-        }
-
-        .cell {
             display: table-cell;
             border-top: 1px solid $main_theme_border_color;
             padding: 10px;
+            font-weight: normal;
 
-            &:first-child {
-                width: 20px;
-            }
+            // &:first-child {
+            //     width: 20px;
+            // }
 
-            &.index {
-                color: $main_theme_border_color_darker1;
-            }
+            // &.index {
+            //     color: $main_theme_border_color_darker1;
+            // }
         }
     }
 }
