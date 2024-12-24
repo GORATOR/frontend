@@ -9,6 +9,7 @@ const redirectUsersList = () => router.push({ path: "/users" })
 const redirectUsersNew = () => router.push({ path: "/users/new" })
 const redirectProjectsList = () => router.push({ path: "/projects" })
 const redirectProjectsNew = () => router.push({ path: "/projects/new" })
+const redirectIssuesList = () => router.push({ path: "/issues" })
 
 export {
     redirectHome,
@@ -24,4 +25,6 @@ export {
 
     redirectProjectsList,
     redirectProjectsNew,
+
+    redirectIssuesList,
 }
