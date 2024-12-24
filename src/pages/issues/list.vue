@@ -63,8 +63,8 @@ initLoad()
             <h2>Issues</h2>
 
             <Table
-                :headers="['Issue']"
-                :rows="list.map(x => ({ Issue: x }))"
+                :headers="['EventId', 'Sdk']"
+                :rows="list.map(x => ({ EventId: x.event_id, Sdk: x.sdk }))"
                 :indexOffset="offset" />
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
