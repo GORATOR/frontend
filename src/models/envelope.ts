@@ -1,6 +1,9 @@
 interface Envelope {
-    event_id: string,
-    sdk: any
+    EnvelopeEventExtras: EnvelopeEventExtra[]
 }
 
-export type { Envelope }
+interface EnvelopeEventExtra {
+    Data: string
+}
+
+export type { Envelope, EnvelopeEventExtra }
