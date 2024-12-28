@@ -5,6 +5,7 @@ import { sendPost } from '../../utils/requests'
 import { redirectUsersList } from '../../utils/redirects'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
+import { MenuItem } from '../../models/sidebarMenuItem.ts'
 
 const name = ref<string>("")
 const email = ref<string>("")
@@ -41,7 +42,7 @@ async function create() {
 </script>
 
 <template>
-    <Sidebar>
+    <Sidebar :active=MenuItem.Users>
         <h1>Create new User</h1>
         <div>
             <TextBox label="Name" v-model="name" />

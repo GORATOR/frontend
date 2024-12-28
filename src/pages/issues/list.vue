@@ -7,6 +7,7 @@ import { Envelope } from '../../models/envelope'
 import { EntityCount } from '../../models/count.ts'
 // import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 import Issue from '../../components/issue/Issue.vue'
+import { MenuItem } from '../../models/sidebarMenuItem.ts'
 
 const list = ref<Envelope[]>([])
 const loaded = ref(false)
@@ -57,7 +58,7 @@ initLoad()
 </script>
 
 <template>
-    <Sidebar>
+    <Sidebar :active=MenuItem.Issues>
         <template v-if="loaded">
             <h2>Issues</h2>
 

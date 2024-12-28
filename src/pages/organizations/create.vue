@@ -5,6 +5,7 @@ import { sendPost } from '../../utils/requests'
 import { redirectOrganizationsList } from '../../utils/redirects'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
+import { MenuItem } from '../../models/sidebarMenuItem.ts'
 
 const name = ref<string>("")
 const loading = ref<boolean>(false)
@@ -39,7 +40,7 @@ async function create() {
 </script>
 
 <template>
-    <Sidebar>
+    <Sidebar :active=MenuItem.Orgs>
         <h1>Create new Organization</h1>
         <div>
             <TextBox label="Name" v-model="name" />
