@@ -65,8 +65,7 @@ initLoad()
 
             <Table
                 :headers="['Name', 'Email']"
-                :rows="list.map(x => ({ Name: x.Username, Email: x.Email }))"
-                :indexOffset="offset" />
+                :rows="list.map(x => ({ Name: x.Username, Email: x.Email }))" />
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
 

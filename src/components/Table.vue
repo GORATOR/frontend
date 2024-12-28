@@ -1,8 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
     headers: string[],
-    rows: any[],
-    indexOffset?: number
+    rows: any[]
 }>()
 </script>
 
