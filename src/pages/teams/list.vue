@@ -9,6 +9,7 @@ import Table from '../../components/Table.vue'
 import Paging from '../../components/paging/Paging.vue'
 import { EntityCount } from '../../models/count.ts'
 import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
+import { MenuItem } from '../../models/sidebarMenuItem.ts'
 
 const list = ref<Team[]>([])
 const loaded = ref(false)
@@ -59,7 +60,7 @@ initLoad()
 </script>
 
 <template>
-    <Sidebar>
+    <Sidebar :active=MenuItem.Teams>
         <template v-if="loaded">
             <h2>Teams</h2>
 

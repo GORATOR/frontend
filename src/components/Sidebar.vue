@@ -11,6 +11,11 @@ import {
 } from '../utils/redirects.ts'
 import MenuIcon from '../icons/MenuIcon.vue'
 import MenuIconFold from '../icons/MenuIconFold.vue'
+import { MenuItem } from '../models/sidebarMenuItem.ts'
+
+const props = defineProps<{
+    active?: MenuItem
+}>()
 
 const store = useUserStore()
 const isMenuVisible = ref(false)
@@ -32,11 +37,31 @@ function showMenu() {
                 </div>
             </div>
             <div class="menu-items">
-                <button class="menu-item" @click="redirectIssuesList">Issues</button>
-                <button class="menu-item" @click="redirectUsersList">Users</button>
-                <button class="menu-item" @click="redirectTeamsList">Teams</button>
-                <button class="menu-item" @click="redirectOrganizationsList">Orgs</button>
-                <button class="menu-item" @click="redirectProjectsList">Projects</button>
+                <button
+                    :class="{ 'menu-item': true, 'active': props.active == MenuItem.Issues }"
+                    @click="redirectIssuesList">
+                    Issues
+                </button>
+                <button
+                    :class="{ 'menu-item': true, 'active': props.active == MenuItem.Users }"
+                    @click="redirectUsersList">
+                    Users
+                </button>
+                <button
+                    :class="{ 'menu-item': true, 'active': props.active == MenuItem.Teams }"
+                    @click="redirectTeamsList">
+                    Teams
+                </button>
+                <button
+                    :class="{ 'menu-item': true, 'active': props.active == MenuItem.Orgs }"
+                    @click="redirectOrganizationsList">
+                    Orgs
+                </button>
+                <button
+                    :class="{ 'menu-item': true, 'active': props.active == MenuItem.Projects }"
+                    @click="redirectProjectsList">
+                    Projects
+                </button>
             </div>
         </div>
         <div class="sidebar-container">
@@ -124,6 +149,12 @@ function showMenu() {
                 background-color: transparent;
                 text-align: left;
                 cursor: pointer;
+
+                &.active {
+                    box-shadow: -5px 0px 0px 0px $main_theme_active_color;
+                    color: white;
+                    background-color: $main_theme_background_lighter1;
+                }
             }
 
             .menu-item:hover {
