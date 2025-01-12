@@ -3,9 +3,9 @@ import { ref } from 'vue'
 import { sendGet } from '../../utils/requests'
 import Sidebar from '../../components/Sidebar.vue'
 import { Envelope } from '../../models/envelope'
-// import Paging from '../../components/paging/Paging.vue'
+import Paging from '../../components/paging/Paging.vue'
 import { EntityCount } from '../../models/count.ts'
-// import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
+import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 import Issue from '../../components/issue/Issue.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
 
@@ -13,7 +13,7 @@ const list = ref<Envelope[]>([])
 const loaded = ref(false)
 
 const count = ref<EntityCount>({ count: 0 })
-// const page = ref(1)
+const page = ref(1)
 const offset = ref(0)
 
 async function loadCount() {
@@ -42,12 +42,12 @@ async function loadList() {
     }
 }
 
-// async function pageSelect(e: PageSelectEvent)
-// {
-//     page.value = e.page
-//     offset.value = e.offset
-//     await loadList()
-// }
+async function pageSelect(e: PageSelectEvent)
+{
+    page.value = e.page
+    offset.value = e.offset
+    await loadList()
+}
 
 async function initLoad() {
     await loadCount()
@@ -64,7 +64,7 @@ initLoad()
 
             <Issue v-for="envelope in list" :envelope=envelope />
 
-            <!-- <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" /> -->
+            <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
         </template>
     </Sidebar>
 </template>
