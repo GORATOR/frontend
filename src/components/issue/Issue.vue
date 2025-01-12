@@ -13,7 +13,7 @@ const envelopeException: EnvelopeException = JSON.parse(
 <template>
     <div class="envelope-container">
         <div>
-            <b>{{ envelopeException.exception.values[0].type }}</b>
+            <a href="#TODO">{{ envelopeException.exception.values[0].type }}</a>
         </div>
         <div class="description">
             <i>{{ envelopeException.exception.values[0].value }}</i>
@@ -23,13 +23,16 @@ const envelopeException: EnvelopeException = JSON.parse(
 
 <style scoped lang="scss">
 .envelope-container {
-    border: 1px solid black;
-    border-radius: 5px;
     padding: 10px;
-    margin-bottom: 10px;
+}
 
-    .description i {
-        font-weight: normal;
+a {
+    color: rgb(0, 106, 255);
+    font-weight: bold;
+    text-decoration: none;
+
+    &:visited {
+        color: rgb(0, 106, 255);
     }
 }
 </style>
