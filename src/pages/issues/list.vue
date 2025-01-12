@@ -42,8 +42,7 @@ async function loadList() {
     }
 }
 
-async function pageSelect(e: PageSelectEvent)
-{
+async function pageSelect(e: PageSelectEvent) {
     page.value = e.page
     offset.value = e.offset
     await loadList()
@@ -62,7 +61,11 @@ initLoad()
         <template v-if="loaded">
             <h2>Issues</h2>
 
-            <Issue v-for="envelope in list" :envelope=envelope />
+            <div class="issue-container">
+                <div v-for="envelope in list" class="issue">
+                    <Issue :envelope=envelope />
+                </div>
+            </div>
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
         </template>
@@ -70,7 +73,18 @@ initLoad()
 </template>
 
 <style scoped lang="scss">
+@use '../../assets/variables' as *;
+
 .padding-small {
     padding-top: 14px;
+}
+
+.issue {
+    border: 1px solid $main_theme_border_color;
+    border-top: none;
+
+    &:first-child {
+        border-top: 1px solid $main_theme_border_color;
+    }
 }
 </style>
