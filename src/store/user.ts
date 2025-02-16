@@ -78,8 +78,8 @@ export const useUserStore = defineStore('user', () => {
             username.value = data.user.Username
 
             logined.value = true
-            sessionId.value = data.session_id
-            saveSessionId(data.session_id)
+            sessionId.value = data.sessionId
+            saveSessionId(data.sessionId)
             return true
         } catch (err) {
             console.error('Error:', err)
