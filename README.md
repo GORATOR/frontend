@@ -7,7 +7,8 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 # Сборка образа
 
 ```
-docker build --build-arg VITE_BACKEND_URL=http://host.com -t sh-frontend:latest .
+cp .env.example .env
+docker build -t sh-frontend:latest .
 ```
 
 VITE_BACKEND_URL - адрес бекенда
