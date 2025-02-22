@@ -70,7 +70,7 @@ jobs:
           cache-to: type=gha,ref=${{ env.DOCKER_HUB_USER }}/${{ env.DOCKER_HUB_REPOSITORY }}:${{ env.IMAGE_TAG }},mode=max
 
   deploy-gorator-frontend-image:
-    needs: build-gorator-backend-image
+    needs: build-gorator-frontend-image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
