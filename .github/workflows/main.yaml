@@ -39,10 +39,6 @@ jobs:
           ${{ secrets.FRONTEND_ENV_FILE }}
           EOF
 
-      - name: Check dir
-        run: |
-          ls -la
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
