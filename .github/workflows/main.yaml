@@ -90,7 +90,7 @@ jobs:
 
       - name: Deploy project on the Remote Server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.FRONTEND_HOST_USER }}@${{ secrets.FRONTEND_HOST_IP }} "cd ${{ secrets.FRONTEND_HOST_PATH }} \
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.FRONTEND_HOST_USER }}@${{ secrets.FRONTEND_HOST_IP }} "cd ${{ secrets.FRONTEND_HOST_PATH }} \
           && docker compose pull \
           && docker compose up -d --force-recreate \
           && docker container prune --force \
