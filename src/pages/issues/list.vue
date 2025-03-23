@@ -1,56 +1,31 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { sendGet } from '../../utils/requests'
+import {ref} from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
-import { Envelope } from '../../models/envelope'
+import {Envelope} from '../../models/envelope'
 import Paging from '../../components/paging/Paging.vue'
-import { EntityCount } from '../../models/count.ts'
-import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
+import {EntityCount, EntityName} from '../../models/count.ts'
+import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
 import Issue from '../../components/issue/Issue.vue'
-import { MenuItem } from '../../models/sidebarMenuItem.ts'
+import {MenuItem} from '../../models/sidebarMenuItem.ts'
+import {loadIssues} from "../../service/loadList.ts";
+import loadCount from "../../service/loadCount.ts";
 
 const list = ref<Envelope[]>([])
 const loaded = ref(false)
 
-const count = ref<EntityCount>({ count: 0 })
+const count = ref<EntityCount>({ count: 0, entity: EntityName.Envelope })
 const page = ref(1)
 const offset = ref(0)
-
-async function loadCount() {
-    try {
-        const response = await sendGet("/envelopes/count")
-        if (response.status == 200) {
-            const data = await response.json()
-            count.value = data
-        }
-    } catch (err) {
-        console.error('Error:', err)
-    }
-}
-
-async function loadList() {
-    loaded.value = false
-    try {
-        const response = await sendGet("/envelopes?limit=10&offset=" + offset.value)
-        if (response.status == 200) {
-            const data = await response.json()
-            list.value = data
-            loaded.value = true
-        }
-    } catch (err) {
-        console.error('Error:', err)
-    }
-}
 
 async function pageSelect(e: PageSelectEvent) {
     page.value = e.page
     offset.value = e.offset
-    await loadList()
+    list.value = await loadIssues(loaded, offset.value);
 }
 
 async function initLoad() {
-    await loadCount()
-    await loadList()
+    count.value = await loadCount(count.value.entity);
+    list.value = await loadIssues(loaded, offset.value);
 }
 
 initLoad()
