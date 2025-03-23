@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
-import {sendGet, sendPost} from '../../utils/requests'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
@@ -9,6 +8,7 @@ import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
 import SelectBox from "../../components/SelectBox.vue";
 import {Team} from "../../models/team.ts";
 import {createTeam} from "../../service/createEntity.ts";
+import {loadOrganizations} from "../../service/loadList.ts";
 
 const name = ref<string>("")
 const organizationId = ref<number>()
@@ -20,19 +20,10 @@ const offset = ref(0)
 const options = ref(Array<SelectBoxOption>())
 
 async function loadList() {
-  loaded.value = false
-  try {
-    const response = await sendGet("/organizations?limit=10&offset=" + offset.value)
-    if (response.status == 200) {
-      const data = await response.json()
-      if (data.length > 0) {
-        //@ts-ignore
-        options.value = data.map(el=> ({value: el.ID, label: el.Name}))
-      }
-      loaded.value = true
-    }
-  } catch (err) {
-    console.error('Error:', err)
+  const data = await loadOrganizations(loaded, offset.value);
+  if (data.length > 0) {
+    //@ts-ignore
+    options.value = data.map(el => (<SelectBoxOption>{value: el.ID, label: el.Name}))
   }
 }
 
