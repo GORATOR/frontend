@@ -10,6 +10,7 @@ import {EntityCount, EntityName} from '../../models/count.ts'
 import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
 import {MenuItem} from '../../models/sidebarMenuItem.ts'
 import {loadTeams} from "../../service/loadList.ts";
+import loadCount from "../../service/loadCount.ts";
 
 const list = ref<Team[]>([])
 const loaded = ref(false)
