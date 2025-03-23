@@ -26,6 +26,7 @@ async function loadList() {
     if (response.status == 200) {
       const data = await response.json()
       if (data.length > 0) {
+        //@ts-ignore
         options.value = data.map(el=> ({value: el.ID, label: el.Name}))
       }
       loaded.value = true
