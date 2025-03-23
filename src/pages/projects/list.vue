@@ -1,35 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { sendGet } from '../../utils/requests'
+import {ref} from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
-import { Project } from '../../models/project'
-import { redirectProjectsNew } from '../../utils/redirects.ts'
+import {Project} from '../../models/project'
+import {redirectProjectsNew} from '../../utils/redirects.ts'
 import Button from '../../components/Button.vue'
 import Table from '../../components/Table.vue'
 import Paging from '../../components/paging/Paging.vue'
-import { EntityCount } from '../../models/count.ts'
-import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
-import { MenuItem } from '../../models/sidebarMenuItem.ts'
+import {EntityCount, EntityName} from '../../models/count.ts'
+import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
+import {MenuItem} from '../../models/sidebarMenuItem.ts'
 import {loadProjects} from "../../service/loadList.ts";
+import loadCount from "../../service/loadCount.ts";
 
 const list = ref<Project[]>([])
 const loaded = ref(false)
 
-const count = ref<EntityCount>({ count: 0 })
+const count = ref<EntityCount>({ count: 0, entity: EntityName.Project })
 const page = ref(1)
 const offset = ref(0)
-
-async function loadCount() {
-    try {
-        const response = await sendGet("/projects/count")
-        if (response.status == 200) {
-            const data = await response.json()
-            count.value = data
-        }
-    } catch (err) {
-        console.error('Error:', err)
-    }
-}
 
 async function pageSelect(e: PageSelectEvent)
 {
@@ -39,7 +27,7 @@ async function pageSelect(e: PageSelectEvent)
 }
 
 async function initLoad() {
-    await loadCount()
+    count.value = await loadCount(count.value.entity);
     list.value = await loadProjects(loaded, offset.value);
 }
 
