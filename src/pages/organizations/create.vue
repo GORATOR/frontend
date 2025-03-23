@@ -1,41 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
-import { sendPost } from '../../utils/requests'
-import { redirectOrganizationsList } from '../../utils/redirects'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
+import {createOrganization} from "../../service/createEntity.ts";
+import {Organization} from "../../models/organization.ts";
 
 const name = ref<string>("")
 const loading = ref<boolean>(false)
 
 async function create() {
-    loading.value = true
-
-    const newEntity = {
-        Name: name.value
-    }
-
-    try {
-        const response = await sendPost("/organization", newEntity)
-
-        if (response.status != 200) {
-            console.error('Invalid response:', response)
-            return false
-        }
-
-        redirectOrganizationsList()
-        return true
-    }
-    catch (err) {
-        console.error('Error:', err)
-    }
-    finally {
-        loading.value = false
-    }
-
-    return false
+    return await createOrganization(loading, <Organization>{ Name: name.value})
 }
 </script>
 

@@ -1,42 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
-import { sendPost } from '../../utils/requests'
-import { redirectProjectsList } from '../../utils/redirects'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
+import {createProject} from "../../service/createEntity.ts";
+import {Project} from "../../models/project.ts";
 
 const name = ref<string>("")
 const loading = ref<boolean>(false)
 
 async function create() {
-    loading.value = true
-
-    const newEntity = {
-        Name: name.value,
-        TeamId: 1 // for test
-    }
-
-    try {
-        const response = await sendPost("/project", newEntity)
-
-        if (response.status != 200) {
-            console.error('Invalid response:', response)
-            return false
-        }
-
-        redirectProjectsList()
-        return true
-    }
-    catch (err) {
-        console.error('Error:', err)
-    }
-    finally {
-        loading.value = false
-    }
-
-    return false
+    return await createProject(loading, <Project>{Name: name.value, TeamId: 1})
 }
 </script>
 

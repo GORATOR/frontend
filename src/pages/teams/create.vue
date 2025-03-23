@@ -2,13 +2,13 @@
 import { ref } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
 import {sendGet, sendPost} from '../../utils/requests'
-import { redirectTeamsList } from '../../utils/redirects'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
 import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
 import SelectBox from "../../components/SelectBox.vue";
 import {Team} from "../../models/team.ts";
+import {createTeam} from "../../service/createEntity.ts";
 
 const name = ref<string>("")
 const organizationId = ref<number>()
@@ -37,33 +37,12 @@ async function loadList() {
 }
 
 async function create() {
-    loading.value = true
-
-    const newEntity = <Team>{
+    const team = <Team>{
         Name: name.value,
         Avatar: '',
         OrganizationIds: [organizationId.value]
     }
-
-    try {
-        const response = await sendPost("/team", newEntity)
-
-        if (response.status != 200) {
-            console.error('Invalid response:', response)
-            return false
-        }
-
-        redirectTeamsList()
-        return true
-    }
-    catch (err) {
-        console.error('Error:', err)
-    }
-    finally {
-        loading.value = false
-    }
-
-    return false
+    return await createTeam(loading, team);
 }
 
 loadList()
