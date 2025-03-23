@@ -8,6 +8,7 @@ import { EntityCount } from '../../models/count.ts'
 import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 import Issue from '../../components/issue/Issue.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
+import {loadIssues, loadOrganizations} from "../../service/loadList.ts";
 
 const list = ref<Envelope[]>([])
 const loaded = ref(false)
@@ -28,29 +29,15 @@ async function loadCount() {
     }
 }
 
-async function loadList() {
-    loaded.value = false
-    try {
-        const response = await sendGet("/envelopes?limit=10&offset=" + offset.value)
-        if (response.status == 200) {
-            const data = await response.json()
-            list.value = data
-            loaded.value = true
-        }
-    } catch (err) {
-        console.error('Error:', err)
-    }
-}
-
 async function pageSelect(e: PageSelectEvent) {
     page.value = e.page
     offset.value = e.offset
-    await loadList()
+    list.value = await loadIssues(loaded, offset.value);
 }
 
 async function initLoad() {
     await loadCount()
-    await loadList()
+    list.value = await loadIssues(loaded, offset.value);
 }
 
 initLoad()

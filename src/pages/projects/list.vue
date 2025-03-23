@@ -10,6 +10,7 @@ import Paging from '../../components/paging/Paging.vue'
 import { EntityCount } from '../../models/count.ts'
 import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
+import {loadProjects} from "../../service/loadList.ts";
 
 const list = ref<Project[]>([])
 const loaded = ref(false)
@@ -30,30 +31,16 @@ async function loadCount() {
     }
 }
 
-async function loadList() {
-    loaded.value = false
-    try {
-        const response = await sendGet("/projects?limit=10&offset=" + offset.value)
-        if (response.status == 200) {
-            const data = await response.json()
-            list.value = data
-            loaded.value = true
-        }
-    } catch (err) {
-        console.error('Error:', err)
-    }
-}
-
 async function pageSelect(e: PageSelectEvent)
 {
     page.value = e.page
     offset.value = e.offset
-    await loadList()
+    list.value = await loadProjects(loaded, offset.value);
 }
 
 async function initLoad() {
     await loadCount()
-    await loadList()
+    list.value = await loadProjects(loaded, offset.value);
 }
 
 initLoad()
