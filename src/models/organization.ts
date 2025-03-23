@@ -1,5 +1,6 @@
 interface Organization {
-    Name: string
+    Name: string,
+    ID: number,
 }
 
 export type { Organization }
