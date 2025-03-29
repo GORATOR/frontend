@@ -31,6 +31,10 @@ async function initLoad() {
     list.value = await loadOrganizations(loaded, offset.value);
 }
 
+function orgUrl(id: string) : string {
+  return `${location.origin}/organization/${id}`;
+}
+
 initLoad()
 </script>
 
@@ -41,7 +45,7 @@ initLoad()
 
             <Table
                 :headers="['Name']"
-                :rows="list.map(x => ({ Name: x.Name }))" />
+                :rows="list.map(x => ({ Name: x.Name, url: orgUrl(x.ID.toString()) }))" />
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
 
