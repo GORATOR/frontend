@@ -24,7 +24,7 @@ initLoad();
 </script>
 
 <template>
-  <Sidebar :active=MenuItem.Orgs>
+  <Sidebar :active=MenuItem.Users>
     <template v-if="loaded">
       <h2>
         {{ user?.Username }}
