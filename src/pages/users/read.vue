@@ -3,16 +3,16 @@
 import {MenuItem} from "../../models/sidebarMenuItem.ts";
 import Sidebar from "../../components/Sidebar.vue";
 import {ref} from "vue";
-import {Organization} from "../../models/organization.ts";
 import {EntityName} from "../../models/count.ts";
+import {User} from "../../models/user.ts";
 import {getEntityId, readEntity} from "../../service/readEntity.ts";
 
 const loaded = ref(false);
-const org = ref<Organization | undefined>(undefined);
+const user = ref<User | undefined>(undefined);
 
 async function initLoad() {
   try {
-    org.value = await readEntity(EntityName.Organization, getEntityId(EntityName.Organization))
+    user.value = await readEntity(EntityName.User, getEntityId(EntityName.User))
     loaded.value = true;
   } catch (e) {
     console.log(e);
@@ -27,7 +27,7 @@ initLoad();
   <Sidebar :active=MenuItem.Orgs>
     <template v-if="loaded">
       <h2>
-        {{ org?.Name}}
+        {{ user?.Username }}
       </h2>
     </template>
 
