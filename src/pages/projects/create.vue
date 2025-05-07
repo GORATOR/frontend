@@ -5,13 +5,13 @@ import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
 import {createProject} from "../../service/createEntity.ts";
-import {Project} from "../../models/project.ts";
+import {ProjectCreate} from "../../models/project.ts";
 
 const name = ref<string>("")
 const loading = ref<boolean>(false)
 
 async function create() {
-    return await createProject(loading, <Project>{Name: name.value, TeamId: 1})
+    return await createProject(loading, <ProjectCreate>{Name: name.value, TeamId: 1})
 }
 </script>
 
