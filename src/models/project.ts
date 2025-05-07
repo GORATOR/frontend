@@ -3,4 +3,9 @@ interface Project {
     ID: number
 }
 
-export type { Project }
+interface ProjectCreate {
+    Name: string,
+    TeamId: number,
+}
+
+export type { Project, ProjectCreate }
