@@ -11,6 +11,7 @@ import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
 import {MenuItem} from '../../models/sidebarMenuItem.ts'
 import {loadTeams} from "../../service/loadList.ts";
 import loadCount from "../../service/loadCount.ts";
+import {generateEntityRecordUrl} from "../../service/readEntity.ts";
 
 const list = ref<Team[]>([])
 const loaded = ref(false)
@@ -41,7 +42,7 @@ initLoad()
 
             <Table
                 :headers="['Name']"
-                :rows="list.map(x => ({ Name: x.Name }))" />
+                :rows="list.map(x => ({ Name: x.Name,  url: generateEntityRecordUrl(EntityName.Team, x.ID) }))" />
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
 

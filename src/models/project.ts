@@ -1,5 +1,6 @@
 interface Project {
-    Name: string
+    Name: string,
+    ID: number
 }
 
 export type { Project }

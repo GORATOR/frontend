@@ -11,6 +11,7 @@ import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
 import {MenuItem} from '../../models/sidebarMenuItem.ts'
 import {loadOrganizations} from "../../service/loadList.ts";
 import loadCount from "../../service/loadCount.ts";
+import {generateEntityRecordUrl} from "../../service/readEntity.ts";
 
 const list = ref<Organization[]>([])
 const loaded = ref(false)
@@ -31,10 +32,6 @@ async function initLoad() {
     list.value = await loadOrganizations(loaded, offset.value);
 }
 
-function orgUrl(id: string) : string {
-  return `${location.origin}/organization/${id}`;
-}
-
 initLoad()
 </script>
 
@@ -45,7 +42,7 @@ initLoad()
 
             <Table
                 :headers="['Name']"
-                :rows="list.map(x => ({ Name: x.Name, url: orgUrl(x.ID.toString()) }))" />
+                :rows="list.map(x => ({ Name: x.Name, url: generateEntityRecordUrl(EntityName.Organization, x.ID) }))" />
 
             <Paging :page="page" :limit="10" :count="count.count" v-on:page-select="pageSelect" />
 
