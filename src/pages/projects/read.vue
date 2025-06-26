@@ -4,7 +4,7 @@ import {MenuItem} from "../../models/sidebarMenuItem.ts";
 import Sidebar from "../../components/Sidebar.vue";
 import {ref} from "vue";
 import {EntityName} from "../../models/count.ts";
-import {Project} from "../../models/project.ts";
+import {Project, ProjectUpdate} from "../../models/project.ts";
 import {getEntityId, readEntity} from "../../service/readEntity.ts";
 import {updateProject} from "../../service/updateEntity.ts";
 import Button from "../../components/Button.vue";
@@ -34,7 +34,7 @@ function getButtonCaption(): string {
 async function actionButtonClick(): Promise<void> {
   if (isEditing.value) {
     console.log('save action');
-    await updateProject(loading, project.value);
+    await updateProject(loading, project.value as ProjectUpdate);
     console.log('edit disabled');
   } else {
     console.log('edit enabled');
