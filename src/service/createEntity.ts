@@ -9,7 +9,7 @@ import {
     redirectUsersList
 } from "../utils/redirects.ts";
 import {Organization} from "../models/organization.ts";
-import {ProjectCreate} from "../models/project.ts";
+import {ProjectUpdate} from "../models/project.ts";
 import {User} from "../models/user.ts";
 
 
@@ -41,7 +41,7 @@ export async function createTeam(loading: Ref<boolean, boolean>, obj: Team): Pro
     return createEntity(loading, EntityName.Team, obj, redirectTeamsList);
 }
 
-export async function createProject(loading: Ref<boolean, boolean>, obj: ProjectCreate): Promise<boolean> {
+export async function createProject(loading: Ref<boolean, boolean>, obj: ProjectUpdate): Promise<boolean> {
     return createEntity(loading, EntityName.Project, obj, redirectProjectsList);
 }
 

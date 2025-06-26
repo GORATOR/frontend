@@ -18,6 +18,23 @@ function sendPost(url: string, body: any): Promise<Response> {
         })
 }
 
+function sendPut(url: string, body: any): Promise<Response> {
+    const auth = useUserStore();
+
+    return fetch(
+        BASE_URL + url,
+        {
+            method: 'PUT',
+            headers: auth.sessionId
+                ? {
+                    'Content-Type': 'application/json',
+                    'X-Session-Id': `${auth.sessionId}`
+                }
+                : { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+}
+
 function sendGet(url: string): Promise<Response> {
     const auth = useUserStore()
 
@@ -34,4 +51,4 @@ function sendGet(url: string): Promise<Response> {
         })
 }
 
-export { sendPost, sendGet }
+export { sendPost, sendGet, sendPut }

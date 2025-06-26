@@ -8,4 +8,10 @@ interface ProjectCreate {
     TeamId: number,
 }
 
-export type { Project, ProjectCreate }
+interface ProjectUpdate {
+    ID: number
+    Name: string,
+    TeamId: number,
+}
+
+export type { Project, ProjectCreate, ProjectUpdate }
