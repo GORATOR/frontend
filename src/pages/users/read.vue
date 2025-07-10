@@ -6,9 +6,32 @@ import {ref} from "vue";
 import {EntityName} from "../../models/count.ts";
 import {User} from "../../models/user.ts";
 import {getEntityId, readEntity} from "../../service/readEntity.ts";
+import {updateUser} from "../../service/updateEntity.ts";
+import Button from "../../components/Button.vue";
 
 const loaded = ref(false);
-const user = ref<User | undefined>(undefined);
+const user = ref<User>({} as User);
+let isEditing = ref<boolean>(false);
+const loading = ref<boolean>(false);
+
+function editSwitch() : void {
+  isEditing.value = !isEditing.value;
+}
+
+function getButtonCaption(): string {
+  return isEditing.value ? 'SAVE' : 'EDIT';
+}
+
+async function actionButtonClick(): Promise<void> {
+  if (isEditing.value) {
+    console.log('save action');
+    await updateUser(loading, user.value);
+    console.log('edit disabled');
+  } else {
+    console.log('edit enabled');
+  }
+  editSwitch();
+}
 
 async function initLoad() {
   try {
@@ -29,6 +52,13 @@ initLoad();
       <h2>
         {{ user?.Username }}
       </h2>
+      <div>
+        <Button @click="actionButtonClick">{{getButtonCaption()}}</Button>
+      </div>
+      <div>
+        <p v-if="!isEditing">{{user?.Username}}</p>
+        <input type="text" v-if="isEditing" v-model="user.Username" />
+      </div>
     </template>
 
   </Sidebar>
