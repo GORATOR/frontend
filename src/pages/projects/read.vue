@@ -4,15 +4,16 @@ import {MenuItem} from "../../models/sidebarMenuItem.ts";
 import Sidebar from "../../components/Sidebar.vue";
 import {ref} from "vue";
 import {EntityName} from "../../models/count.ts";
-import {Project, ProjectUpdate} from "../../models/project.ts";
+import {ProjectUpdate} from "../../models/project.ts";
 import {getEntityId, readEntity} from "../../service/readEntity.ts";
 import {updateProject} from "../../service/updateEntity.ts";
 import Button from "../../components/Button.vue";
 
 const loaded = ref(false);
-const project = ref<Project>({} as Project);
+const project = ref<ProjectUpdate>({} as ProjectUpdate);
 let isEditing = ref<boolean>(false);
 const loading = ref<boolean>(false);
+const teams = ref<Map<number, string>>(new Map<number, string>);
 
 async function initLoad() {
   try {
@@ -48,16 +49,23 @@ initLoad();
 
 <template>
   <Sidebar :active=MenuItem.Projects>
-    <template v-if="loaded">
+    <template class="model" v-if="loaded">
       <h2>
         {{ project?.Name }}
       </h2>
       <div>
         <Button @click="actionButtonClick">{{getButtonCaption()}}</Button>
       </div>
-      <div>
-        <p v-if="!isEditing">{{project?.Name}}</p>
-        <input type="text" v-if="isEditing" v-model="project.Name" />
+      <div class="properties">
+        <div class="property">
+          <label>Name:</label>
+          <p v-if="!isEditing">{{project?.Name}}</p>
+          <input type="text" v-if="isEditing" v-model="project.Name" />
+        </div>
+        <div class="property">
+          <label>Team:</label>
+          <p v-if="!isEditing">{{project?.TeamId}}</p>
+        </div>
       </div>
     </template>
 
@@ -65,5 +73,12 @@ initLoad();
 </template>
 
 <style scoped lang="scss">
-
+.properties {
+  display: block;
+  .property {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+}
 </style>
