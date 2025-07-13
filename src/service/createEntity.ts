@@ -10,7 +10,7 @@ import {
 } from "../utils/redirects.ts";
 import {Organization} from "../models/organization.ts";
 import {ProjectCreate} from "../models/project.ts";
-import {User} from "../models/user.ts";
+import {UserCreate} from "../models/user.ts";
 
 
 async function createEntity(loading: Ref<boolean, boolean>, name: EntityName, obj: any, redirectCallback: Function ): Promise<boolean> {
@@ -49,6 +49,6 @@ export async function createOrganization(loading: Ref<boolean, boolean>, obj: Or
     return createEntity(loading, EntityName.Organization, obj, redirectOrganizationsList);
 }
 
-export async function createUser(loading: Ref<boolean, boolean>, obj: User): Promise<boolean> {
+export async function createUser(loading: Ref<boolean, boolean>, obj: UserCreate): Promise<boolean> {
     return createEntity(loading, EntityName.User, obj, redirectUsersList);
 }
