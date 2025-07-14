@@ -6,7 +6,15 @@ const props = defineProps<{
   options: Array<SelectBoxOption>,
 }>();
 
-const model = defineModel<number>()
+const model = defineModel<number>();
+
+const emit = defineEmits<{
+  (e: 'changed', value: number | undefined): void;
+}>();
+
+function onChange() {
+  emit('changed', model.value);
+}
 
 </script>
 
@@ -14,7 +22,7 @@ const model = defineModel<number>()
   <div class="textbox-container">
     <label class="label">
       {{ props.label }}
-      <select class="select-box" v-model="model">
+      <select class="select-box" v-model="model" @change="onChange">
         <option disabled value=""></option>
         <option v-for="option in props.options" :key="option.value" :value="option.value">
           {{ option.label }}

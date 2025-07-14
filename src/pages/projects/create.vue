@@ -6,13 +6,30 @@ import Button from '../../components/Button.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
 import {createProject} from "../../service/createEntity.ts";
 import {ProjectCreate} from "../../models/project.ts";
+import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
+import {loadTeams} from "../../service/loadList.ts";
+import SelectBox from "../../components/SelectBox.vue";
 
 const name = ref<string>("")
 const loading = ref<boolean>(false)
+const options = ref(Array<SelectBoxOption>())
+const teamOffset = ref(0);
+const loaded = ref(false);
+const teamId = ref(0);
 
 async function create() {
-    return await createProject(loading, <ProjectCreate>{Name: name.value, TeamId: 1})
+    return await createProject(loading, <ProjectCreate>{Name: name.value, TeamId: teamId.value})
 }
+
+async function loadList() {
+  const data = await loadTeams(loaded, teamOffset.value);
+  if (data.length > 0) {
+    //@ts-ignore
+    options.value = data.map(el => (<SelectBoxOption>{value: el.ID, label: el.Name}))
+  }
+}
+
+loadList();
 </script>
 
 <template>
@@ -20,6 +37,11 @@ async function create() {
         <h1>Create new Project</h1>
         <div>
             <TextBox label="Name" v-model="name" />
+            <SelectBox
+                :options="options"
+                :label="'Select team'"
+                v-model="teamId"
+            ></SelectBox>
             <div class="padding-small">
                 <Button v-if="loading" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
