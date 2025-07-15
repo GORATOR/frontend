@@ -18,15 +18,16 @@ function onClose() : void {
 
 <template>
 
-  <span :class="['removable-chip', props.chipClass]">
+  <div :class="['removable-chip', props.chipClass]">
     {{ props.text }}
     <p @click="onClose">❌</p>
-  </span>
+  </div>
 
 </template>
 
 <style scoped lang="scss">
 .removable-chip {
+  border:1px solid black;
   display: flex;
   flex-direction: row;
   align-items: center;

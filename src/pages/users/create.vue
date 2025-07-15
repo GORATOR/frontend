@@ -88,14 +88,20 @@ loadLists();
         <h1>Create new User</h1>
         <div v-if="user.OrganizationIds.length > 0" class="organizations">
           <label>Organizations:</label>
-          <div v-for="org in user.OrganizationIds">
-            <removable-chip :text="org.toString()" :payload="org.toString()" :chip-class="``" @onClose="removeOrg" />
+          <div class="chip-group org-chip-group">
+            <removable-chip v-for="org in user.OrganizationIds"
+                :text="org.toString()"
+                :payload="org.toString()"
+                :chip-class="`chip-el`" @onClose="removeOrg" />
           </div>
         </div>
         <div v-if="user.TeamIds.length > 0" class="teams">
           <label>Teams:</label>
-          <div v-for="team in user.TeamIds">
-            <removable-chip :text="team.toString()" :payload="team.toString()" :chip-class="``" @onClose="removeTeam" />
+          <div class="chip-group team-chip-group">
+            <removable-chip v-for="team in user.TeamIds"
+                :text="team.toString()"
+                :payload="team.toString()"
+                :chip-class="`chip-el`" @onClose="removeTeam" />
           </div>
         </div>
         <div>
@@ -125,5 +131,17 @@ loadLists();
 <style scoped lang="scss">
 .padding-small {
     padding-top: 14px;
+}
+.chip-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  .chip-el {
+    margin-left: 8px;
+    border-radius: 5px;
+    height: 32px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
 }
 </style>
