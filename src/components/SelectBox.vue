@@ -1,19 +1,40 @@
 <script setup lang="ts">
 import {SelectBoxOption} from "../models/SelectBoxOption.ts";
 
+export interface SelectBoxElement {
+  index: number,
+  name: string,
+  value: string
+}
+
 const props = defineProps<{
   label: string,
   options: Array<SelectBoxOption>,
 }>();
 
-const model = defineModel<number>();
+const model = defineModel<string>();
 
 const emit = defineEmits<{
-  (e: 'changed', value: number | undefined): void;
+  (e: 'changed', el: SelectBoxElement): void;
 }>();
 
 function onChange() {
-  emit('changed', model.value);
+  let i = 0;
+  const el = <SelectBoxElement>{
+    index: -1,
+    name: '',
+    value: ''
+  };
+  for (const option of props.options) {
+    if (option.value === model.value) {
+      el.index = i;
+      el.value = model.value;
+      el.name = option.label;
+      break;
+    }
+    i++;
+  }
+  emit('changed', el);
 }
 
 </script>
