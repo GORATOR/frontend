@@ -169,8 +169,8 @@ watch(isOpen, (open) => {
     border: 1px solid $main_theme_background_lighter1;
     border-top: none;
     border-radius: 0 0 7px 7px;
-    height: 200px;
-    overflow-y: scroll;
+    max-height: 100px;
+    overflow-y: auto;
     z-index: 1000;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
