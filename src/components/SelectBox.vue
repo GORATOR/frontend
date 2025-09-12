@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, computed } from 'vue';
 import {SelectBoxOption} from "../models/SelectBoxOption.ts";
 
 export interface SelectBoxElement {
@@ -19,10 +19,13 @@ const model = defineModel<string>();
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement>();
 const selectedOption = ref<SelectBoxOption | null>(null);
+const searchQuery = ref('');
+const searchInputRef = ref<HTMLInputElement>();
 
 const emit = defineEmits<{
   (e: 'changed', el: SelectBoxElement): void;
   (e: 'loadMore'): void;
+  (e: 'search', query: string): void;
 }>();
 
 // Watch model changes to update selected option
@@ -35,8 +38,25 @@ watch(model, (newValue) => {
   }
 }, { immediate: true });
 
+// Computed property for filtered options
+const filteredOptions = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return props.options;
+  }
+  return props.options.filter(option => 
+    option.label.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
 function toggleDropdown() {
   isOpen.value = !isOpen.value;
+  if (isOpen.value) {
+    nextTick(() => {
+      searchInputRef.value?.focus();
+    });
+  } else {
+    searchQuery.value = '';
+  }
 }
 
 function selectOption(option: SelectBoxOption, index: number) {
@@ -61,6 +81,22 @@ function onScroll(event: Event) {
       emit('loadMore');
     }
   }
+}
+
+// Search functionality
+let searchTimeout: ReturnType<typeof setTimeout>;
+
+function onSearchInput() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    const query = searchQuery.value.trim();
+    emit('search', query);
+    
+    // If filtered results are less than 5 and we have search query, try to load more from API
+    if (query && filteredOptions.value.length < 5) {
+      emit('loadMore');
+    }
+  }, 300); // 300ms debounce
 }
 
 // Close dropdown when clicking outside
@@ -93,23 +129,40 @@ watch(isOpen, (open) => {
       <div class="select-arrow" :class="{ 'select-arrow--open': isOpen }">▼</div>
     </div>
     
-    <div v-if="isOpen" class="dropdown" @scroll="onScroll">
-      <div 
-        v-for="(option, index) in options" 
-        :key="option.value"
-        class="dropdown-item"
-        :class="{ 'dropdown-item--selected': selectedOption?.value === option.value }"
-        @click="selectOption(option, index)"
-      >
-        {{ option.label }}
+    <div v-if="isOpen" class="dropdown">
+      <div class="search-container">
+        <input 
+          ref="searchInputRef"
+          v-model="searchQuery"
+          @input="onSearchInput"
+          type="text"
+          class="search-input"
+          placeholder="Search..."
+          @click.stop
+        />
       </div>
-      
-      <div v-if="loading" class="dropdown-item dropdown-loading">
-        Loading...
-      </div>
-      
-      <div v-if="!hasMore && options.length > 0" class="dropdown-item dropdown-end">
-        No more items
+      <div class="dropdown-list" @scroll="onScroll">
+        <div 
+          v-for="(option, index) in filteredOptions" 
+          :key="option.value"
+          class="dropdown-item"
+          :class="{ 'dropdown-item--selected': selectedOption?.value === option.value }"
+          @click="selectOption(option, index)"
+        >
+          {{ option.label }}
+        </div>
+        
+        <div v-if="filteredOptions.length === 0 && searchQuery.trim() !== ''" class="dropdown-item dropdown-no-results">
+          No results found
+        </div>
+        
+        <div v-if="loading" class="dropdown-item dropdown-loading">
+          Loading...
+        </div>
+        
+        <div v-if="!hasMore && filteredOptions.length > 0 && !loading" class="dropdown-item dropdown-end">
+          No more items
+        </div>
       </div>
     </div>
   </div>
@@ -169,10 +222,35 @@ watch(isOpen, (open) => {
     border: 1px solid $main_theme_background_lighter1;
     border-top: none;
     border-radius: 0 0 7px 7px;
-    max-height: 100px;
-    overflow-y: auto;
+    height: 200px;
     z-index: 1000;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+
+    .search-container {
+      padding: 8px;
+      border-bottom: 1px solid #f0f0f0;
+      
+      .search-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        
+        &:focus {
+          outline: none;
+          border-color: $main_theme_active_color;
+          box-shadow: 0 0 0 2px rgba($main_theme_active_color, 0.2);
+        }
+      }
+    }
+
+    .dropdown-list {
+      flex: 1;
+      overflow-y: scroll;
+    }
 
     .dropdown-item {
       padding: 8px;
@@ -198,7 +276,8 @@ watch(isOpen, (open) => {
     }
 
     .dropdown-loading,
-    .dropdown-end {
+    .dropdown-end,
+    .dropdown-no-results {
       padding: 8px;
       text-align: center;
       color: #666;
