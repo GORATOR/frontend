@@ -48,6 +48,16 @@ const filteredOptions = computed(() => {
   );
 });
 
+// Watch filtered options to trigger load more if needed
+watch(filteredOptions, (newFilteredOptions) => {
+  // If we have search query and few results, and there's more data available
+  if (searchQuery.value.trim() && newFilteredOptions.length < 5 && props.hasMore && !props.loading) {
+    nextTick(() => {
+      emit('loadMore');
+    });
+  }
+}, { immediate: false });
+
 function toggleDropdown() {
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
@@ -91,11 +101,6 @@ function onSearchInput() {
   searchTimeout = setTimeout(() => {
     const query = searchQuery.value.trim();
     emit('search', query);
-    
-    // If filtered results are less than 5 and we have search query, try to load more from API
-    if (query && filteredOptions.value.length < 5) {
-      emit('loadMore');
-    }
   }, 300); // 300ms debounce
 }
 
