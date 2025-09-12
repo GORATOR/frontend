@@ -30,7 +30,7 @@ async function loadList(reset = false) {
   if (isLoadingMore.value) return
 
   isLoadingMore.value = true
-  const data = await loadOrganizations(loaded, offset.value)
+  const data = await loadOrganizations(loaded, offset.value, 5) // Load 5 items per batch
   
   if (data.length > 0) {
     const newOptions = data.map(el => (<SelectBoxOption>{
@@ -45,7 +45,7 @@ async function loadList(reset = false) {
     }
     
     offset.value += data.length
-    hasMore.value = data.length === 10 // Assume we have more if we got full batch
+    hasMore.value = data.length === 5 // We have more if we got full batch of 5
   } else {
     hasMore.value = false
   }
