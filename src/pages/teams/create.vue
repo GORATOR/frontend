@@ -19,18 +19,20 @@ const offset = ref(0)
 const options = ref(Array<SelectBoxOption>())
 const hasMore = ref(true)
 const isLoadingMore = ref(false)
+const currentSearchQuery = ref('')
 
-async function loadList(reset = false) {
+async function loadList(reset = false, search = '') {
   if (reset) {
     offset.value = 0
     options.value = []
     hasMore.value = true
+    currentSearchQuery.value = search
   }
 
   if (isLoadingMore.value) return
 
   isLoadingMore.value = true
-  const data = await loadOrganizations(loaded, offset.value, 5) // Load 5 items per batch
+  const data = await loadOrganizations(loaded, offset.value, 5, search) // Load 5 items per batch with search
   
   if (data.length > 0) {
     const newOptions = data.map(el => (<SelectBoxOption>{
@@ -41,7 +43,10 @@ async function loadList(reset = false) {
     if (reset) {
       options.value = newOptions
     } else {
-      options.value = [...options.value, ...newOptions]
+      // Avoid duplicates when merging
+      const existingValues = new Set(options.value.map(opt => opt.value))
+      const filteredNewOptions = newOptions.filter(opt => !existingValues.has(opt.value))
+      options.value = [...options.value, ...filteredNewOptions]
     }
     
     offset.value += data.length
@@ -54,7 +59,12 @@ async function loadList(reset = false) {
 }
 
 async function loadMore() {
-  await loadList(false)
+  await loadList(false, currentSearchQuery.value)
+}
+
+async function handleSearch(query: string) {
+  // Reset and load with new search query
+  await loadList(true, query)
 }
 
 async function create() {
@@ -80,6 +90,7 @@ loadList(true)
                 :loading="isLoadingMore"
                 :hasMore="hasMore"
                 @loadMore="loadMore"
+                @search="handleSearch"
                 v-model="organizationId">
             </SelectBox>
             <TextBox label="Name" v-model="name" />
