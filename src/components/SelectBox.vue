@@ -8,6 +8,8 @@ export interface SelectBoxElement {
   value: string
 }
 
+export const DEFAULT_LIMIT = 5;
+
 const props = defineProps<{
   label: string,
   options: Array<SelectBoxOption>,
@@ -28,7 +30,7 @@ const emit = defineEmits<{
   (e: 'search', query: string): void;
 }>();
 
-// Watch model changes to update selected option
+
 watch(model, (newValue) => {
   if (newValue) {
     const option = props.options.find(opt => opt.value === newValue);
@@ -38,7 +40,7 @@ watch(model, (newValue) => {
   }
 }, { immediate: true });
 
-// Computed property for filtered options
+
 const filteredOptions = computed(() => {
   if (!searchQuery.value.trim()) {
     return props.options;
@@ -48,9 +50,8 @@ const filteredOptions = computed(() => {
   );
 });
 
-// Watch filtered options to trigger load more if needed
+
 watch(filteredOptions, (newFilteredOptions) => {
-  // If we have search query and few results, and there's more data available
   if (searchQuery.value.trim() && newFilteredOptions.length < 5 && props.hasMore && !props.loading) {
     nextTick(() => {
       emit('loadMore');
@@ -93,7 +94,7 @@ function onScroll(event: Event) {
   }
 }
 
-// Search functionality
+
 let searchTimeout: ReturnType<typeof setTimeout>;
 
 function onSearchInput() {
@@ -101,17 +102,17 @@ function onSearchInput() {
   searchTimeout = setTimeout(() => {
     const query = searchQuery.value.trim();
     emit('search', query);
-  }, 300); // 300ms debounce
+  }, 300);
 }
 
-// Close dropdown when clicking outside
+
 function handleClickOutside(event: Event) {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
     isOpen.value = false;
   }
 }
 
-// Add/remove event listener for clicking outside
+
 watch(isOpen, (open) => {
   if (open) {
     nextTick(() => {
