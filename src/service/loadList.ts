@@ -11,7 +11,7 @@ async function loadList(loaded:Ref<boolean, boolean>, endpoint: string, offset: 
     try {
         let url = `/${endpoint}?limit=${limit}&offset=${offset}`
         if (search && search.trim() !== '') {
-            url += `&search=${encodeURIComponent(search)}`
+            url += `&${encodeURIComponent(search)}`
         }
         const response = await sendGet(url)
         if (response.status == 200) {
@@ -25,23 +25,48 @@ async function loadList(loaded:Ref<boolean, boolean>, endpoint: string, offset: 
     return [];
 }
 
-export async function loadTeams(loaded:Ref<boolean, boolean>, offset: number, limit = 10, search?: string) : Promise<Team[]> {
-    return loadList(loaded, 'teams', offset, limit, search);
+function addURIComponent(name: string, value?: string): string {
+    let result = '';
+    if (value && value.trim() !== '') {
+        result = `${name}=${encodeURIComponent(value)}`
+    }
+    return result;
 }
 
-export async function loadProjects(loaded:Ref<boolean, boolean>, offset: number, limit = 10, search?: string): Promise<Project[]> {
-    return loadList(loaded, 'projects', offset, limit, search);
+export async function loadTeams(loaded:Ref<boolean, boolean>, offset: number, limit = 10, name?: string) : Promise<Team[]> {
+    return loadList(loaded, 'teams', offset, limit, addURIComponent('name', name));
 }
 
-export async function loadUsers(loaded:Ref<boolean, boolean>, offset: number, limit = 10, search?: string): Promise<User[]> {
-    return loadList(loaded, 'users', offset, limit, search);
+export async function loadProjects(loaded:Ref<boolean, boolean>, offset: number, limit = 10, name?: string): Promise<Project[]> {
+    return loadList(loaded, 'projects', offset, limit, addURIComponent('name', name));
 }
 
-export async function loadOrganizations(loaded:Ref<boolean, boolean>, offset: number, limit = 10, search?: string): Promise<Organization[]> {
-    return await loadList(loaded, 'organizations', offset, limit, search);
+export async function loadUsers(loaded:Ref<boolean, boolean>, offset: number, limit = 10, username?: string): Promise<User[]> {
+    return loadList(loaded, 'users', offset, limit, addURIComponent('username', username));
 }
 
-export async function loadIssues(loaded:Ref<boolean, boolean>, offset: number, limit = 10, search?: string): Promise<Envelope[]> {
-    return loadList(loaded, 'envelopes', offset, limit, search);
+export async function loadOrganizations(loaded:Ref<boolean, boolean>, offset: number, limit = 10, name?: string): Promise<Organization[]> {
+    return await loadList(loaded, 'organizations', offset, limit, addURIComponent('name', name));
+}
+
+export async function loadIssues(
+    loaded:Ref<boolean, boolean>,
+    offset: number,
+    limit = 10,
+    groupBy?: string,
+    createdAtFrom?: string,
+    createdAtTo?: string): Promise<Envelope[]> {
+    const search = [];
+
+    if (groupBy === 'tag') {
+        search.push(`groupBy=${encodeURIComponent(groupBy)}`);
+    }
+    if (createdAtFrom) {
+        search.push(`createdAtFrom=${encodeURIComponent(createdAtFrom)}`);
+    }
+    if (createdAtTo) {
+        search.push(`createdAtFrom=${encodeURIComponent(createdAtTo)}`);
+    }
+    return loadList(loaded, 'envelopes', offset, limit, search.join('&'));
 }
 

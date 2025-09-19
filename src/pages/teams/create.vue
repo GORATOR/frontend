@@ -5,7 +5,7 @@ import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
 import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
-import SelectBox from "../../components/SelectBox.vue";
+import SelectBox, {DEFAULT_LIMIT} from "../../components/SelectBox.vue";
 import {Team} from "../../models/team.ts";
 import {createTeam} from "../../service/createEntity.ts";
 import {loadOrganizations} from "../../service/loadList.ts";
@@ -29,10 +29,12 @@ async function loadList(reset = false, search = '') {
     currentSearchQuery.value = search
   }
 
-  if (isLoadingMore.value) return
+  if (isLoadingMore.value) {
+    return
+  }
 
   isLoadingMore.value = true
-  const data = await loadOrganizations(loaded, offset.value, 5, search) // Load 5 items per batch with search
+  const data = await loadOrganizations(loaded, offset.value, DEFAULT_LIMIT, search)
   
   if (data.length > 0) {
     const newOptions = data.map(el => (<SelectBoxOption>{
@@ -43,14 +45,13 @@ async function loadList(reset = false, search = '') {
     if (reset) {
       options.value = newOptions
     } else {
-      // Avoid duplicates when merging
       const existingValues = new Set(options.value.map(opt => opt.value))
       const filteredNewOptions = newOptions.filter(opt => !existingValues.has(opt.value))
       options.value = [...options.value, ...filteredNewOptions]
     }
     
     offset.value += data.length
-    hasMore.value = data.length === 5 // We have more if we got full batch of 5
+    hasMore.value = data.length === DEFAULT_LIMIT;
   } else {
     hasMore.value = false
   }
@@ -63,7 +64,6 @@ async function loadMore() {
 }
 
 async function handleSearch(query: string) {
-  // Reset and load with new search query
   await loadList(true, query)
 }
 
