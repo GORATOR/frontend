@@ -15,17 +15,17 @@ const loading = ref<boolean>(false)
 const options = ref(Array<SelectBoxOption>())
 const teamOffset = ref(0);
 const loaded = ref(false);
-const teamId = ref(0);
+const teamId = ref("");
 
 async function create() {
-    return await createProject(loading, <ProjectCreate>{Name: name.value, TeamId: teamId.value})
+    return await createProject(loading, <ProjectCreate>{Name: name.value, TeamId: parseInt(teamId.value)})
 }
 
 async function loadList() {
   const data = await loadTeams(loaded, teamOffset.value);
   if (data.length > 0) {
     //@ts-ignore
-    options.value = data.map(el => (<SelectBoxOption>{value: el.ID, label: el.Name}))
+    options.value = data.map(el => (<SelectBoxOption>{value: el.ID.toString(), label: el.Name}))
   }
 }
 
