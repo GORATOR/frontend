@@ -1,3 +1,7 @@
+<script lang="ts">
+  export const DEFAULT_LIMIT = 5;
+</script>
+
 <script setup lang="ts">
 import { ref, watch, nextTick, computed } from 'vue';
 import {SelectBoxOption} from "../models/SelectBoxOption.ts";
@@ -8,7 +12,6 @@ export interface SelectBoxElement {
   value: string
 }
 
-export const DEFAULT_LIMIT = 5;
 
 const props = defineProps<{
   label: string,
