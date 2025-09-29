@@ -15,6 +15,12 @@ async function goLogin() {
         redirectHome()
     }
 }
+
+function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && !store.loading) {
+        goLogin()
+    }
+}
 </script>
 
 <template>
@@ -24,7 +30,7 @@ async function goLogin() {
         </option>
     </select>
     <div class="container">
-        <div class="content-form">
+        <div class="content-form" @keydown="handleKeydown">
             <TextBox :label="$t('login.login_field')" v-model="username" />
             <TextBox :label="$t('login.password_field')" type="password" v-model="password" />
             <div class="form-buttons">
