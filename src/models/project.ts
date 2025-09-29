@@ -5,7 +5,8 @@ interface ProjectInput {
 }
 
 interface Project extends ProjectInput {
-    ID: number
+    ID: number,
+    EnvelopeKey: string
 }
 
 interface ProjectCreate {
