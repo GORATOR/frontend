@@ -9,6 +9,7 @@ const props = defineProps<{
 const model = defineModel<string>();
 const previewUrl = ref<string>(props.currentImage || '');
 const fileInput = ref<HTMLInputElement>();
+const isDragging = ref(false);
 
 watch(() => props.currentImage, (newValue) => {
   if (newValue) {
@@ -16,12 +17,7 @@ watch(() => props.currentImage, (newValue) => {
   }
 });
 
-function handleFileChange(event: Event) {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-
-  if (!file) return;
-
+function processFile(file: File) {
   // Validate file type
   if (!file.type.startsWith('image/')) {
     alert('Please select an image file');
@@ -42,6 +38,34 @@ function handleFileChange(event: Event) {
     model.value = base64String;
   };
   reader.readAsDataURL(file);
+}
+
+function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (file) {
+    processFile(file);
+  }
+}
+
+function handleDragOver(event: DragEvent) {
+  event.preventDefault();
+  isDragging.value = true;
+}
+
+function handleDragLeave(event: DragEvent) {
+  event.preventDefault();
+  isDragging.value = false;
+}
+
+function handleDrop(event: DragEvent) {
+  event.preventDefault();
+  isDragging.value = false;
+
+  const file = event.dataTransfer?.files[0];
+  if (file) {
+    processFile(file);
+  }
 }
 
 function triggerFileInput() {
@@ -70,9 +94,16 @@ function clearImage() {
         </div>
       </div>
 
-      <div v-else class="upload-placeholder" @click="triggerFileInput">
+      <div
+        v-else
+        class="upload-placeholder"
+        :class="{ 'dragging': isDragging }"
+        @click="triggerFileInput"
+        @dragover="handleDragOver"
+        @dragleave="handleDragLeave"
+        @drop="handleDrop">
         <div class="upload-icon">📷</div>
-        <div class="upload-text">Click to upload image</div>
+        <div class="upload-text">Click or drag & drop to upload image</div>
         <div class="upload-hint">PNG, JPG up to 5MB</div>
       </div>
 
@@ -118,6 +149,12 @@ function clearImage() {
       &:hover {
         border-color: $main_theme_active_color;
         background: #f5f5f5;
+      }
+
+      &.dragging {
+        border-color: $main_theme_active_color;
+        background: #e8f4fd;
+        transform: scale(1.02);
       }
 
       .upload-icon {
