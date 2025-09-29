@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
+import ImageUpload from '../../components/ImageUpload.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
 import {createProject} from "../../service/createEntity.ts";
 import {ProjectCreate} from "../../models/project.ts";
@@ -11,6 +12,7 @@ import {loadTeams} from "../../service/loadList.ts";
 import SelectBox from "../../components/SelectBox.vue";
 
 const name = ref<string>("")
+const avatar = ref<string>("")
 const loading = ref<boolean>(false)
 const options = ref(Array<SelectBoxOption>())
 const teamOffset = ref(0);
@@ -18,7 +20,11 @@ const loaded = ref(false);
 const teamId = ref("");
 
 async function create() {
-    return await createProject(loading, <ProjectCreate>{Name: name.value, TeamId: parseInt(teamId.value)})
+    return await createProject(loading, <ProjectCreate>{
+        Name: name.value,
+        TeamId: parseInt(teamId.value),
+        Avatar: avatar.value
+    })
 }
 
 async function loadList() {
@@ -42,6 +48,7 @@ loadList();
                 :label="'Select team'"
                 v-model="teamId"
             ></SelectBox>
+            <ImageUpload label="Project Avatar" v-model="avatar" />
             <div class="padding-small">
                 <Button v-if="loading" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>

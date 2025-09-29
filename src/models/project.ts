@@ -1,6 +1,7 @@
 interface ProjectInput {
     Name: string,
-    TeamId: number
+    TeamId: number,
+    Avatar: string
 }
 
 interface Project extends ProjectInput {
@@ -16,6 +17,7 @@ interface ProjectUpdate {
     ID: number
     Name: string,
     TeamId: number,
+    Avatar: string
 }
 
 export type { Project, ProjectInput, ProjectCreate, ProjectUpdate }
