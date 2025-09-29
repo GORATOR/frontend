@@ -20,6 +20,8 @@ const project = ref<Project>({} as Project);
 const team = ref<Team | null>(null);
 let isEditing = ref<boolean>(false);
 const loading = ref<boolean>(false);
+const showEnvelopeKey = ref<boolean>(false);
+const copySuccess = ref<boolean>(false);
 
 // Team selection
 const teamOptions = ref<SelectBoxOption[]>([]);
@@ -126,6 +128,23 @@ const teamUrl = computed(() => {
   return team.value ? generateEntityRecordUrl(EntityName.Team, team.value.ID) : '#';
 });
 
+const maskedEnvelopeKey = computed(() => {
+  if (!project.value.EnvelopeKey) return '';
+  return '•'.repeat(project.value.EnvelopeKey.length);
+});
+
+async function copyToClipboard() {
+  try {
+    await navigator.clipboard.writeText(project.value.EnvelopeKey);
+    copySuccess.value = true;
+    setTimeout(() => {
+      copySuccess.value = false;
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy:', err);
+  }
+}
+
 initLoad();
 
 </script>
@@ -184,6 +203,29 @@ initLoad();
             <label class="field-label">Project ID:</label>
             <div class="field-value">
               <p>{{ project?.ID }}</p>
+            </div>
+          </div>
+
+          <div class="detail-field">
+            <label class="field-label">Envelope Key:</label>
+            <div class="field-value envelope-key-container">
+              <input
+                type="text"
+                :value="showEnvelopeKey ? project?.EnvelopeKey : maskedEnvelopeKey"
+                readonly
+                class="envelope-key-input"
+                @focus="showEnvelopeKey = true"
+                @blur="showEnvelopeKey = false"
+              />
+              <button
+                @click="copyToClipboard"
+                class="copy-button"
+                :class="{ 'copied': copySuccess }"
+                type="button"
+                title="Copy to clipboard">
+                <span v-if="!copySuccess">📋</span>
+                <span v-else>✓</span>
+              </button>
             </div>
           </div>
         </div>
@@ -263,6 +305,57 @@ initLoad();
         .no-avatar {
           color: #999;
           font-style: italic;
+        }
+
+        .envelope-key-container {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+
+          .envelope-key-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid $main_theme_background_lighter1;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:focus {
+              outline: none;
+              border-color: $main_theme_active_color;
+              background: white;
+              box-shadow: 0 0 0 2px rgba($main_theme_active_color, 0.1);
+            }
+          }
+
+          .copy-button {
+            padding: 8px 12px;
+            border: 1px solid $main_theme_background_lighter1;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+
+            &:hover {
+              background: $main_theme_active_color;
+              border-color: $main_theme_active_color;
+              transform: scale(1.05);
+            }
+
+            &.copied {
+              background: #28a745;
+              border-color: #28a745;
+              color: white;
+            }
+          }
         }
       }
     }
