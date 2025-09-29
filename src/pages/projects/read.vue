@@ -9,6 +9,7 @@ import {getEntityId, readEntity, generateEntityRecordUrl} from "../../service/re
 import {updateProject} from "../../service/updateEntity.ts";
 import Button from "../../components/Button.vue";
 import TextBox from "../../components/TextBox.vue";
+import ImageUpload from "../../components/ImageUpload.vue";
 import SelectBox, {DEFAULT_LIMIT} from "../../components/SelectBox.vue";
 import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
 import {loadTeams} from "../../service/loadList.ts";
@@ -107,7 +108,8 @@ async function actionButtonClick(): Promise<void> {
     const updateData: ProjectUpdate = {
       ID: project.value.ID,
       Name: project.value.Name,
-      TeamId: parseInt(selectedTeamId.value)
+      TeamId: parseInt(selectedTeamId.value),
+      Avatar: project.value.Avatar
     };
 
     await updateProject(loading, updateData);
@@ -140,6 +142,15 @@ initLoad();
       <div class="project-details">
         <div class="detail-section">
           <h3>Project Information</h3>
+
+          <div class="detail-field">
+            <label class="field-label">Project Avatar:</label>
+            <div class="field-value">
+              <img v-if="!isEditing && project?.Avatar" :src="project.Avatar" alt="Project Avatar" class="avatar-display" />
+              <p v-if="!isEditing && !project?.Avatar" class="no-avatar">No avatar</p>
+              <ImageUpload v-if="isEditing" label="" v-model="project.Avatar" :currentImage="project.Avatar" />
+            </div>
+          </div>
 
           <div class="detail-field">
             <label class="field-label">Project Name:</label>
@@ -239,6 +250,19 @@ initLoad();
           &:hover {
             text-decoration: underline;
           }
+        }
+
+        .avatar-display {
+          max-width: 200px;
+          max-height: 200px;
+          border-radius: 8px;
+          border: 1px solid $main_theme_background_lighter1;
+          object-fit: contain;
+        }
+
+        .no-avatar {
+          color: #999;
+          font-style: italic;
         }
       }
     }
