@@ -180,7 +180,7 @@ loadTeamsData(true);
             />
             
             <div class="padding-small">
-                <Button v-if="loading || !isFormValid" disabled>SUBMIT</Button>
+                <Button v-if="!isFormValid" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
             </div>
         </div>
