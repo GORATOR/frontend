@@ -197,19 +197,18 @@ watch(isOpen, (open) => {
         />
       </div>
       <div class="dropdown-list" @scroll="onScroll">
-        <div 
-          v-for="option in filteredOptions" 
+        <div
+          v-for="option in filteredOptions"
           :key="option.value"
           class="dropdown-item"
           :class="{ 'dropdown-item--selected': isSelected(option.value) }"
-          @click.stop="toggleOption(option, $event)"
-          @mousedown.prevent
+          @click="toggleOption(option, $event)"
         >
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             :checked="isSelected(option.value)"
             class="checkbox"
-            @click.stop
+            readonly
           />
           <span class="option-label">{{ option.label }}</span>
         </div>
@@ -376,6 +375,7 @@ watch(isOpen, (open) => {
         width: 16px;
         height: 16px;
         flex-shrink: 0;
+        pointer-events: none;
       }
       
       .option-label {
