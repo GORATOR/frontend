@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
@@ -136,6 +136,14 @@ function onTeamChanged(el: MultiSelectBoxElement) {
   user.value.TeamIds = el.values.map(v => parseInt(v));
 }
 
+const isFormValid = computed(() => {
+  return user.value.Username.trim() !== '' &&
+         user.value.Email.trim() !== '' &&
+         user.value.Password.trim() !== '' &&
+         user.value.OrganizationIds.length > 0 &&
+         user.value.TeamIds.length > 0;
+});
+
 // Load initial data
 loadOrgs(true);
 loadTeamsData(true);
@@ -172,7 +180,7 @@ loadTeamsData(true);
             />
             
             <div class="padding-small">
-                <Button v-if="loading" disabled>SUBMIT</Button>
+                <Button v-if="loading || !isFormValid" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
             </div>
         </div>
