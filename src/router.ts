@@ -16,7 +16,6 @@ import organization from './pages/organizations/read.vue'
 import project from './pages/projects/read.vue'
 import team from './pages/teams/read.vue'
 import user from './pages/users/read.vue'
-import multiselectDemo from './pages/multiselect-demo.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -36,7 +35,6 @@ export const router = createRouter({
     { path: '/projects', component: projects },
     { path: '/projects/new', component: projectCreate },
     { path: '/issues', component: issues },
-    { path: '/multiselect-demo', component: multiselectDemo },
   ]
 })
 
