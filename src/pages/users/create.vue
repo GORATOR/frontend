@@ -34,6 +34,7 @@ const currentOrgSearch = ref('');
 
 async function create() {
     console.log('create clicked');
+    console.log('User data:', JSON.stringify(user.value, null, 2));
     return await createUser(loading, user.value);
 }
 
@@ -126,10 +127,12 @@ async function handleTeamSearch(query: string) {
 }
 
 function onOrgChanged(el: MultiSelectBoxElement) {
+  selectedOrgIds.value = el.values;
   user.value.OrganizationIds = el.values.map(v => parseInt(v));
 }
 
 function onTeamChanged(el: MultiSelectBoxElement) {
+  selectedTeamIds.value = el.values;
   user.value.TeamIds = el.values.map(v => parseInt(v));
 }
 
