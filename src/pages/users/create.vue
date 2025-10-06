@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
 import TextBox from '../../components/TextBox.vue'
 import Button from '../../components/Button.vue'
@@ -8,14 +8,13 @@ import {createUser} from "../../service/createEntity.ts";
 import {UserCreate} from "../../models/user.ts";
 import {loadOrganizations, loadTeams} from "../../service/loadList.ts";
 import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
-import SelectBox, {SelectBoxElement} from "../../components/SelectBox.vue";
-import RemovableChip from "../../components/RemovableChip.vue";
+import MultiSelectBox, { DEFAULT_LIMIT, MultiSelectBoxElement } from "../../components/MultiSelectBox.vue";
 
 const loading = ref<boolean>(false)
 const orgOffset = ref(0);
 const teamOffset = ref(0);
-const teamId = ref('');
-const orgId = ref('');
+const selectedTeamIds = ref<string[]>([]);
+const selectedOrgIds = ref<string[]>([]);
 const user = ref<UserCreate>({
   Username: '',
   Email: '',
@@ -23,120 +22,165 @@ const user = ref<UserCreate>({
   TeamIds: [],
   OrganizationIds: [],
 });
-const selectedTeams = ref<Array<SelectBoxElement>>([]);
-const selectedOrgs = ref<Array<SelectBoxElement>>([]);
 
-const optionsTeams = ref(Array<SelectBoxOption>());
-const optionsOrgs = ref(Array<SelectBoxOption>());
+const optionsTeams = ref<Array<SelectBoxOption>>([]);
+const optionsOrgs = ref<Array<SelectBoxOption>>([]);
+const hasMoreTeams = ref(true);
+const hasMoreOrgs = ref(true);
+const isLoadingTeams = ref(false);
+const isLoadingOrgs = ref(false);
+const currentTeamSearch = ref('');
+const currentOrgSearch = ref('');
 
 async function create() {
     console.log('create clicked');
+    console.log('User data:', JSON.stringify(user.value, null, 2));
     return await createUser(loading, user.value);
 }
 
-async function loadLists() {
-  const dataOrgs = await loadOrganizations(loading, orgOffset.value);
+async function loadOrgs(reset = false, search = '') {
+  if (reset) {
+    orgOffset.value = 0;
+    optionsOrgs.value = [];
+    hasMoreOrgs.value = true;
+    currentOrgSearch.value = search;
+  }
+
+  if (isLoadingOrgs.value) return;
+
+  isLoadingOrgs.value = true;
+  const dataOrgs = await loadOrganizations(loading, orgOffset.value, DEFAULT_LIMIT, search);
+  
   if (dataOrgs.length > 0) {
-    //@ts-ignore
-    optionsOrgs.value = dataOrgs.map(el => (<SelectBoxOption>{value: el.ID, label: el.Name}))
-  }
-  const dataTeams = await loadTeams(loading, teamOffset.value);
-  if (dataTeams.length > 0) {
-    //@ts-ignore
-    optionsTeams.value = dataTeams.map(el => (<SelectBoxOption>{value: el.ID, label: el.Name}))
-  }
-  loading.value = false;
-}
-
-function addIdOnlyIfNew(el: SelectBoxElement, data: Array<number>, selectedData: Array<SelectBoxElement>) : void {
-  if (el.value === undefined) {
-    return;
-  }
-  const id = Number.parseInt(el.value);
-  if (id <= 0) {
-    return;
-  }
-  for (let i of data) {
-    if(i == id) {
-      return;
+    const newOptions = dataOrgs.map(el => (<SelectBoxOption>{
+      value: el.ID.toString(), 
+      label: el.Name
+    }));
+    
+    if (reset) {
+      optionsOrgs.value = newOptions;
+    } else {
+      const existingValues = new Set(optionsOrgs.value.map(opt => opt.value));
+      const filteredNewOptions = newOptions.filter(opt => !existingValues.has(opt.value));
+      optionsOrgs.value = [...optionsOrgs.value, ...filteredNewOptions];
     }
+    
+    orgOffset.value += dataOrgs.length;
+    hasMoreOrgs.value = dataOrgs.length === DEFAULT_LIMIT;
+  } else {
+    hasMoreOrgs.value = false;
   }
-  data.push(id);
-  selectedData.push(el);
+  
+  isLoadingOrgs.value = false;
 }
 
-function removeFromArrByValue(data: Array<number>, value: number) : Array<number> {
-  return data.filter(el => el !== value);
-}
-
-function onOrgChanged(el: SelectBoxElement) : void {
-  if (el.value === undefined) {
-    return;
+async function loadTeamsData(reset = false, search = '') {
+  if (reset) {
+    teamOffset.value = 0;
+    optionsTeams.value = [];
+    hasMoreTeams.value = true;
+    currentTeamSearch.value = search;
   }
-  addIdOnlyIfNew(el, user.value.OrganizationIds, selectedOrgs.value);
-  orgId.value = '';
-}
 
-function onTeamChanged(el: SelectBoxElement) : void {
-  if (el.value === undefined) {
-    return;
+  if (isLoadingTeams.value) return;
+
+  isLoadingTeams.value = true;
+  const dataTeams = await loadTeams(loading, teamOffset.value, DEFAULT_LIMIT, search);
+  
+  if (dataTeams.length > 0) {
+    const newOptions = dataTeams.map(el => (<SelectBoxOption>{
+      value: el.ID.toString(), 
+      label: el.Name
+    }));
+    
+    if (reset) {
+      optionsTeams.value = newOptions;
+    } else {
+      const existingValues = new Set(optionsTeams.value.map(opt => opt.value));
+      const filteredNewOptions = newOptions.filter(opt => !existingValues.has(opt.value));
+      optionsTeams.value = [...optionsTeams.value, ...filteredNewOptions];
+    }
+    
+    teamOffset.value += dataTeams.length;
+    hasMoreTeams.value = dataTeams.length === DEFAULT_LIMIT;
+  } else {
+    hasMoreTeams.value = false;
   }
-  addIdOnlyIfNew(el, user.value.TeamIds, selectedTeams.value);
-  teamId.value = '';
+  
+  isLoadingTeams.value = false;
 }
 
-function removeOrg(value: string) : void {
-  selectedOrgs.value = selectedOrgs.value.filter(el => el.value !== value);
-  user.value.OrganizationIds = removeFromArrByValue(user.value.OrganizationIds, Number.parseInt(value));
+async function loadMoreOrgs() {
+  await loadOrgs(false, currentOrgSearch.value);
 }
 
-function removeTeam(value: string) : void {
-  selectedTeams.value = selectedTeams.value.filter(el => el.value !== value);
-  user.value.TeamIds = removeFromArrByValue(user.value.TeamIds, Number.parseInt(value));
+async function loadMoreTeams() {
+  await loadTeamsData(false, currentTeamSearch.value);
 }
 
-loadLists();
+async function handleOrgSearch(query: string) {
+  await loadOrgs(true, query);
+}
+
+async function handleTeamSearch(query: string) {
+  await loadTeamsData(true, query);
+}
+
+function onOrgChanged(el: MultiSelectBoxElement) {
+  selectedOrgIds.value = el.values;
+  user.value.OrganizationIds = el.values.map(v => parseInt(v));
+}
+
+function onTeamChanged(el: MultiSelectBoxElement) {
+  selectedTeamIds.value = el.values;
+  user.value.TeamIds = el.values.map(v => parseInt(v));
+}
+
+const isFormValid = computed(() => {
+  return user.value.Username.trim() !== '' &&
+         user.value.Email.trim() !== '' &&
+         user.value.Password.trim() !== '' &&
+         user.value.OrganizationIds.length > 0 &&
+         user.value.TeamIds.length > 0;
+});
+
+// Load initial data
+loadOrgs(true);
+loadTeamsData(true);
 </script>
 
 <template>
     <Sidebar :active=MenuItem.Users>
         <h1>Create new User</h1>
-        <div v-if="selectedOrgs.length > 0" class="organizations">
-          <label>Organizations:</label>
-          <div class="chip-group org-chip-group">
-            <removable-chip v-for="org in selectedOrgs"
-                :text="org.name"
-                :payload="org.value"
-                :chip-class="`chip-el`" @onClose="removeOrg" />
-          </div>
-        </div>
-        <div v-if="selectedTeams.length > 0" class="teams">
-          <label>Teams:</label>
-          <div class="chip-group team-chip-group">
-            <removable-chip v-for="team in selectedTeams"
-                :text="team.name"
-                :payload="team.value"
-                :chip-class="`chip-el`" @onClose="removeTeam" />
-          </div>
-        </div>
         <div>
             <TextBox label="Name" v-model="user.Username" />
             <TextBox label="Email" v-model="user.Email" />
             <TextBox label="Password" v-model="user.Password" />
-            <SelectBox
+            
+            <MultiSelectBox
                 :options="optionsOrgs"
-                :label="'Select organization'"
-                v-model="orgId"
+                :label="'Select organizations'"
+                :loading="isLoadingOrgs"
+                :hasMore="hasMoreOrgs"
+                @loadMore="loadMoreOrgs"
+                @search="handleOrgSearch"
                 @changed="onOrgChanged"
-            ></SelectBox>
-            <SelectBox
+                v-model="selectedOrgIds"
+            />
+            
+            <MultiSelectBox
                 :options="optionsTeams"
-                :label="'Select team'"
-                v-model="teamId"
+                :label="'Select teams'"
+                :loading="isLoadingTeams"
+                :hasMore="hasMoreTeams"
+                @loadMore="loadMoreTeams"
+                @search="handleTeamSearch"
                 @changed="onTeamChanged"
-            ></SelectBox>
+                v-model="selectedTeamIds"
+            />
+            
             <div class="padding-small">
-                <Button v-if="loading" disabled>SUBMIT</Button>
+                <Button v-if="!isFormValid" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
             </div>
         </div>
