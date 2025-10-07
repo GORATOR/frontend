@@ -12,6 +12,7 @@ import userCreate from './pages/users/create.vue'
 import projects from './pages/projects/list.vue'
 import projectCreate from './pages/projects/create.vue'
 import issues from './pages/issues/list.vue'
+import issue from './pages/issues/read.vue'
 import organization from './pages/organizations/read.vue'
 import project from './pages/projects/read.vue'
 import team from './pages/teams/read.vue'
@@ -35,6 +36,7 @@ export const router = createRouter({
     { path: '/projects', component: projects },
     { path: '/projects/new', component: projectCreate },
     { path: '/issues', component: issues },
+    { path: '/issue/:id', component: issue },
   ]
 })
 
