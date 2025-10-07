@@ -79,7 +79,9 @@ function showMenu() {
 @use '../assets/variables' as *;
 
 .sidebar {
-    height: 100vh;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 
     @media (width < $sm) {
         display: block;
@@ -87,6 +89,7 @@ function showMenu() {
 
     @media ($sm <=width) {
         display: flex;
+        flex-direction: row;
     }
 
     .sidebar-menu {
