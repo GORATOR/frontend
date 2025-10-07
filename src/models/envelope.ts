@@ -14,8 +14,8 @@ interface Envelope {
     sent_at: string
     dsn: string
     sdk?: SDK
-    EnvelopeEventExtras: EnvelopeEventExtra[]
-    Project?: Project
+    EnvelopeEventExtras?: EnvelopeEventExtra[]
+    project?: Project
     ProjectID?: number
 }
 

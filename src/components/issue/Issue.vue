@@ -18,18 +18,30 @@ const envelopeException = computed<EnvelopeException | null>(() => {
     return null
 })
 
+const exceptionValue = computed(() => {
+    if (!envelopeException.value) return null
+
+    // Handle both formats: { values: [...] } and [...]
+    if (Array.isArray(envelopeException.value.exception)) {
+        return envelopeException.value.exception[0]
+    } else if (envelopeException.value.exception?.values?.[0]) {
+        return envelopeException.value.exception.values[0]
+    }
+    return null
+})
+
 const issueUrl = computed(() => {
     return `/issue/${props.envelope.ID}`
 })
 </script>
 
 <template>
-    <div class="envelope-container" v-if="envelopeException && envelopeException.exception?.values?.[0]">
+    <div class="envelope-container" v-if="exceptionValue">
         <div>
-            <a :href="issueUrl">{{ envelopeException.exception.values[0].type }}</a>
+            <a :href="issueUrl">{{ exceptionValue.type }}</a>
         </div>
         <div class="description">
-            <i>{{ envelopeException.exception.values[0].value }}</i>
+            <i>{{ exceptionValue.value }}</i>
         </div>
     </div>
 </template>
