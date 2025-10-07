@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
-import {Envelope} from '../../models/envelope'
 import Paging from '../../components/paging/Paging.vue'
 import {EntityCount, EntityName} from '../../models/count.ts'
 import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
 import Issue from '../../components/issue/Issue.vue'
+import IssueChart from '../../components/issue/IssueChart.vue'
 import {MenuItem} from '../../models/sidebarMenuItem.ts'
-import {loadIssues} from "../../service/loadList.ts";
-import loadCount from "../../service/loadCount.ts";
+import {loadIssuesAggregated, AggregatedIssue} from "../../service/loadList.ts";
+import {loadAggregatedIssuesCount} from "../../service/loadCount.ts";
 
-const list = ref<Envelope[]>([])
+const list = ref<AggregatedIssue[]>([])
 const loaded = ref(false)
 
 const count = ref<EntityCount>({ count: 0, entity: EntityName.Envelope })
@@ -20,12 +20,12 @@ const offset = ref(0)
 async function pageSelect(e: PageSelectEvent) {
     page.value = e.page
     offset.value = e.offset
-    list.value = await loadIssues(loaded, offset.value);
+    list.value = await loadIssuesAggregated(loaded, offset.value);
 }
 
 async function initLoad() {
-    count.value = await loadCount(count.value.entity);
-    list.value = await loadIssues(loaded, offset.value);
+    count.value = await loadAggregatedIssuesCount();
+    list.value = await loadIssuesAggregated(loaded, offset.value);
 }
 
 initLoad()
@@ -36,9 +36,11 @@ initLoad()
         <template v-if="loaded">
             <h2>Issues</h2>
 
+            <IssueChart :days="14" />
+
             <div class="issue-container">
-                <div v-for="envelope in list" class="issue">
-                    <Issue :envelope=envelope />
+                <div v-for="item in list" class="issue">
+                    <Issue :envelope="item.envelope" :count="item.count" />
                 </div>
             </div>
 
