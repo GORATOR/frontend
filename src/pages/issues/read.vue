@@ -13,8 +13,20 @@ const envelope = ref<Envelope>({} as Envelope);
 const envelopeException = ref<EnvelopeException | null>(null);
 
 const projectUrl = computed(() => {
-  return envelope.value.Project ? generateEntityRecordUrl(EntityName.Project, envelope.value.Project.ID) : '#';
+  return envelope.value.project ? generateEntityRecordUrl(EntityName.Project, envelope.value.project.ID) : '#';
 });
+
+const exceptionValue = computed(() => {
+  if (!envelopeException.value) return null
+
+  // Handle both formats: { values: [...] } and [...]
+  if (Array.isArray(envelopeException.value.exception)) {
+    return envelopeException.value.exception[0]
+  } else if (envelopeException.value.exception?.values?.[0]) {
+    return envelopeException.value.exception.values[0]
+  }
+  return null
+})
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString();
@@ -75,10 +87,10 @@ initLoad();
             </div>
           </div>
 
-          <div class="detail-field" v-if="envelope.Project">
+          <div class="detail-field" v-if="envelope.project">
             <label class="field-label">Project:</label>
             <div class="field-value">
-              <p><a :href="projectUrl" class="link">{{ envelope.Project.Name }}</a></p>
+              <p><a :href="projectUrl" class="link">{{ envelope.project.Name }}</a></p>
             </div>
           </div>
 
@@ -105,27 +117,27 @@ initLoad();
         </CollapsibleSection>
 
         <!-- Exception Information -->
-        <CollapsibleSection title="Exception Information" :defaultExpanded="true" v-if="envelopeException?.exception.values[0]">
+        <CollapsibleSection title="Exception Information" :defaultExpanded="true" v-if="exceptionValue">
           <div class="detail-field">
             <label class="field-label">Exception Type:</label>
             <div class="field-value">
-              <p class="exception-type">{{ envelopeException.exception.values[0].type }}</p>
+              <p class="exception-type">{{ exceptionValue.type }}</p>
             </div>
           </div>
 
           <div class="detail-field">
             <label class="field-label">Exception Message:</label>
             <div class="field-value">
-              <p class="exception-message">{{ envelopeException.exception.values[0].value }}</p>
+              <p class="exception-message">{{ exceptionValue.value }}</p>
             </div>
           </div>
 
-          <div class="detail-field" v-if="envelopeException.exception.values[0].mechanism">
+          <div class="detail-field" v-if="exceptionValue.mechanism">
             <label class="field-label">Mechanism:</label>
             <div class="field-value">
-              <p>{{ envelopeException.exception.values[0].mechanism.type }}
-                <span class="badge" :class="envelopeException.exception.values[0].mechanism.handled ? 'handled' : 'unhandled'">
-                  {{ envelopeException.exception.values[0].mechanism.handled ? 'handled' : 'unhandled' }}
+              <p>{{ exceptionValue.mechanism.type }}
+                <span class="badge" :class="exceptionValue.mechanism.handled ? 'handled' : 'unhandled'">
+                  {{ exceptionValue.mechanism.handled ? 'handled' : 'unhandled' }}
                 </span>
               </p>
             </div>
@@ -133,9 +145,9 @@ initLoad();
         </CollapsibleSection>
 
         <!-- Stack Trace -->
-        <CollapsibleSection title="Stack Trace" :defaultExpanded="true" v-if="envelopeException?.exception.values[0]?.stacktrace?.frames">
+        <CollapsibleSection title="Stack Trace" :defaultExpanded="true" v-if="exceptionValue?.stacktrace?.frames">
           <div class="stacktrace-container">
-            <div v-for="(frame, index) in envelopeException.exception.values[0].stacktrace.frames"
+            <div v-for="(frame, index) in exceptionValue.stacktrace.frames"
                  :key="index"
                  class="stack-frame"
                  :class="{ 'in-app': frame.in_app }">
