@@ -41,7 +41,7 @@ interface EnvelopeException {
     level: string
     exception: {
         values: ExceptionValue[]
-    }
+    } | ExceptionValue[]
     event_id: string
     timestamp: string
     contexts?: Context
