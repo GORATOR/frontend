@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 
-defineProps<{
+const props = defineProps<{
   title: string
   defaultExpanded?: boolean
 }>();
 
-const isExpanded = ref(true);
+const isExpanded = ref(props.defaultExpanded ?? true);
 
 const toggleExpanded = () => {
   isExpanded.value = !isExpanded.value;
