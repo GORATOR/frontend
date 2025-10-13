@@ -9,7 +9,6 @@ const props = defineProps<{
 }>()
 
 const exceptionValue = computed(() => {
-    // First, try to use the new exception_type and exception_value fields
     if (props.envelope.exception_type && props.envelope.exception_value) {
         return {
             type: props.envelope.exception_type,
@@ -17,12 +16,10 @@ const exceptionValue = computed(() => {
         }
     }
 
-    // Fallback to parsing from EnvelopeEventExtras for old data
     try {
         if (props.envelope.EnvelopeEventExtras && props.envelope.EnvelopeEventExtras.length > 1) {
             const envelopeException = JSON.parse(props.envelope.EnvelopeEventExtras[1].Data)
 
-            // Handle both formats: { values: [...] } and [...]
             if (Array.isArray(envelopeException.exception)) {
                 return envelopeException.exception[0]
             } else if (envelopeException.exception?.values?.[0]) {
