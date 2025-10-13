@@ -78,10 +78,24 @@ export interface AggregatedIssue {
 export async function loadIssuesAggregated(
     loaded:Ref<boolean, boolean>,
     offset: number,
-    limit = 10): Promise<AggregatedIssue[]> {
+    limit = 10,
+    sortBy?: string,
+    sortOrder?: string): Promise<AggregatedIssue[]> {
+    const search = [];
+
+    if (sortBy) {
+        search.push(`sortBy=${encodeURIComponent(sortBy)}`);
+    }
+    if (sortOrder) {
+        search.push(`sortOrder=${encodeURIComponent(sortOrder)}`);
+    }
+
     loaded.value = false;
     try {
-        const url = `/issues-aggregated?limit=${limit}&offset=${offset}`;
+        let url = `/issues-aggregated?limit=${limit}&offset=${offset}`;
+        if (search.length > 0) {
+            url += `&${search.join('&')}`;
+        }
         const response = await sendGet(url);
         if (response.status == 200) {
             const data = await response.json();
