@@ -33,11 +33,7 @@ const bars = computed(() => {
 })
 
 async function loadData() {
-    // For now, just generate some dummy data based on total count
-    // In production, you'd call an API that filters by exception type
     const allStats = await loadIssuesStats(daysToShow.value)
-
-    // Extract just the counts
     stats.value = allStats.map(s => s.count)
 }
 
