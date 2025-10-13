@@ -17,6 +17,9 @@ interface Envelope {
     EnvelopeEventExtras?: EnvelopeEventExtra[]
     project?: Project
     ProjectID?: number
+    exception_type?: string
+    exception_value?: string
+    exception_data?: string
 }
 
 interface EnvelopeEventExtra {

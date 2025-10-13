@@ -70,3 +70,27 @@ export async function loadIssues(
     return loadList(loaded, 'envelopes', offset, limit, search.join('&'));
 }
 
+export interface AggregatedIssue {
+    envelope: Envelope;
+    count: number;
+}
+
+export async function loadIssuesAggregated(
+    loaded:Ref<boolean, boolean>,
+    offset: number,
+    limit = 10): Promise<AggregatedIssue[]> {
+    loaded.value = false;
+    try {
+        const url = `/issues-aggregated?limit=${limit}&offset=${offset}`;
+        const response = await sendGet(url);
+        if (response.status == 200) {
+            const data = await response.json();
+            loaded.value = true;
+            return data;
+        }
+    } catch (err) {
+        console.error('Error:', err);
+    }
+    return [];
+}
+

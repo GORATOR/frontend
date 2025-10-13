@@ -1,32 +1,35 @@
 <script setup lang="ts">
 import { Envelope } from '../../models/envelope'
-import { EnvelopeException } from '../../models/envelopeException'
 import { computed } from 'vue'
+import IssueMiniChart from './IssueMiniChart.vue'
 
 const props = defineProps<{
     envelope: Envelope
+    count?: number
 }>()
 
-const envelopeException = computed<EnvelopeException | null>(() => {
+const exceptionValue = computed(() => {
+    if (props.envelope.exception_type && props.envelope.exception_value) {
+        return {
+            type: props.envelope.exception_type,
+            value: props.envelope.exception_value
+        }
+    }
+
     try {
         if (props.envelope.EnvelopeEventExtras && props.envelope.EnvelopeEventExtras.length > 1) {
-            return JSON.parse(props.envelope.EnvelopeEventExtras[1].Data)
+            const envelopeException = JSON.parse(props.envelope.EnvelopeEventExtras[1].Data)
+
+            if (Array.isArray(envelopeException.exception)) {
+                return envelopeException.exception[0]
+            } else if (envelopeException.exception?.values?.[0]) {
+                return envelopeException.exception.values[0]
+            }
         }
     } catch (e) {
         console.error('Error parsing envelope exception:', e)
     }
-    return null
-})
 
-const exceptionValue = computed(() => {
-    if (!envelopeException.value) return null
-
-    // Handle both formats: { values: [...] } and [...]
-    if (Array.isArray(envelopeException.value.exception)) {
-        return envelopeException.value.exception[0]
-    } else if (envelopeException.value.exception?.values?.[0]) {
-        return envelopeException.value.exception.values[0]
-    }
     return null
 })
 
@@ -37,11 +40,24 @@ const issueUrl = computed(() => {
 
 <template>
     <div class="envelope-container" v-if="exceptionValue">
-        <div>
-            <a :href="issueUrl">{{ exceptionValue.type }}</a>
-        </div>
-        <div class="description">
-            <i>{{ exceptionValue.value }}</i>
+        <div class="issue-content">
+            <div class="issue-info">
+                <div>
+                    <a :href="issueUrl">{{ exceptionValue.type }}</a>
+                </div>
+                <div class="description">
+                    <i>{{ exceptionValue.value }}</i>
+                </div>
+            </div>
+            <div class="issue-count" v-if="count">
+                <IssueMiniChart
+                    v-if="exceptionValue"
+                    :exceptionType="exceptionValue.type"
+                    :exceptionValue="exceptionValue.value"
+                    :days="7"
+                />
+                <span class="count-badge">{{ count }}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -49,6 +65,34 @@ const issueUrl = computed(() => {
 <style scoped lang="scss">
 .envelope-container {
     padding: 10px;
+}
+
+.issue-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.issue-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.issue-count {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.count-badge {
+    background-color: rgba(0, 106, 255, 0.1);
+    color: rgb(0, 106, 255);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 a {
