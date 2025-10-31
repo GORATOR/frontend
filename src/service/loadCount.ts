@@ -13,9 +13,13 @@ export default async function loadCount(entity: string): Promise<EntityCount> {
     return <EntityCount>{count: 0, entity: entity};
 }
 
-export async function loadAggregatedIssuesCount(): Promise<EntityCount> {
+export async function loadAggregatedIssuesCount(projectIds?: string[]): Promise<EntityCount> {
     try {
-        const response = await sendGet('/issues-aggregated/count');
+        let url = '/issues-aggregated/count';
+        if (projectIds && projectIds.length > 0) {
+            url += `?projectIds=${projectIds.map(id => encodeURIComponent(id)).join(',')}`;
+        }
+        const response = await sendGet(url);
         if (response.status == 200) {
             return await response.json();
         }
