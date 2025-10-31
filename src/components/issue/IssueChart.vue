@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { loadIssuesStats, IssueStatEntry } from '../../service/loadStats'
 
 const props = defineProps<{
-    days?: number
+    interval?: 'minute' | 'hour' | 'day' | 'week'
+    periods?: number
+    label?: string
+    projectIds?: string[]
 }>()
 
 const stats = ref<IssueStatEntry[]>([])
 const hoveredIndex = ref<number | null>(null)
-const daysToShow = computed(() => props.days || 14)
+const intervalType = computed(() => props.interval || 'day')
+const periodsCount = computed(() => props.periods || 14)
+const chartLabel = computed(() => props.label || `Last ${periodsCount.value} ${intervalType.value}s`)
+const projectIdsFilter = computed(() => props.projectIds || [])
 
 const maxCount = computed(() => {
     if (stats.value.length === 0) return 1
@@ -43,17 +49,47 @@ const bars = computed(() => {
 
 function formatDate(dateStr: string): string {
     const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    switch (intervalType.value) {
+        case 'minute':
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        case 'hour':
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        case 'week':
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        default: // day
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    }
 }
 
 function formatDateFull(dateStr: string): string {
     const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    switch (intervalType.value) {
+        case 'minute':
+        case 'hour':
+            return date.toLocaleString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        default:
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    }
 }
 
 async function loadData() {
-    stats.value = await loadIssuesStats(daysToShow.value)
+    stats.value = await loadIssuesStats(
+        intervalType.value,
+        periodsCount.value,
+        projectIdsFilter.value.length > 0 ? projectIdsFilter.value : undefined
+    )
 }
+
+// Watch for prop changes and reload data
+watch([intervalType, periodsCount, projectIdsFilter], () => {
+    loadData()
+}, { deep: true })
 
 onMounted(() => {
     loadData()
@@ -65,7 +101,7 @@ onMounted(() => {
         <div class="chart-header">
             <div class="chart-title">
                 <h3>Event Activity</h3>
-                <div class="chart-subtitle">Last {{ daysToShow }} days</div>
+                <div class="chart-subtitle">{{ chartLabel }}</div>
             </div>
             <div class="chart-total">
                 <div class="total-label">Total Events</div>

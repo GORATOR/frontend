@@ -5,9 +5,19 @@ export interface IssueStatEntry {
     count: number;
 }
 
-export async function loadIssuesStats(days: number = 14): Promise<IssueStatEntry[]> {
+export async function loadIssuesStats(
+    interval: 'minute' | 'hour' | 'day' | 'week' = 'day',
+    periods: number = 14,
+    projectIds?: string[]
+): Promise<IssueStatEntry[]> {
     try {
-        const response = await sendGet(`/issues/stats?days=${days}`);
+        const params = [`interval=${interval}`, `periods=${periods}`];
+
+        if (projectIds && projectIds.length > 0) {
+            params.push(`projectIds=${projectIds.map(id => encodeURIComponent(id)).join(',')}`);
+        }
+
+        const response = await sendGet(`/issues/stats?${params.join('&')}`);
         if (response.status == 200) {
             return await response.json();
         }

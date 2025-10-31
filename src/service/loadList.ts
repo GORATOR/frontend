@@ -80,7 +80,9 @@ export async function loadIssuesAggregated(
     offset: number,
     limit = 10,
     sortBy?: string,
-    sortOrder?: string): Promise<AggregatedIssue[]> {
+    sortOrder?: string,
+    projectIds?: string[],
+    createdAtFrom?: string): Promise<AggregatedIssue[]> {
     const search = [];
 
     if (sortBy) {
@@ -88,6 +90,12 @@ export async function loadIssuesAggregated(
     }
     if (sortOrder) {
         search.push(`sortOrder=${encodeURIComponent(sortOrder)}`);
+    }
+    if (projectIds && projectIds.length > 0) {
+        search.push(`projectIds=${projectIds.map(id => encodeURIComponent(id)).join(',')}`);
+    }
+    if (createdAtFrom) {
+        search.push(`createdAtFrom=${encodeURIComponent(createdAtFrom)}`);
     }
 
     loaded.value = false;
