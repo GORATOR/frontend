@@ -81,7 +81,8 @@ export async function loadIssuesAggregated(
     limit = 10,
     sortBy?: string,
     sortOrder?: string,
-    projectIds?: string[]): Promise<AggregatedIssue[]> {
+    projectIds?: string[],
+    createdAtFrom?: string): Promise<AggregatedIssue[]> {
     const search = [];
 
     if (sortBy) {
@@ -92,6 +93,9 @@ export async function loadIssuesAggregated(
     }
     if (projectIds && projectIds.length > 0) {
         search.push(`projectIds=${projectIds.map(id => encodeURIComponent(id)).join(',')}`);
+    }
+    if (createdAtFrom) {
+        search.push(`createdAtFrom=${encodeURIComponent(createdAtFrom)}`);
     }
 
     loaded.value = false;
