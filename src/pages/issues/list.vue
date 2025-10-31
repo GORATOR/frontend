@@ -7,8 +7,11 @@ import {EntityCount, EntityName} from '../../models/count.ts'
 import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
 import IssueChart from '../../components/issue/IssueChart.vue'
 import {MenuItem} from '../../models/sidebarMenuItem.ts'
-import {loadIssuesAggregated, AggregatedIssue} from "../../service/loadList.ts";
+import {loadIssuesAggregated, AggregatedIssue, loadProjects} from "../../service/loadList.ts";
 import {loadAggregatedIssuesCount} from "../../service/loadCount.ts";
+import MultiSelectBox from '../../components/MultiSelectBox.vue'
+import {SelectBoxOption} from '../../models/SelectBoxOption.ts'
+import {Project} from '../../models/project.ts'
 
 const list = ref<AggregatedIssue[]>([])
 const loaded = ref(false)
@@ -19,12 +22,80 @@ const offset = ref(0)
 const sortBy = ref<string>('count')
 const sortOrder = ref<string>('DESC')
 
+// Filters state
+const selectedProjectIds = ref<string[]>([])
+const projects = ref<Project[]>([])
+const projectsLoaded = ref(false)
+const projectsLoading = ref(false)
+const projectsOffset = ref(0)
+const hasMoreProjects = ref(true)
+
 const sortLabel = computed(() => {
     if (sortBy.value === 'count') {
         return sortOrder.value === 'DESC' ? 'Count ↓' : 'Count ↑';
     }
     return 'Count';
 })
+
+const projectOptions = computed<SelectBoxOption[]>(() => {
+    return projects.value.map((project) => ({
+        value: project.ID.toString(),
+        label: project.Name
+    }));
+})
+
+async function loadProjectsData(resetOffset = false) {
+    if (resetOffset) {
+        projectsOffset.value = 0;
+        projects.value = [];
+    }
+
+    projectsLoading.value = true;
+    const newProjects = await loadProjects(projectsLoaded, projectsOffset.value, 20);
+
+    if (resetOffset) {
+        projects.value = newProjects;
+    } else {
+        projects.value = [...projects.value, ...newProjects];
+    }
+
+    hasMoreProjects.value = newProjects.length === 20;
+    projectsOffset.value += newProjects.length;
+    projectsLoading.value = false;
+}
+
+async function loadMoreProjects() {
+    if (!projectsLoading.value && hasMoreProjects.value) {
+        await loadProjectsData();
+    }
+}
+
+async function searchProjects(query: string) {
+    projectsOffset.value = 0;
+    projects.value = [];
+    projectsLoading.value = true;
+    const newProjects = await loadProjects(projectsLoaded, 0, 20, query);
+    projects.value = newProjects;
+    hasMoreProjects.value = newProjects.length === 20;
+    projectsOffset.value = newProjects.length;
+    projectsLoading.value = false;
+}
+
+async function onProjectFilterChange() {
+    offset.value = 0;
+    page.value = 1;
+    count.value = await loadAggregatedIssuesCount(
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+    );
+    list.value = await loadIssuesAggregated(
+        loaded,
+        offset.value,
+        10,
+        sortBy.value === 'first_id' ? undefined : sortBy.value,
+        sortBy.value === 'first_id' ? undefined : sortOrder.value,
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+    );
+}
 
 async function pageSelect(e: PageSelectEvent) {
     page.value = e.page
@@ -34,7 +105,8 @@ async function pageSelect(e: PageSelectEvent) {
         offset.value,
         10,
         sortBy.value === 'first_id' ? undefined : sortBy.value,
-        sortBy.value === 'first_id' ? undefined : sortOrder.value
+        sortBy.value === 'first_id' ? undefined : sortOrder.value,
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
     );
 }
 
@@ -57,19 +129,24 @@ async function toggleSort() {
         offset.value,
         10,
         sortBy.value === 'first_id' ? undefined : sortBy.value,
-        sortBy.value === 'first_id' ? undefined : sortOrder.value
+        sortBy.value === 'first_id' ? undefined : sortOrder.value,
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
     );
 }
 
 async function initLoad() {
-    count.value = await loadAggregatedIssuesCount();
+    count.value = await loadAggregatedIssuesCount(
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+    );
     list.value = await loadIssuesAggregated(
         loaded,
         offset.value,
         10,
         sortBy.value,
-        sortOrder.value
+        sortOrder.value,
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
     );
+    await loadProjectsData(true);
 }
 
 initLoad()
@@ -79,6 +156,22 @@ initLoad()
     <Sidebar :active=MenuItem.Issues>
         <template v-if="loaded">
             <h2>Issues</h2>
+
+            <div class="filters-block">
+                <h3>Filters</h3>
+                <div class="filters-container">
+                    <MultiSelectBox
+                        label="Projects"
+                        :options="projectOptions"
+                        :loading="projectsLoading"
+                        :hasMore="hasMoreProjects"
+                        v-model="selectedProjectIds"
+                        @changed="onProjectFilterChange"
+                        @loadMore="loadMoreProjects"
+                        @search="searchProjects"
+                    />
+                </div>
+            </div>
 
           <IssueChart :days="14"/>
 
@@ -108,6 +201,27 @@ initLoad()
 
 .padding-small {
     padding-top: 14px;
+}
+
+.filters-block {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid $main_theme_border_color;
+
+    h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 18px;
+        color: $main_theme_border_color_darker1;
+    }
+
+    .filters-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
 }
 
 .issues-table {
