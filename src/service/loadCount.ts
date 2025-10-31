@@ -13,12 +13,21 @@ export default async function loadCount(entity: string): Promise<EntityCount> {
     return <EntityCount>{count: 0, entity: entity};
 }
 
-export async function loadAggregatedIssuesCount(projectIds?: string[]): Promise<EntityCount> {
+export async function loadAggregatedIssuesCount(projectIds?: string[], createdAtFrom?: string): Promise<EntityCount> {
     try {
-        let url = '/issues-aggregated/count';
+        const params = [];
         if (projectIds && projectIds.length > 0) {
-            url += `?projectIds=${projectIds.map(id => encodeURIComponent(id)).join(',')}`;
+            params.push(`projectIds=${projectIds.map(id => encodeURIComponent(id)).join(',')}`);
         }
+        if (createdAtFrom) {
+            params.push(`createdAtFrom=${encodeURIComponent(createdAtFrom)}`);
+        }
+
+        let url = '/issues-aggregated/count';
+        if (params.length > 0) {
+            url += `?${params.join('&')}`;
+        }
+
         const response = await sendGet(url);
         if (response.status == 200) {
             return await response.json();

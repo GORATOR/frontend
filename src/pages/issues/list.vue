@@ -10,8 +10,10 @@ import {MenuItem} from '../../models/sidebarMenuItem.ts'
 import {loadIssuesAggregated, AggregatedIssue, loadProjects} from "../../service/loadList.ts";
 import {loadAggregatedIssuesCount} from "../../service/loadCount.ts";
 import MultiSelectBox from '../../components/MultiSelectBox.vue'
+import SelectBox from '../../components/SelectBox.vue'
 import {SelectBoxOption} from '../../models/SelectBoxOption.ts'
 import {Project} from '../../models/project.ts'
+import {TIME_RANGE_CONFIGS, getTimeRangeConfig, getCreatedAtFrom} from '../../config/timeRangeConfig'
 
 const list = ref<AggregatedIssue[]>([])
 const loaded = ref(false)
@@ -30,6 +32,17 @@ const projectsLoading = ref(false)
 const projectsOffset = ref(0)
 const hasMoreProjects = ref(true)
 
+// Time filter state
+const selectedTimeRange = ref<string>('14d')
+
+// Generate time range options from config
+const timeRangeOptions = computed<SelectBoxOption[]>(() => {
+    return Object.values(TIME_RANGE_CONFIGS).map(config => ({
+        value: config.value,
+        label: config.label
+    }))
+})
+
 const sortLabel = computed(() => {
     if (sortBy.value === 'count') {
         return sortOrder.value === 'DESC' ? 'Count ↓' : 'Count ↑';
@@ -42,6 +55,16 @@ const projectOptions = computed<SelectBoxOption[]>(() => {
         value: project.ID.toString(),
         label: project.Name
     }));
+})
+
+// Chart configuration based on selected time range
+const chartConfig = computed(() => {
+    const config = getTimeRangeConfig(selectedTimeRange.value)
+    return {
+        interval: config.interval,
+        periods: config.periods,
+        label: config.label
+    }
 })
 
 async function loadProjectsData(resetOffset = false) {
@@ -84,8 +107,10 @@ async function searchProjects(query: string) {
 async function onProjectFilterChange() {
     offset.value = 0;
     page.value = 1;
+    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
     count.value = await loadAggregatedIssuesCount(
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom
     );
     list.value = await loadIssuesAggregated(
         loaded,
@@ -93,20 +118,42 @@ async function onProjectFilterChange() {
         10,
         sortBy.value === 'first_id' ? undefined : sortBy.value,
         sortBy.value === 'first_id' ? undefined : sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom
+    );
+}
+
+async function onTimeRangeChange() {
+    offset.value = 0;
+    page.value = 1;
+    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
+    count.value = await loadAggregatedIssuesCount(
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom
+    );
+    list.value = await loadIssuesAggregated(
+        loaded,
+        offset.value,
+        10,
+        sortBy.value === 'first_id' ? undefined : sortBy.value,
+        sortBy.value === 'first_id' ? undefined : sortOrder.value,
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom
     );
 }
 
 async function pageSelect(e: PageSelectEvent) {
     page.value = e.page
     offset.value = e.offset
+    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
     list.value = await loadIssuesAggregated(
         loaded,
         offset.value,
         10,
         sortBy.value === 'first_id' ? undefined : sortBy.value,
         sortBy.value === 'first_id' ? undefined : sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom
     );
 }
 
@@ -124,19 +171,23 @@ async function toggleSort() {
 
     offset.value = 0;
     page.value = 1;
+    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
     list.value = await loadIssuesAggregated(
         loaded,
         offset.value,
         10,
         sortBy.value === 'first_id' ? undefined : sortBy.value,
         sortBy.value === 'first_id' ? undefined : sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom
     );
 }
 
 async function initLoad() {
+    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
     count.value = await loadAggregatedIssuesCount(
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom
     );
     list.value = await loadIssuesAggregated(
         loaded,
@@ -144,7 +195,8 @@ async function initLoad() {
         10,
         sortBy.value,
         sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined
+        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom
     );
     await loadProjectsData(true);
 }
@@ -160,6 +212,12 @@ initLoad()
             <div class="filters-block">
                 <h3>Filters</h3>
                 <div class="filters-container">
+                    <SelectBox
+                        label="Time Range"
+                        :options="timeRangeOptions"
+                        v-model="selectedTimeRange"
+                        @changed="onTimeRangeChange"
+                    />
                     <MultiSelectBox
                         label="Projects"
                         :options="projectOptions"
@@ -173,7 +231,12 @@ initLoad()
                 </div>
             </div>
 
-          <IssueChart :days="14"/>
+          <IssueChart
+              :interval="chartConfig.interval"
+              :periods="chartConfig.periods"
+              :label="chartConfig.label"
+              :projectIds="selectedProjectIds"
+          />
 
             <div class="issues-table">
                 <div class="table-header">
