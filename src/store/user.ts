@@ -1,6 +1,7 @@
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import { defineStore } from "pinia"
 import { sendPost, sendGet } from "../utils/requests"
+import type { Role } from "../models/role"
 
 const SESSIONID_LOCAL_STORAGE_KEY = 'sessionId'
 
@@ -21,6 +22,8 @@ export const useUserStore = defineStore('user', () => {
     const logined = ref(false)
     const loading = ref(false)
     const username = ref<string | null>(null)
+    const currentUserId = ref<number | null>(null)
+    const roles = ref<Role[]>([])
 
     function cleanStoredSession() {
         sessionId.value = null
@@ -42,6 +45,8 @@ export const useUserStore = defineStore('user', () => {
 
                 const data = await response.json()
                 username.value = data.Username
+                currentUserId.value = data.ID
+                roles.value = data.Roles || []
 
                 logined.value = true
                 return true
@@ -90,5 +95,25 @@ export const useUserStore = defineStore('user', () => {
         return false
     }
 
-    return { logined, loading, username, sessionId, login, loadCurrentUser }
+    const isAdmin = computed(() => {
+        return roles.value.some(role => role.Name === 'admin')
+    })
+
+    function canEditUser(userId: number): boolean {
+        // Can edit if it's their own profile OR if they're an admin
+        return currentUserId.value === userId || isAdmin.value
+    }
+
+    return {
+        logined,
+        loading,
+        username,
+        sessionId,
+        currentUserId,
+        roles,
+        isAdmin,
+        login,
+        loadCurrentUser,
+        canEditUser
+    }
 })
