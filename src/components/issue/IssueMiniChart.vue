@@ -33,7 +33,7 @@ const bars = computed(() => {
 })
 
 async function loadData() {
-    const allStats = await loadIssuesStats(daysToShow.value)
+    const allStats = await loadIssuesStats('day', daysToShow.value)
     stats.value = allStats.map(s => s.count)
 }
 
