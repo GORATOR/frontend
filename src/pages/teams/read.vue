@@ -15,6 +15,9 @@ import ImageUpload from "../../components/ImageUpload.vue";
 import CollapsibleSection from "../../components/CollapsibleSection.vue";
 import Table from "../../components/Table.vue";
 import {updateTeam} from "../../service/updateEntity.ts";
+import MultiSelectBox, { MultiSelectBoxElement } from "../../components/MultiSelectBox.vue";
+import {loadOrganizations, loadUsers, loadProjects} from "../../service/loadList.ts";
+import {useEntityLoader} from "../../utils/useEntityLoader.ts";
 
 const loaded = ref(false);
 const team = ref<Team>({} as Team );
@@ -25,6 +28,36 @@ const loading = ref<boolean>(false);
 const relatedUsers = ref<User[]>([]);
 const relatedOrganizations = ref<Organization[]>([]);
 const relatedProjects = ref<Project[]>([]);
+
+// Selected IDs for editing
+const selectedUserIds = ref<string[]>([]);
+const selectedOrganizationIds = ref<string[]>([]);
+const selectedProjectIds = ref<string[]>([]);
+
+// Initialize entity loaders using composable
+const usersLoader = useEntityLoader({
+  loadFunction: loadUsers,
+  mapToOption: (user) => ({
+    value: user.ID.toString(),
+    label: user.Username
+  })
+});
+
+const organizationsLoader = useEntityLoader({
+  loadFunction: loadOrganizations,
+  mapToOption: (org) => ({
+    value: org.ID.toString(),
+    label: org.Name
+  })
+});
+
+const projectsLoader = useEntityLoader({
+  loadFunction: loadProjects,
+  mapToOption: (project) => ({
+    value: project.ID.toString(),
+    label: project.Name
+  })
+});
 
 async function initLoad() {
   try {
@@ -44,16 +77,19 @@ function loadRelatedEntities() {
   // Use preloaded nested entities from backend
   if (team.value.Users && team.value.Users.length > 0) {
     relatedUsers.value = team.value.Users;
+    selectedUserIds.value = team.value.Users.map(u => u.ID.toString());
     console.log('Loaded users:', relatedUsers.value);
   }
 
   if (team.value.Organizations && team.value.Organizations.length > 0) {
     relatedOrganizations.value = team.value.Organizations;
+    selectedOrganizationIds.value = team.value.Organizations.map(o => o.ID.toString());
     console.log('Loaded organizations:', relatedOrganizations.value);
   }
 
   if (team.value.Projects && team.value.Projects.length > 0) {
     relatedProjects.value = team.value.Projects;
+    selectedProjectIds.value = team.value.Projects.map(p => p.ID.toString());
     console.log('Loaded projects:', relatedProjects.value);
   }
 }
@@ -69,12 +105,33 @@ function getButtonCaption(): string {
 async function actionButtonClick(): Promise<void> {
   if (isEditing.value) {
     console.log('save action');
+    // Update IDs before saving
+    team.value.UserIds = selectedUserIds.value.map(id => parseInt(id));
+    team.value.OrganizationIds = selectedOrganizationIds.value.map(id => parseInt(id));
+    team.value.ProjectIds = selectedProjectIds.value.map(id => parseInt(id));
+
     await updateTeam(loading, team.value);
     console.log('edit disabled');
   } else {
     console.log('edit enabled');
+    usersLoader.loadData(true);
+    organizationsLoader.loadData(true);
+    projectsLoader.loadData(true);
   }
   editSwitch();
+}
+
+// Change handlers for MultiSelectBox
+function onUserChanged(el: MultiSelectBoxElement) {
+  selectedUserIds.value = el.values;
+}
+
+function onOrganizationChanged(el: MultiSelectBoxElement) {
+  selectedOrganizationIds.value = el.values;
+}
+
+function onProjectChanged(el: MultiSelectBoxElement) {
+  selectedProjectIds.value = el.values;
 }
 
 const userTableHeaders = ['ID', 'Username', 'Email'];
@@ -148,7 +205,7 @@ initLoad();
 
         <!-- Related Organizations -->
         <CollapsibleSection
-          v-if="relatedOrganizations.length > 0"
+          v-if="!isEditing && relatedOrganizations.length > 0"
           title="Organizations"
           :defaultExpanded="false">
           <Table
@@ -157,9 +214,26 @@ initLoad();
           />
         </CollapsibleSection>
 
+        <!-- Organizations Edit Mode -->
+        <CollapsibleSection
+          v-if="isEditing"
+          title="Organizations"
+          :defaultExpanded="true">
+          <MultiSelectBox
+            :options="organizationsLoader.options.value"
+            :label="'Select organizations'"
+            :loading="organizationsLoader.isLoading.value"
+            :hasMore="organizationsLoader.hasMore.value"
+            @loadMore="organizationsLoader.loadMore"
+            @search="organizationsLoader.handleSearch"
+            @changed="onOrganizationChanged"
+            v-model="selectedOrganizationIds"
+          />
+        </CollapsibleSection>
+
         <!-- Related Projects -->
         <CollapsibleSection
-          v-if="relatedProjects.length > 0"
+          v-if="!isEditing && relatedProjects.length > 0"
           title="Projects"
           :defaultExpanded="false">
           <Table
@@ -168,14 +242,48 @@ initLoad();
           />
         </CollapsibleSection>
 
+        <!-- Projects Edit Mode -->
+        <CollapsibleSection
+          v-if="isEditing"
+          title="Projects"
+          :defaultExpanded="true">
+          <MultiSelectBox
+            :options="projectsLoader.options.value"
+            :label="'Select projects'"
+            :loading="projectsLoader.isLoading.value"
+            :hasMore="projectsLoader.hasMore.value"
+            @loadMore="projectsLoader.loadMore"
+            @search="projectsLoader.handleSearch"
+            @changed="onProjectChanged"
+            v-model="selectedProjectIds"
+          />
+        </CollapsibleSection>
+
         <!-- Related Users -->
         <CollapsibleSection
-          v-if="relatedUsers.length > 0"
+          v-if="!isEditing && relatedUsers.length > 0"
           title="Users"
           :defaultExpanded="false">
           <Table
             :headers="userTableHeaders"
             :rows="userTableRows"
+          />
+        </CollapsibleSection>
+
+        <!-- Users Edit Mode -->
+        <CollapsibleSection
+          v-if="isEditing"
+          title="Users"
+          :defaultExpanded="true">
+          <MultiSelectBox
+            :options="usersLoader.options.value"
+            :label="'Select users'"
+            :loading="usersLoader.isLoading.value"
+            :hasMore="usersLoader.hasMore.value"
+            @loadMore="usersLoader.loadMore"
+            @search="usersLoader.handleSearch"
+            @changed="onUserChanged"
+            v-model="selectedUserIds"
           />
         </CollapsibleSection>
       </div>
