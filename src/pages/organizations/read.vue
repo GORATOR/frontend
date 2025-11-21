@@ -15,9 +15,8 @@ import ImageUpload from "../../components/ImageUpload.vue";
 import CollapsibleSection from "../../components/CollapsibleSection.vue";
 import Table from "../../components/Table.vue";
 import MultiSelectBox, { MultiSelectBoxElement } from "../../components/MultiSelectBox.vue";
-import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
-import {DEFAULT_LIMIT} from "../../components/SelectBox.vue";
 import {loadUsers, loadTeams} from "../../service/loadList.ts";
+import {useEntityLoader} from "../../utils/useEntityLoader.ts";
 
 const loaded = ref(false);
 const org = ref<Organization>({} as Organization);
@@ -28,21 +27,26 @@ const loading = ref<boolean>(false);
 const relatedTeams = ref<Team[]>([]);
 const relatedUsers = ref<User[]>([]);
 
-// MultiSelect for Users
+// Selected IDs for editing
 const selectedUserIds = ref<string[]>([]);
-const userOffset = ref(0);
-const optionsUsers = ref<Array<SelectBoxOption>>([]);
-const hasMoreUsers = ref(true);
-const isLoadingUsers = ref(false);
-const currentUserSearch = ref('');
-
-// MultiSelect for Teams
 const selectedTeamIds = ref<string[]>([]);
-const teamOffset = ref(0);
-const optionsTeams = ref<Array<SelectBoxOption>>([]);
-const hasMoreTeams = ref(true);
-const isLoadingTeams = ref(false);
-const currentTeamSearch = ref('');
+
+// Initialize entity loaders using composable
+const usersLoader = useEntityLoader({
+  loadFunction: loadUsers,
+  mapToOption: (user) => ({
+    value: user.ID.toString(),
+    label: user.Username
+  })
+});
+
+const teamsLoader = useEntityLoader({
+  loadFunction: loadTeams,
+  mapToOption: (team) => ({
+    value: team.ID.toString(),
+    label: team.Name
+  })
+});
 
 async function initLoad() {
   try {
@@ -77,8 +81,8 @@ function editSwitch() : void {
   isEditing.value = !isEditing.value;
   if (isEditing.value) {
     // Load data for MultiSelectBoxes when entering edit mode
-    loadUsersData(true);
-    loadTeamsData(true);
+    usersLoader.loadData(true);
+    teamsLoader.loadData(true);
   }
 }
 
@@ -100,98 +104,9 @@ async function actionButtonClick(): Promise<void> {
   editSwitch();
 }
 
-// Users MultiSelect functions
-async function loadUsersData(reset = false, search = '') {
-  if (reset) {
-    userOffset.value = 0;
-    optionsUsers.value = [];
-    hasMoreUsers.value = true;
-    currentUserSearch.value = search;
-  }
-
-  if (isLoadingUsers.value) return;
-
-  isLoadingUsers.value = true;
-  const dataUsers = await loadUsers(loaded, userOffset.value, DEFAULT_LIMIT, search);
-
-  if (dataUsers.length > 0) {
-    const newOptions = dataUsers.map(el => (<SelectBoxOption>{
-      value: el.ID.toString(),
-      label: el.Username
-    }));
-
-    if (reset) {
-      optionsUsers.value = newOptions;
-    } else {
-      const existingValues = new Set(optionsUsers.value.map(opt => opt.value));
-      const filteredNewOptions = newOptions.filter(opt => !existingValues.has(opt.value));
-      optionsUsers.value = [...optionsUsers.value, ...filteredNewOptions];
-    }
-
-    userOffset.value += dataUsers.length;
-    hasMoreUsers.value = dataUsers.length === DEFAULT_LIMIT;
-  } else {
-    hasMoreUsers.value = false;
-  }
-
-  isLoadingUsers.value = false;
-}
-
-async function loadMoreUsers() {
-  await loadUsersData(false, currentUserSearch.value);
-}
-
-async function handleUserSearch(query: string) {
-  await loadUsersData(true, query);
-}
-
+// Change handlers for MultiSelectBox
 function onUserChanged(el: MultiSelectBoxElement) {
   selectedUserIds.value = el.values;
-}
-
-// Teams MultiSelect functions
-async function loadTeamsData(reset = false, search = '') {
-  if (reset) {
-    teamOffset.value = 0;
-    optionsTeams.value = [];
-    hasMoreTeams.value = true;
-    currentTeamSearch.value = search;
-  }
-
-  if (isLoadingTeams.value) return;
-
-  isLoadingTeams.value = true;
-  const dataTeams = await loadTeams(loaded, teamOffset.value, DEFAULT_LIMIT, search);
-
-  if (dataTeams.length > 0) {
-    const newOptions = dataTeams.map(el => (<SelectBoxOption>{
-      value: el.ID.toString(),
-      label: el.Name
-    }));
-
-    if (reset) {
-      optionsTeams.value = newOptions;
-    } else {
-      const existingValues = new Set(optionsTeams.value.map(opt => opt.value));
-      const filteredNewOptions = newOptions.filter(opt => !existingValues.has(opt.value));
-      optionsTeams.value = [...optionsTeams.value, ...filteredNewOptions];
-    }
-
-    teamOffset.value += dataTeams.length;
-    hasMoreTeams.value = dataTeams.length === DEFAULT_LIMIT;
-  } else {
-    hasMoreTeams.value = false;
-  }
-
-  isLoadingTeams.value = false;
-}
-
-async function loadMoreTeams() {
-  await loadTeamsData(false, currentTeamSearch.value);
-}
-
-async function handleTeamSearch(query: string) {
-  await loadTeamsData(true, query);
 }
 
 function onTeamChanged(el: MultiSelectBoxElement) {
@@ -256,45 +171,11 @@ initLoad();
               <p>{{ org?.ID }}</p>
             </div>
           </div>
-
-          <!-- MultiSelect for Users (Edit Mode) -->
-          <div v-if="isEditing" class="detail-field">
-            <label class="field-label">Users:</label>
-            <div class="field-value">
-              <MultiSelectBox
-                :options="optionsUsers"
-                :label="'Select users'"
-                :loading="isLoadingUsers"
-                :hasMore="hasMoreUsers"
-                @loadMore="loadMoreUsers"
-                @search="handleUserSearch"
-                @changed="onUserChanged"
-                v-model="selectedUserIds"
-              />
-            </div>
-          </div>
-
-          <!-- MultiSelect for Teams (Edit Mode) -->
-          <div v-if="isEditing" class="detail-field">
-            <label class="field-label">Teams:</label>
-            <div class="field-value">
-              <MultiSelectBox
-                :options="optionsTeams"
-                :label="'Select teams'"
-                :loading="isLoadingTeams"
-                :hasMore="hasMoreTeams"
-                @loadMore="loadMoreTeams"
-                @search="handleTeamSearch"
-                @changed="onTeamChanged"
-                v-model="selectedTeamIds"
-              />
-            </div>
-          </div>
         </CollapsibleSection>
 
         <!-- Related Teams -->
         <CollapsibleSection
-          v-if="relatedTeams.length > 0"
+          v-if="!isEditing && relatedTeams.length > 0"
           title="Teams"
           :defaultExpanded="false">
           <Table
@@ -303,14 +184,48 @@ initLoad();
           />
         </CollapsibleSection>
 
+        <!-- Teams Edit Mode -->
+        <CollapsibleSection
+          v-if="isEditing"
+          title="Teams"
+          :defaultExpanded="true">
+          <MultiSelectBox
+            :options="teamsLoader.options.value"
+            :label="'Select teams'"
+            :loading="teamsLoader.isLoading.value"
+            :hasMore="teamsLoader.hasMore.value"
+            @loadMore="teamsLoader.loadMore"
+            @search="teamsLoader.handleSearch"
+            @changed="onTeamChanged"
+            v-model="selectedTeamIds"
+          />
+        </CollapsibleSection>
+
         <!-- Related Users -->
         <CollapsibleSection
-          v-if="relatedUsers.length > 0"
+          v-if="!isEditing && relatedUsers.length > 0"
           title="Users"
           :defaultExpanded="false">
           <Table
             :headers="userTableHeaders"
             :rows="userTableRows"
+          />
+        </CollapsibleSection>
+
+        <!-- Users Edit Mode -->
+        <CollapsibleSection
+          v-if="isEditing"
+          title="Users"
+          :defaultExpanded="true">
+          <MultiSelectBox
+            :options="usersLoader.options.value"
+            :label="'Select users'"
+            :loading="usersLoader.isLoading.value"
+            :hasMore="usersLoader.hasMore.value"
+            @loadMore="usersLoader.loadMore"
+            @search="usersLoader.handleSearch"
+            @changed="onUserChanged"
+            v-model="selectedUserIds"
           />
         </CollapsibleSection>
       </div>
