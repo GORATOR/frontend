@@ -30,6 +30,14 @@ const canEdit = computed(() => {
   return user.value.ID ? userStore.canEditUser(user.value.ID) : false;
 });
 
+// Determine active menu item - show Profile for own profile, Users for admins viewing others
+const activeMenuItem = computed(() => {
+  if (user.value.ID === userStore.currentUserId) {
+    return MenuItem.Profile;
+  }
+  return MenuItem.Users;
+});
+
 // Related entities
 const relatedTeams = ref<Team[]>([]);
 const relatedOrganizations = ref<Organization[]>([]);
@@ -197,7 +205,7 @@ initLoad();
 </script>
 
 <template>
-  <Sidebar :active=MenuItem.Users>
+  <Sidebar :active="activeMenuItem">
     <template v-if="loaded">
       <h2>{{ user?.Username }}</h2>
 
