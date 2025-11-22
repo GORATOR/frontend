@@ -16,6 +16,9 @@ import ImageUpload from "../../components/ImageUpload.vue";
 import CollapsibleSection from "../../components/CollapsibleSection.vue";
 import Table from "../../components/Table.vue";
 import {useUserStore} from "../../store/user.ts";
+import MultiSelectBox, { MultiSelectBoxElement } from "../../components/MultiSelectBox.vue";
+import {loadTeams, loadOrganizations} from "../../service/loadList.ts";
+import {useEntityLoader} from "../../utils/useEntityLoader.ts";
 
 const loaded = ref(false);
 const user = ref<User>({} as User);
@@ -31,6 +34,27 @@ const canEdit = computed(() => {
 const relatedTeams = ref<Team[]>([]);
 const relatedOrganizations = ref<Organization[]>([]);
 const relatedRoles = ref<Role[]>([]);
+
+// Selected IDs for editing
+const selectedTeamIds = ref<string[]>([]);
+const selectedOrganizationIds = ref<string[]>([]);
+
+// Initialize entity loaders using composable
+const teamsLoader = useEntityLoader({
+  loadFunction: loadTeams,
+  mapToOption: (team) => ({
+    value: team.ID.toString(),
+    label: team.Name
+  })
+});
+
+const organizationsLoader = useEntityLoader({
+  loadFunction: loadOrganizations,
+  mapToOption: (org) => ({
+    value: org.ID.toString(),
+    label: org.Name
+  })
+});
 
 // Password fields
 const password = ref<string>('');
@@ -55,11 +79,13 @@ function loadRelatedEntities() {
   // Use preloaded nested entities from backend
   if (user.value.Teams && user.value.Teams.length > 0) {
     relatedTeams.value = user.value.Teams;
+    selectedTeamIds.value = user.value.Teams.map(t => t.ID.toString());
     console.log('Loaded teams:', relatedTeams.value);
   }
 
   if (user.value.Organizations && user.value.Organizations.length > 0) {
     relatedOrganizations.value = user.value.Organizations;
+    selectedOrganizationIds.value = user.value.Organizations.map(o => o.ID.toString());
     console.log('Loaded organizations:', relatedOrganizations.value);
   }
 
@@ -71,7 +97,11 @@ function loadRelatedEntities() {
 
 function editSwitch() : void {
   isEditing.value = !isEditing.value;
-  if (!isEditing.value) {
+  if (isEditing.value) {
+    // Load data for MultiSelectBoxes when entering edit mode
+    teamsLoader.loadData(true);
+    organizationsLoader.loadData(true);
+  } else {
     // Clear passwords when exiting edit mode
     password.value = '';
     confirmPassword.value = '';
@@ -107,8 +137,8 @@ async function actionButtonClick(): Promise<void> {
       Username: user.value.Username,
       Email: user.value.Email,
       Avatar: user.value.Avatar,
-      TeamIds: user.value.TeamIds,
-      OrganizationIds: user.value.OrganizationIds
+      TeamIds: selectedTeamIds.value.map(id => parseInt(id)),
+      OrganizationIds: selectedOrganizationIds.value.map(id => parseInt(id))
       // Note: RoleIds is not included - roles should be managed separately by admins
     };
 
@@ -125,6 +155,15 @@ async function actionButtonClick(): Promise<void> {
     console.log('edit enabled');
   }
   editSwitch();
+}
+
+// Change handlers for MultiSelectBox
+function onTeamChanged(el: MultiSelectBoxElement) {
+  selectedTeamIds.value = el.values;
+}
+
+function onOrganizationChanged(el: MultiSelectBoxElement) {
+  selectedOrganizationIds.value = el.values;
 }
 
 const teamTableHeaders = ['ID', 'Name'];
@@ -219,7 +258,7 @@ initLoad();
 
         <!-- Related Organizations -->
         <CollapsibleSection
-          v-if="relatedOrganizations.length > 0"
+          v-if="!isEditing && relatedOrganizations.length > 0"
           title="Organizations"
           :defaultExpanded="false">
           <Table
@@ -228,14 +267,48 @@ initLoad();
           />
         </CollapsibleSection>
 
+        <!-- Organizations Edit Mode -->
+        <CollapsibleSection
+          v-if="isEditing"
+          title="Organizations"
+          :defaultExpanded="true">
+          <MultiSelectBox
+            :options="organizationsLoader.options.value"
+            :label="'Select organizations'"
+            :loading="organizationsLoader.isLoading.value"
+            :hasMore="organizationsLoader.hasMore.value"
+            @loadMore="organizationsLoader.loadMore"
+            @search="organizationsLoader.handleSearch"
+            @changed="onOrganizationChanged"
+            v-model="selectedOrganizationIds"
+          />
+        </CollapsibleSection>
+
         <!-- Related Teams -->
         <CollapsibleSection
-          v-if="relatedTeams.length > 0"
+          v-if="!isEditing && relatedTeams.length > 0"
           title="Teams"
           :defaultExpanded="false">
           <Table
             :headers="teamTableHeaders"
             :rows="teamTableRows"
+          />
+        </CollapsibleSection>
+
+        <!-- Teams Edit Mode -->
+        <CollapsibleSection
+          v-if="isEditing"
+          title="Teams"
+          :defaultExpanded="true">
+          <MultiSelectBox
+            :options="teamsLoader.options.value"
+            :label="'Select teams'"
+            :loading="teamsLoader.isLoading.value"
+            :hasMore="teamsLoader.hasMore.value"
+            @loadMore="teamsLoader.loadMore"
+            @search="teamsLoader.handleSearch"
+            @changed="onTeamChanged"
+            v-model="selectedTeamIds"
           />
         </CollapsibleSection>
 
