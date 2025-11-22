@@ -24,6 +24,11 @@ const isMenuVisible = ref(false)
 function showMenu() {
     isMenuVisible.value = !isMenuVisible.value
 }
+
+function handleLogout() {
+    store.logout()
+    window.location.href = '/login'
+}
 </script>
 
 <template>
@@ -69,6 +74,11 @@ function showMenu() {
                     :class="{ 'menu-item': true, 'active': props.active == MenuItem.Projects }"
                     @click="redirectProjectsList">
                     Projects
+                </button>
+                <button
+                    class="menu-item logout-button"
+                    @click="handleLogout">
+                    Logout
                 </button>
             </div>
         </div>
@@ -171,6 +181,12 @@ function showMenu() {
             .menu-item:hover {
                 color: white;
                 background-color: $main_theme_background_lighter1;
+            }
+
+            .logout-button {
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid $main_theme_background_lighter1;
             }
         }
     }

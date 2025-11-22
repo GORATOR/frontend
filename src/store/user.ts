@@ -31,7 +31,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function loadCurrentUser(): Promise<boolean> {
-        if (storedSessionId) {
+        if (sessionId.value) {
             loading.value = true
 
             try {
@@ -80,11 +80,13 @@ export const useUserStore = defineStore('user', () => {
             }
 
             const data = await response.json()
-            username.value = data.user.Username
-
-            logined.value = true
             sessionId.value = data.sessionId
             saveSessionId(data.sessionId)
+
+            logined.value = true
+
+            // Load full user data including roles
+            await loadCurrentUser()
             return true
         } catch (err) {
             console.error('Error:', err)
@@ -104,6 +106,14 @@ export const useUserStore = defineStore('user', () => {
         return currentUserId.value === userId || isAdmin.value
     }
 
+    function logout() {
+        cleanStoredSession()
+        logined.value = false
+        username.value = null
+        currentUserId.value = null
+        roles.value = []
+    }
+
     return {
         logined,
         loading,
@@ -113,6 +123,7 @@ export const useUserStore = defineStore('user', () => {
         roles,
         isAdmin,
         login,
+        logout,
         loadCurrentUser,
         canEditUser
     }
