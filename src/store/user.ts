@@ -4,30 +4,66 @@ import { sendPost, sendGet } from "../utils/requests"
 import type { Role } from "../models/role"
 
 const SESSIONID_LOCAL_STORAGE_KEY = 'sessionId'
+const USER_DATA_LOCAL_STORAGE_KEY = 'userData'
+
+interface StoredUserData {
+    username: string
+    currentUserId: number
+    roles: Role[]
+}
 
 function saveSessionId(sessionId: string) {
     localStorage.setItem(SESSIONID_LOCAL_STORAGE_KEY, sessionId)
 }
+
 function removeSessionId() {
     localStorage.removeItem(SESSIONID_LOCAL_STORAGE_KEY)
 }
+
 function loadSessionId(): string | null {
     return localStorage.getItem(SESSIONID_LOCAL_STORAGE_KEY)
 }
 
+function saveUserData(username: string, userId: number, roles: Role[]) {
+    const data: StoredUserData = {
+        username,
+        currentUserId: userId,
+        roles
+    }
+    localStorage.setItem(USER_DATA_LOCAL_STORAGE_KEY, JSON.stringify(data))
+}
+
+function loadUserData(): StoredUserData | null {
+    const data = localStorage.getItem(USER_DATA_LOCAL_STORAGE_KEY)
+    if (data) {
+        try {
+            return JSON.parse(data)
+        } catch {
+            return null
+        }
+    }
+    return null
+}
+
+function removeUserData() {
+    localStorage.removeItem(USER_DATA_LOCAL_STORAGE_KEY)
+}
+
 export const useUserStore = defineStore('user', () => {
     const storedSessionId = loadSessionId()
+    const storedUserData = loadUserData()
 
     const sessionId = ref<string | null>(storedSessionId)
-    const logined = ref(false)
+    const logined = ref(!!storedSessionId)
     const loading = ref(false)
-    const username = ref<string | null>(null)
-    const currentUserId = ref<number | null>(null)
-    const roles = ref<Role[]>([])
+    const username = ref<string | null>(storedUserData?.username || null)
+    const currentUserId = ref<number | null>(storedUserData?.currentUserId || null)
+    const roles = ref<Role[]>(storedUserData?.roles || [])
 
     function cleanStoredSession() {
         sessionId.value = null
         removeSessionId()
+        removeUserData()
     }
 
     async function loadCurrentUser(): Promise<boolean> {
@@ -47,6 +83,9 @@ export const useUserStore = defineStore('user', () => {
                 username.value = data.Username
                 currentUserId.value = data.ID
                 roles.value = data.Roles || []
+
+                // Save user data to localStorage
+                saveUserData(data.Username, data.ID, data.Roles || [])
 
                 logined.value = true
                 return true
