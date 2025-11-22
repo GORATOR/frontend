@@ -14,15 +14,13 @@ import TextBox from "../../components/TextBox.vue";
 import ImageUpload from "../../components/ImageUpload.vue";
 import CollapsibleSection from "../../components/CollapsibleSection.vue";
 import Table from "../../components/Table.vue";
-import {updateTeam} from "../../service/updateEntity.ts";
+import {useEntityEditor} from "../../utils/useEntityEditor.ts";
 import MultiSelectBox, { MultiSelectBoxElement } from "../../components/MultiSelectBox.vue";
 import {loadOrganizations, loadUsers, loadProjects} from "../../service/loadList.ts";
 import {useEntityLoader} from "../../utils/useEntityLoader.ts";
 
 const loaded = ref(false);
 const team = ref<Team>({} as Team );
-let isEditing = ref<boolean>(false);
-const loading = ref<boolean>(false);
 
 // Related entities
 const relatedUsers = ref<User[]>([]);
@@ -57,6 +55,38 @@ const projectsLoader = useEntityLoader({
     value: project.ID.toString(),
     label: project.Name
   })
+});
+
+// Initialize entity editor composable
+const editor = useEntityEditor({
+  entity: team,
+  entityType: 'team',
+  onEditStart: () => {
+    usersLoader.loadData(true);
+    organizationsLoader.loadData(true);
+    projectsLoader.loadData(true);
+  },
+  onSaveSuccess: async () => {
+    await initLoad();
+  },
+  prepareUpdateData: (team) => {
+    return {
+      ...team,
+      UserIds: selectedUserIds.value.map(id => parseInt(id)),
+      OrganizationIds: selectedOrganizationIds.value.map(id => parseInt(id)),
+      ProjectIds: selectedProjectIds.value.map(id => parseInt(id))
+    };
+  },
+  additionalStateToSave: () => ({
+    selectedUserIds: [...selectedUserIds.value],
+    selectedOrganizationIds: [...selectedOrganizationIds.value],
+    selectedProjectIds: [...selectedProjectIds.value]
+  }),
+  restoreAdditionalState: (state) => {
+    selectedUserIds.value = state.selectedUserIds || [];
+    selectedOrganizationIds.value = state.selectedOrganizationIds || [];
+    selectedProjectIds.value = state.selectedProjectIds || [];
+  }
 });
 
 async function initLoad() {
@@ -94,31 +124,8 @@ function loadRelatedEntities() {
   }
 }
 
-function editSwitch() : void {
-  isEditing.value = !isEditing.value;
-}
-
-function getButtonCaption(): string {
-  return isEditing.value ? 'SAVE' : 'EDIT';
-}
-
 async function actionButtonClick(): Promise<void> {
-  if (isEditing.value) {
-    console.log('save action');
-    // Update IDs before saving
-    team.value.UserIds = selectedUserIds.value.map(id => parseInt(id));
-    team.value.OrganizationIds = selectedOrganizationIds.value.map(id => parseInt(id));
-    team.value.ProjectIds = selectedProjectIds.value.map(id => parseInt(id));
-
-    await updateTeam(loading, team.value);
-    console.log('edit disabled');
-  } else {
-    console.log('edit enabled');
-    usersLoader.loadData(true);
-    organizationsLoader.loadData(true);
-    projectsLoader.loadData(true);
-  }
-  editSwitch();
+  await editor.handleActionButton();
 }
 
 // Change handlers for MultiSelectBox
@@ -172,7 +179,12 @@ initLoad();
       <h2>{{ team?.Name }}</h2>
 
       <div class="action-buttons">
-        <Button @click="actionButtonClick">{{getButtonCaption()}}</Button>
+        <Button @click="actionButtonClick">{{editor.getButtonCaption()}}</Button>
+        <Button v-if="editor.isEditing.value" @click="editor.cancelEdit">CANCEL</Button>
+      </div>
+
+      <div v-if="editor.saveError.value" class="error-banner">
+        {{ editor.saveError.value }}
       </div>
 
       <div class="team-details">
@@ -181,17 +193,17 @@ initLoad();
           <div class="detail-field">
             <label class="field-label">Team Avatar:</label>
             <div class="field-value">
-              <img v-if="!isEditing && team?.Avatar" :src="team.Avatar" alt="Team Avatar" class="avatar-display" />
-              <p v-if="!isEditing && !team?.Avatar" class="no-avatar">No avatar</p>
-              <ImageUpload v-if="isEditing" label="" v-model="team.Avatar" :currentImage="team.Avatar" />
+              <img v-if="!editor.isEditing.value && team?.Avatar" :src="team.Avatar" alt="Team Avatar" class="avatar-display" />
+              <p v-if="!editor.isEditing.value && !team?.Avatar" class="no-avatar">No avatar</p>
+              <ImageUpload v-if="editor.isEditing.value" label="" v-model="team.Avatar" :currentImage="team.Avatar" />
             </div>
           </div>
 
           <div class="detail-field">
             <label class="field-label">Team Name:</label>
             <div class="field-value">
-              <p v-if="!isEditing">{{ team?.Name }}</p>
-              <TextBox v-if="isEditing" label="" v-model="team.Name" />
+              <p v-if="!editor.isEditing.value">{{ team?.Name }}</p>
+              <TextBox v-if="editor.isEditing.value" label="" v-model="team.Name" />
             </div>
           </div>
 
@@ -205,7 +217,7 @@ initLoad();
 
         <!-- Related Organizations -->
         <CollapsibleSection
-          v-if="!isEditing && relatedOrganizations.length > 0"
+          v-if="!editor.isEditing.value && relatedOrganizations.length > 0"
           title="Organizations"
           :defaultExpanded="false">
           <Table
@@ -216,7 +228,7 @@ initLoad();
 
         <!-- Organizations Edit Mode -->
         <CollapsibleSection
-          v-if="isEditing"
+          v-if="editor.isEditing.value"
           title="Organizations"
           :defaultExpanded="true">
           <MultiSelectBox
@@ -233,7 +245,7 @@ initLoad();
 
         <!-- Related Projects -->
         <CollapsibleSection
-          v-if="!isEditing && relatedProjects.length > 0"
+          v-if="!editor.isEditing.value && relatedProjects.length > 0"
           title="Projects"
           :defaultExpanded="false">
           <Table
@@ -244,7 +256,7 @@ initLoad();
 
         <!-- Projects Edit Mode -->
         <CollapsibleSection
-          v-if="isEditing"
+          v-if="editor.isEditing.value"
           title="Projects"
           :defaultExpanded="true">
           <MultiSelectBox
@@ -261,7 +273,7 @@ initLoad();
 
         <!-- Related Users -->
         <CollapsibleSection
-          v-if="!isEditing && relatedUsers.length > 0"
+          v-if="!editor.isEditing.value && relatedUsers.length > 0"
           title="Users"
           :defaultExpanded="false">
           <Table
@@ -272,7 +284,7 @@ initLoad();
 
         <!-- Users Edit Mode -->
         <CollapsibleSection
-          v-if="isEditing"
+          v-if="editor.isEditing.value"
           title="Users"
           :defaultExpanded="true">
           <MultiSelectBox
@@ -297,6 +309,18 @@ initLoad();
 
 .action-buttons {
   margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.error-banner {
+  background-color: #ffebee;
+  border: 1px solid #f44336;
+  color: #c62828;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-size: 0.9rem;
 }
 
 .team-details {
