@@ -1,4 +1,5 @@
 enum MenuItem {
+    Profile,
     Issues,
     Users,
     Teams,

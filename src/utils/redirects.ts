@@ -1,4 +1,5 @@
 import { router } from "../router"
+import { useUserStore } from "../store/user"
 
 const redirectHome = () => router.push({ path: "/" })
 const redirectTeamsList = () => router.push({ path: "/teams" })
@@ -10,6 +11,12 @@ const redirectUsersNew = () => router.push({ path: "/users/new" })
 const redirectProjectsList = () => router.push({ path: "/projects" })
 const redirectProjectsNew = () => router.push({ path: "/projects/new" })
 const redirectIssuesList = () => router.push({ path: "/issues" })
+const redirectUserProfile = () => {
+    const userStore = useUserStore()
+    if (userStore.currentUserId) {
+        router.push({ path: `/user/${userStore.currentUserId}` })
+    }
+}
 
 export {
     redirectHome,
@@ -27,4 +34,5 @@ export {
     redirectProjectsNew,
 
     redirectIssuesList,
+    redirectUserProfile,
 }
