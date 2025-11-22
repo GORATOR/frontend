@@ -7,7 +7,8 @@ import {
     redirectOrganizationsList,
     redirectUsersList,
     redirectProjectsList,
-    redirectIssuesList
+    redirectIssuesList,
+    redirectUserProfile
 } from '../utils/redirects.ts'
 import MenuIcon from '../icons/MenuIcon.vue'
 import MenuIconFold from '../icons/MenuIconFold.vue'
@@ -38,11 +39,18 @@ function showMenu() {
             </div>
             <div class="menu-items">
                 <button
+                    v-if="!store.isAdmin"
+                    :class="{ 'menu-item': true, 'active': props.active == MenuItem.Profile }"
+                    @click="redirectUserProfile">
+                    My Profile
+                </button>
+                <button
                     :class="{ 'menu-item': true, 'active': props.active == MenuItem.Issues }"
                     @click="redirectIssuesList">
                     Issues
                 </button>
                 <button
+                    v-if="store.isAdmin"
                     :class="{ 'menu-item': true, 'active': props.active == MenuItem.Users }"
                     @click="redirectUsersList">
                     Users
