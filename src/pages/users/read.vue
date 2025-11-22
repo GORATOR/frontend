@@ -9,7 +9,7 @@ import {Team} from "../../models/team.ts";
 import {Organization} from "../../models/organization.ts";
 import {Role} from "../../models/role.ts";
 import {getEntityId, readEntity, generateEntityRecordUrl} from "../../service/readEntity.ts";
-import {updateUser} from "../../service/updateEntity.ts";
+import {useEntityEditor} from "../../utils/useEntityEditor.ts";
 import Button from "../../components/Button.vue";
 import TextBox from "../../components/TextBox.vue";
 import ImageUpload from "../../components/ImageUpload.vue";
@@ -22,8 +22,11 @@ import {useEntityLoader} from "../../utils/useEntityLoader.ts";
 
 const loaded = ref(false);
 const user = ref<User>({} as User);
-let isEditing = ref<boolean>(false);
-const loading = ref<boolean>(false);
+
+// Password fields
+const password = ref<string>('');
+const confirmPassword = ref<string>('');
+const passwordError = ref<string>('');
 
 const userStore = useUserStore();
 const canEdit = computed(() => {
@@ -64,10 +67,48 @@ const organizationsLoader = useEntityLoader({
   })
 });
 
-// Password fields
-const password = ref<string>('');
-const confirmPassword = ref<string>('');
-const passwordError = ref<string>('');
+// Initialize entity editor composable
+const editor = useEntityEditor({
+  entity: user,
+  entityType: 'user',
+  onEditStart: () => {
+    // Load data for MultiSelectBoxes when entering edit mode
+    teamsLoader.loadData(true);
+    organizationsLoader.loadData(true);
+  },
+  onSaveSuccess: async () => {
+    // Reload data from server to get the updated state
+    await initLoad();
+    // Clear passwords after successful save
+    password.value = '';
+    confirmPassword.value = '';
+  },
+  prepareUpdateData: (user) => {
+    const updatePayload: any = {
+      ID: user.ID,
+      Username: user.Username,
+      Email: user.Email,
+      Avatar: user.Avatar,
+      TeamIds: selectedTeamIds.value.map(id => parseInt(id)),
+      OrganizationIds: selectedOrganizationIds.value.map(id => parseInt(id))
+    };
+
+    // Only include password if it's been set
+    if (password.value && password.value.trim() !== '') {
+      updatePayload.Password = password.value;
+    }
+
+    return updatePayload;
+  },
+  additionalStateToSave: () => ({
+    selectedTeamIds: [...selectedTeamIds.value],
+    selectedOrganizationIds: [...selectedOrganizationIds.value]
+  }),
+  restoreAdditionalState: (state) => {
+    selectedTeamIds.value = state.selectedTeamIds || [];
+    selectedOrganizationIds.value = state.selectedOrganizationIds || [];
+  }
+});
 
 async function initLoad() {
   try {
@@ -103,26 +144,8 @@ function loadRelatedEntities() {
   }
 }
 
-function editSwitch() : void {
-  isEditing.value = !isEditing.value;
-  if (isEditing.value) {
-    // Load data for MultiSelectBoxes when entering edit mode
-    teamsLoader.loadData(true);
-    organizationsLoader.loadData(true);
-  } else {
-    // Clear passwords when exiting edit mode
-    password.value = '';
-    confirmPassword.value = '';
-    passwordError.value = '';
-  }
-}
-
-function getButtonCaption(): string {
-  return isEditing.value ? 'SAVE' : 'EDIT';
-}
-
 async function actionButtonClick(): Promise<void> {
-  if (isEditing.value) {
+  if (editor.isEditing.value) {
     console.log('save action');
 
     // Validate passwords if they are being changed
@@ -138,31 +161,19 @@ async function actionButtonClick(): Promise<void> {
     }
 
     passwordError.value = '';
-
-    // Create update payload
-    const updatePayload: any = {
-      ID: user.value.ID,
-      Username: user.value.Username,
-      Email: user.value.Email,
-      Avatar: user.value.Avatar,
-      TeamIds: selectedTeamIds.value.map(id => parseInt(id)),
-      OrganizationIds: selectedOrganizationIds.value.map(id => parseInt(id))
-      // Note: RoleIds is not included - roles should be managed separately by admins
-    };
-
-    // Only include password if it's been set
-    if (password.value && password.value.trim() !== '') {
-      updatePayload.Password = password.value;
-    }
-
-    await updateUser(loading, updatePayload);
-    console.log('edit disabled');
-    password.value = ''; // Clear passwords after save
-    confirmPassword.value = '';
+    await editor.saveEntity();
   } else {
     console.log('edit enabled');
+    editor.startEdit();
   }
-  editSwitch();
+}
+
+function cancelEdit() : void {
+  editor.cancelEdit();
+  // Clear passwords when canceling
+  password.value = '';
+  confirmPassword.value = '';
+  passwordError.value = '';
 }
 
 // Change handlers for MultiSelectBox
@@ -210,7 +221,12 @@ initLoad();
       <h2>{{ user?.Username }}</h2>
 
       <div class="action-buttons" v-if="canEdit">
-        <Button @click="actionButtonClick">{{getButtonCaption()}}</Button>
+        <Button @click="actionButtonClick">{{editor.getButtonCaption()}}</Button>
+        <Button v-if="editor.isEditing.value" @click="cancelEdit">CANCEL</Button>
+      </div>
+
+      <div v-if="editor.saveError.value" class="error-banner">
+        {{ editor.saveError.value }}
       </div>
 
       <div class="user-details">
@@ -219,36 +235,36 @@ initLoad();
           <div class="detail-field">
             <label class="field-label">User Avatar:</label>
             <div class="field-value">
-              <img v-if="!isEditing && user?.Avatar" :src="user.Avatar" alt="User Avatar" class="avatar-display" />
-              <p v-if="!isEditing && !user?.Avatar" class="no-avatar">No avatar</p>
-              <ImageUpload v-if="isEditing" label="" v-model="user.Avatar" :currentImage="user.Avatar" />
+              <img v-if="!editor.isEditing.value && user?.Avatar" :src="user.Avatar" alt="User Avatar" class="avatar-display" />
+              <p v-if="!editor.isEditing.value && !user?.Avatar" class="no-avatar">No avatar</p>
+              <ImageUpload v-if="editor.isEditing.value" label="" v-model="user.Avatar" :currentImage="user.Avatar" />
             </div>
           </div>
 
           <div class="detail-field">
             <label class="field-label">Username:</label>
             <div class="field-value">
-              <p v-if="!isEditing">{{ user?.Username }}</p>
-              <TextBox v-if="isEditing" label="" v-model="user.Username" />
+              <p v-if="!editor.isEditing.value">{{ user?.Username }}</p>
+              <TextBox v-if="editor.isEditing.value" label="" v-model="user.Username" />
             </div>
           </div>
 
           <div class="detail-field">
             <label class="field-label">Email:</label>
             <div class="field-value">
-              <p v-if="!isEditing">{{ user?.Email }}</p>
-              <TextBox v-if="isEditing" label="" v-model="user.Email" type="email" />
+              <p v-if="!editor.isEditing.value">{{ user?.Email }}</p>
+              <TextBox v-if="editor.isEditing.value" label="" v-model="user.Email" type="email" />
             </div>
           </div>
 
-          <div v-if="isEditing" class="detail-field">
+          <div v-if="editor.isEditing.value" class="detail-field">
             <label class="field-label">Password:</label>
             <div class="field-value">
               <TextBox label="" v-model="password" type="password" placeholder="Leave empty to keep current password" />
             </div>
           </div>
 
-          <div v-if="isEditing" class="detail-field">
+          <div v-if="editor.isEditing.value" class="detail-field">
             <label class="field-label">Confirm Password:</label>
             <div class="field-value">
               <TextBox label="" v-model="confirmPassword" type="password" placeholder="Confirm new password" />
@@ -266,7 +282,7 @@ initLoad();
 
         <!-- Related Organizations -->
         <CollapsibleSection
-          v-if="!isEditing && relatedOrganizations.length > 0"
+          v-if="!editor.isEditing.value && relatedOrganizations.length > 0"
           title="Organizations"
           :defaultExpanded="false">
           <Table
@@ -277,7 +293,7 @@ initLoad();
 
         <!-- Organizations Edit Mode -->
         <CollapsibleSection
-          v-if="isEditing"
+          v-if="editor.isEditing.value"
           title="Organizations"
           :defaultExpanded="true">
           <MultiSelectBox
@@ -294,7 +310,7 @@ initLoad();
 
         <!-- Related Teams -->
         <CollapsibleSection
-          v-if="!isEditing && relatedTeams.length > 0"
+          v-if="!editor.isEditing.value && relatedTeams.length > 0"
           title="Teams"
           :defaultExpanded="false">
           <Table
@@ -305,7 +321,7 @@ initLoad();
 
         <!-- Teams Edit Mode -->
         <CollapsibleSection
-          v-if="isEditing"
+          v-if="editor.isEditing.value"
           title="Teams"
           :defaultExpanded="true">
           <MultiSelectBox
@@ -341,6 +357,18 @@ initLoad();
 
 .action-buttons {
   margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.error-banner {
+  background-color: #ffebee;
+  border: 1px solid #f44336;
+  color: #c62828;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-size: 0.9rem;
 }
 
 .user-details {

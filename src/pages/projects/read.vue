@@ -6,7 +6,7 @@ import {ref, computed} from "vue";
 import {EntityName} from "../../models/count.ts";
 import {Project, ProjectUpdate} from "../../models/project.ts";
 import {getEntityId, readEntity, generateEntityRecordUrl} from "../../service/readEntity.ts";
-import {updateProject} from "../../service/updateEntity.ts";
+import {useEntityEditor} from "../../utils/useEntityEditor.ts";
 import Button from "../../components/Button.vue";
 import TextBox from "../../components/TextBox.vue";
 import ImageUpload from "../../components/ImageUpload.vue";
@@ -18,8 +18,6 @@ import {Team} from "../../models/team.ts";
 const loaded = ref(false);
 const project = ref<Project>({} as Project);
 const team = ref<Team | null>(null);
-let isEditing = ref<boolean>(false);
-const loading = ref<boolean>(false);
 const showEnvelopeKey = ref<boolean>(false);
 const copySuccess = ref<boolean>(false);
 
@@ -94,34 +92,37 @@ async function handleTeamSearch(query: string) {
   await loadTeamsList(true, query)
 }
 
-function editSwitch() : void {
-  isEditing.value = !isEditing.value;
-  if (isEditing.value && teamOptions.value.length === 0) {
-    loadTeamsList(true);
+// Initialize entity editor composable
+const editor = useEntityEditor({
+  entity: project,
+  entityType: 'project',
+  onEditStart: () => {
+    if (teamOptions.value.length === 0) {
+      loadTeamsList(true);
+    }
+  },
+  onSaveSuccess: async () => {
+    await initLoad();
+  },
+  prepareUpdateData: (project) => {
+    const updateData: ProjectUpdate = {
+      ID: project.ID,
+      Name: project.Name,
+      TeamId: parseInt(selectedTeamId.value),
+      Avatar: project.Avatar
+    };
+    return updateData;
+  },
+  additionalStateToSave: () => ({
+    selectedTeamId: selectedTeamId.value
+  }),
+  restoreAdditionalState: (state) => {
+    selectedTeamId.value = state.selectedTeamId || '';
   }
-}
-
-function getButtonCaption(): string {
-  return isEditing.value ? 'SAVE' : 'EDIT';
-}
+});
 
 async function actionButtonClick(): Promise<void> {
-  if (isEditing.value) {
-    const updateData: ProjectUpdate = {
-      ID: project.value.ID,
-      Name: project.value.Name,
-      TeamId: parseInt(selectedTeamId.value),
-      Avatar: project.value.Avatar
-    };
-
-    await updateProject(loading, updateData);
-
-    // Reload team info after update
-    if (updateData.TeamId) {
-      team.value = await readEntity(EntityName.Team, updateData.TeamId);
-    }
-  }
-  editSwitch();
+  await editor.handleActionButton();
 }
 
 const teamUrl = computed(() => {
@@ -155,7 +156,12 @@ initLoad();
       <h2>{{ project?.Name }}</h2>
 
       <div class="action-buttons">
-        <Button @click="actionButtonClick">{{getButtonCaption()}}</Button>
+        <Button @click="actionButtonClick">{{editor.getButtonCaption()}}</Button>
+        <Button v-if="editor.isEditing.value" @click="editor.cancelEdit">CANCEL</Button>
+      </div>
+
+      <div v-if="editor.saveError.value" class="error-banner">
+        {{ editor.saveError.value }}
       </div>
 
       <div class="project-details">
@@ -165,29 +171,29 @@ initLoad();
           <div class="detail-field">
             <label class="field-label">Project Avatar:</label>
             <div class="field-value">
-              <img v-if="!isEditing && project?.Avatar" :src="project.Avatar" alt="Project Avatar" class="avatar-display" />
-              <p v-if="!isEditing && !project?.Avatar" class="no-avatar">No avatar</p>
-              <ImageUpload v-if="isEditing" label="" v-model="project.Avatar" :currentImage="project.Avatar" />
+              <img v-if="!editor.isEditing.value && project?.Avatar" :src="project.Avatar" alt="Project Avatar" class="avatar-display" />
+              <p v-if="!editor.isEditing.value && !project?.Avatar" class="no-avatar">No avatar</p>
+              <ImageUpload v-if="editor.isEditing.value" label="" v-model="project.Avatar" :currentImage="project.Avatar" />
             </div>
           </div>
 
           <div class="detail-field">
             <label class="field-label">Project Name:</label>
             <div class="field-value">
-              <p v-if="!isEditing">{{ project?.Name }}</p>
-              <TextBox v-if="isEditing" label="" v-model="project.Name" />
+              <p v-if="!editor.isEditing.value">{{ project?.Name }}</p>
+              <TextBox v-if="editor.isEditing.value" label="" v-model="project.Name" />
             </div>
           </div>
 
           <div class="detail-field">
             <label class="field-label">Team:</label>
             <div class="field-value">
-              <p v-if="!isEditing && team">
+              <p v-if="!editor.isEditing.value && team">
                 <a :href="teamUrl" class="team-link">{{ team.Name }}</a>
               </p>
-              <p v-if="!isEditing && !team">No team assigned</p>
+              <p v-if="!editor.isEditing.value && !team">No team assigned</p>
               <SelectBox
-                v-if="isEditing"
+                v-if="editor.isEditing.value"
                 :options="teamOptions"
                 :label="'Select team'"
                 :loading="isLoadingMore"
@@ -239,6 +245,18 @@ initLoad();
 
 .action-buttons {
   margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.error-banner {
+  background-color: #ffebee;
+  border: 1px solid #f44336;
+  color: #c62828;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-size: 0.9rem;
 }
 
 .project-details {
