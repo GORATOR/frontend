@@ -8,7 +8,8 @@ import {
     redirectUsersList,
     redirectProjectsList,
     redirectIssuesList,
-    redirectUserProfile
+    redirectUserProfile,
+    redirectRolesList
 } from '../utils/redirects.ts'
 import MenuIcon from '../icons/MenuIcon.vue'
 import MenuIconFold from '../icons/MenuIconFold.vue'
@@ -59,6 +60,12 @@ function handleLogout() {
                     :class="{ 'menu-item': true, 'active': props.active == MenuItem.Users }"
                     @click="redirectUsersList">
                     Users
+                </button>
+                <button
+                    v-if="store.isAdmin"
+                    :class="{ 'menu-item': true, 'active': props.active == MenuItem.Roles }"
+                    @click="redirectRolesList">
+                    Roles
                 </button>
                 <button
                     :class="{ 'menu-item': true, 'active': props.active == MenuItem.Teams }"
