@@ -5,6 +5,7 @@ import {Project} from "../models/project.ts";
 import {User} from "../models/user.ts";
 import {Organization} from "../models/organization.ts";
 import {Envelope} from "../models/envelope.ts";
+import {Role} from "../models/role.ts";
 
 async function loadList(loaded:Ref<boolean, boolean>, endpoint: string, offset: number, limit = 10, search?: string) : Promise<Array<any>> {
     loaded.value = false
@@ -47,6 +48,10 @@ export async function loadUsers(loaded:Ref<boolean, boolean>, offset: number, li
 
 export async function loadOrganizations(loaded:Ref<boolean, boolean>, offset: number, limit = 10, name?: string): Promise<Organization[]> {
     return await loadList(loaded, 'organizations', offset, limit, addURIComponent('name', name));
+}
+
+export async function loadRoles(loaded:Ref<boolean, boolean>, offset: number, limit = 10, name?: string): Promise<Role[]> {
+    return await loadList(loaded, 'roles', offset, limit, addURIComponent('name', name));
 }
 
 export async function loadIssues(

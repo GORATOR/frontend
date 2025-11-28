@@ -5,12 +5,14 @@ import {Team} from "../models/team.ts";
 import {
     redirectOrganizationsList,
     redirectProjectsList,
+    redirectRolesList,
     redirectTeamsList,
     redirectUsersList
 } from "../utils/redirects.ts";
 import {Organization} from "../models/organization.ts";
 import {ProjectUpdate} from "../models/project.ts";
 import {User} from "../models/user.ts";
+import {Role} from "../models/role.ts";
 
 
 async function updateEntity(loading: Ref<boolean, boolean>, name: EntityName, obj: any, redirectCallback: Function ): Promise<boolean> {
@@ -51,4 +53,8 @@ export async function updateOrganization(loading: Ref<boolean, boolean>, obj: Or
 
 export async function updateUser(loading: Ref<boolean, boolean>, obj: User): Promise<boolean> {
     return updateEntity(loading, EntityName.User, obj, redirectUsersList);
+}
+
+export async function updateRole(loading: Ref<boolean, boolean>, obj: Role): Promise<boolean> {
+    return updateEntity(loading, EntityName.Role, obj, redirectRolesList);
 }
