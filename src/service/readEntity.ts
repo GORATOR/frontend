@@ -8,6 +8,7 @@ const entityToUrlMap: Record<EntityName, string> = {
     [EntityName.Project]: 'project',
     [EntityName.Organization]: 'organization',
     [EntityName.Team]: 'team',
+    [EntityName.Role]: 'role',
 };
 
 export function getEntityId(e: EntityName): number {

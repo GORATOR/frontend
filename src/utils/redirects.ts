@@ -11,6 +11,8 @@ const redirectUsersNew = () => router.push({ path: "/users/new" })
 const redirectProjectsList = () => router.push({ path: "/projects" })
 const redirectProjectsNew = () => router.push({ path: "/projects/new" })
 const redirectIssuesList = () => router.push({ path: "/issues" })
+const redirectRolesList = () => router.push({ path: "/roles" })
+const redirectRolesNew = () => router.push({ path: "/roles/new" })
 const redirectUserProfile = () => {
     const userStore = useUserStore()
     if (userStore.currentUserId) {
@@ -35,4 +37,7 @@ export {
 
     redirectIssuesList,
     redirectUserProfile,
+
+    redirectRolesList,
+    redirectRolesNew,
 }

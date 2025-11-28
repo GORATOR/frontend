@@ -5,12 +5,14 @@ import {Team} from "../models/team.ts";
 import {
     redirectOrganizationsList,
     redirectProjectsList,
+    redirectRolesList,
     redirectTeamsList,
     redirectUsersList
 } from "../utils/redirects.ts";
 import {Organization} from "../models/organization.ts";
 import {ProjectCreate} from "../models/project.ts";
 import {UserCreate} from "../models/user.ts";
+import {Role} from "../models/role.ts";
 
 
 async function createEntity(loading: Ref<boolean, boolean>, name: EntityName, obj: any, redirectCallback: Function ): Promise<boolean> {
@@ -51,4 +53,8 @@ export async function createOrganization(loading: Ref<boolean, boolean>, obj: Or
 
 export async function createUser(loading: Ref<boolean, boolean>, obj: UserCreate): Promise<boolean> {
     return createEntity(loading, EntityName.User, obj, redirectUsersList);
+}
+
+export async function createRole(loading: Ref<boolean, boolean>, obj: Role): Promise<boolean> {
+    return createEntity(loading, EntityName.Role, obj, redirectRolesList);
 }

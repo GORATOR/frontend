@@ -5,6 +5,7 @@ enum MenuItem {
     Teams,
     Orgs,
     Projects,
+    Roles,
 }
 
 export { MenuItem }
