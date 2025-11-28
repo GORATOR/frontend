@@ -4,6 +4,7 @@ export enum EntityName {
     Organization = 'organization',
     Team = 'team',
     Envelope = 'envelope',
+    Role = 'role',
 }
 
 interface EntityCount {

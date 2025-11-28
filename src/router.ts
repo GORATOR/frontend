@@ -17,6 +17,9 @@ import organization from './pages/organizations/read.vue'
 import project from './pages/projects/read.vue'
 import team from './pages/teams/read.vue'
 import user from './pages/users/read.vue'
+import roles from './pages/roles/list.vue'
+import roleCreate from './pages/roles/create.vue'
+import role from './pages/roles/read.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -37,6 +40,9 @@ export const router = createRouter({
     { path: '/projects/new', component: projectCreate },
     { path: '/issues', component: issues },
     { path: '/issue/:id', component: issue },
+    { path: '/roles', component: roles },
+    { path: '/roles/new', component: roleCreate },
+    { path: '/role/:id', component: role },
   ]
 })
 
