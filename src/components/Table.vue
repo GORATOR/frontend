@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import {router} from "../router.ts";
+
 const props = defineProps<{
   headers: string[],
   rows: any[],
@@ -13,6 +15,10 @@ function handleHeaderClick(header: string) {
   if (props.sortable) {
     emit('sort', header)
   }
+}
+
+function onItemClick(url: string) {
+  router.push({path:url});
 }
 </script>
 
@@ -30,7 +36,7 @@ function handleHeaderClick(header: string) {
     </div>
     <div v-for="item in props.rows" class="row data">
       <div class="cell" v-for="header in props.headers">
-        <a v-if="item.url !== undefined" :href="item.url">{{ item[header] }}</a>
+        <a @click.prevent="onItemClick(item.url)" v-if="item.url !== undefined" :href="item.url">{{ item[header] }}</a>
         <div v-if="item.url === undefined">{{ item[header] }}</div>
       </div>
     </div>
