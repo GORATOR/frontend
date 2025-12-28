@@ -25,5 +25,5 @@ export async function readEntity(e: EntityName, id: number) : Promise<any> {
 }
 
 export function generateEntityRecordUrl(e: EntityName, id: number): string {
-    return `${location.origin}/${e}/${id}`;
+    return `/${e}/${id}`;
 }
