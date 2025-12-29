@@ -2,6 +2,7 @@
 import { Envelope } from '../../models/envelope'
 import { computed } from 'vue'
 import IssueMiniChart from './IssueMiniChart.vue'
+import {router} from "../../router.ts";
 
 const props = defineProps<{
     envelope: Envelope
@@ -36,6 +37,10 @@ const exceptionValue = computed(() => {
 const issueUrl = computed(() => {
     return `/issue/${props.envelope.ID}`
 })
+
+function onIssueUrlClick(issueUrl: string) {
+  router.push({path: issueUrl});
+}
 </script>
 
 <template>
@@ -43,7 +48,7 @@ const issueUrl = computed(() => {
         <div class="issue-content">
             <div class="issue-info">
                 <div>
-                    <a :href="issueUrl">{{ exceptionValue.type }}</a>
+                    <a @click.prevent="onIssueUrlClick(issueUrl)" :href="issueUrl">{{ exceptionValue.type }}</a>
                 </div>
                 <div class="description">
                     <i>{{ exceptionValue.value }}</i>
