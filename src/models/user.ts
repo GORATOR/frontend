@@ -20,7 +20,8 @@ interface UserCreate {
     Email: string,
     Password: string,
     TeamIds: Array<number>,
-    OrganizationIds: Array<number>
+    OrganizationIds: Array<number>,
+    RoleIds: Array<number>
 }
 
 export type { User, UserCreate }
