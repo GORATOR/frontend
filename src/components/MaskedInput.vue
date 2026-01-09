@@ -37,7 +37,7 @@ async function copyToClipboard() {
         @focus="show = true"
         @blur="show = false"
     />
-    <button
+    <Button
         @click="copyToClipboard"
         class="copy-button"
         :class="{ 'copied': copy }"
@@ -45,7 +45,7 @@ async function copyToClipboard() {
         title="Copy to clipboard">
       <span v-if="!copy">📋</span>
       <span v-else>✓</span>
-    </button>
+    </Button>
   </div>
 </template>
 
