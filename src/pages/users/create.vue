@@ -6,31 +6,38 @@ import Button from '../../components/Button.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
 import {createUser} from "../../service/createEntity.ts";
 import {UserCreate} from "../../models/user.ts";
-import {loadOrganizations, loadTeams} from "../../service/loadList.ts";
+import {loadOrganizations, loadTeams, loadRoles} from "../../service/loadList.ts";
 import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
 import MultiSelectBox, { DEFAULT_LIMIT, MultiSelectBoxElement } from "../../components/MultiSelectBox.vue";
 
 const loading = ref<boolean>(false)
 const orgOffset = ref(0);
 const teamOffset = ref(0);
+const roleOffset = ref(0);
 const selectedTeamIds = ref<string[]>([]);
 const selectedOrgIds = ref<string[]>([]);
+const selectedRoleIds = ref<string[]>([]);
 const user = ref<UserCreate>({
   Username: '',
   Email: '',
   Password: '',
   TeamIds: [],
   OrganizationIds: [],
+  RoleIds: [],
 });
 
 const optionsTeams = ref<Array<SelectBoxOption>>([]);
 const optionsOrgs = ref<Array<SelectBoxOption>>([]);
+const optionsRoles = ref<Array<SelectBoxOption>>([]);
 const hasMoreTeams = ref(true);
 const hasMoreOrgs = ref(true);
+const hasMoreRoles = ref(true);
 const isLoadingTeams = ref(false);
 const isLoadingOrgs = ref(false);
+const isLoadingRoles = ref(false);
 const currentTeamSearch = ref('');
 const currentOrgSearch = ref('');
+const currentRoleSearch = ref('');
 
 async function create() {
     console.log('create clicked');
@@ -136,6 +143,55 @@ function onTeamChanged(el: MultiSelectBoxElement) {
   user.value.TeamIds = el.values.map(v => parseInt(v));
 }
 
+async function loadRolesData(reset = false, search = '') {
+  if (reset) {
+    roleOffset.value = 0;
+    optionsRoles.value = [];
+    hasMoreRoles.value = true;
+    currentRoleSearch.value = search;
+  }
+
+  if (isLoadingRoles.value) return;
+
+  isLoadingRoles.value = true;
+  const dataRoles = await loadRoles(loading, roleOffset.value, DEFAULT_LIMIT, search);
+
+  if (dataRoles.length > 0) {
+    const newOptions = dataRoles.map(el => (<SelectBoxOption>{
+      value: el.ID.toString(),
+      label: el.Name
+    }));
+
+    if (reset) {
+      optionsRoles.value = newOptions;
+    } else {
+      const existingValues = new Set(optionsRoles.value.map(opt => opt.value));
+      const filteredNewOptions = newOptions.filter(opt => !existingValues.has(opt.value));
+      optionsRoles.value = [...optionsRoles.value, ...filteredNewOptions];
+    }
+
+    roleOffset.value += dataRoles.length;
+    hasMoreRoles.value = dataRoles.length === DEFAULT_LIMIT;
+  } else {
+    hasMoreRoles.value = false;
+  }
+
+  isLoadingRoles.value = false;
+}
+
+async function loadMoreRoles() {
+  await loadRolesData(false, currentRoleSearch.value);
+}
+
+async function handleRoleSearch(query: string) {
+  await loadRolesData(true, query);
+}
+
+function onRoleChanged(el: MultiSelectBoxElement) {
+  selectedRoleIds.value = el.values;
+  user.value.RoleIds = el.values.map(v => parseInt(v));
+}
+
 const isFormValid = computed(() => {
   return user.value.Username.trim() !== '' &&
          user.value.Email.trim() !== '' &&
@@ -147,6 +203,7 @@ const isFormValid = computed(() => {
 // Load initial data
 loadOrgs(true);
 loadTeamsData(true);
+loadRolesData(true);
 </script>
 
 <template>
@@ -178,7 +235,18 @@ loadTeamsData(true);
                 @changed="onTeamChanged"
                 v-model="selectedTeamIds"
             />
-            
+
+            <MultiSelectBox
+                :options="optionsRoles"
+                :label="'Select roles'"
+                :loading="isLoadingRoles"
+                :hasMore="hasMoreRoles"
+                @loadMore="loadMoreRoles"
+                @search="handleRoleSearch"
+                @changed="onRoleChanged"
+                v-model="selectedRoleIds"
+            />
+
             <div class="padding-small">
                 <Button v-if="!isFormValid" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
