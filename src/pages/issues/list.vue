@@ -8,7 +8,7 @@ import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
 import IssueChart from '../../components/issue/IssueChart.vue'
 import {MenuItem} from '../../models/sidebarMenuItem.ts'
 import {loadIssuesAggregated, AggregatedIssue, loadProjects} from "../../service/loadList.ts";
-import {loadAggregatedIssuesCount} from "../../service/loadCount.ts";
+import {loadAggregatedIssuesCount, loadTotalEventsCount} from "../../service/loadCount.ts";
 import MultiSelectBox from '../../components/MultiSelectBox.vue'
 import SelectBox from '../../components/SelectBox.vue'
 import {SelectBoxOption} from '../../models/SelectBoxOption.ts'
@@ -19,6 +19,7 @@ const list = ref<AggregatedIssue[]>([])
 const loaded = ref(false)
 
 const count = ref<EntityCount>({ count: 0, entity: EntityName.Envelope })
+const totalEvents = ref(0)
 const page = ref(1)
 const offset = ref(0)
 const sortBy = ref<string>('count')
@@ -124,6 +125,7 @@ function currentFilters() {
 async function reloadCount() {
     const { projectIds, createdAtFrom, eventType } = currentFilters()
     count.value = await loadAggregatedIssuesCount(projectIds, createdAtFrom, eventType)
+    totalEvents.value = await loadTotalEventsCount(projectIds, createdAtFrom, eventType)
 }
 
 async function reloadList(off = offset.value) {
@@ -187,6 +189,7 @@ async function toggleSort() {
 async function initLoad() {
     const { projectIds, createdAtFrom, eventType } = currentFilters()
     count.value = await loadAggregatedIssuesCount(projectIds, createdAtFrom, eventType)
+    totalEvents.value = await loadTotalEventsCount(projectIds, createdAtFrom, eventType)
     list.value = await loadIssuesAggregated(
         loaded,
         offset.value,
@@ -242,6 +245,8 @@ initLoad()
               :label="chartConfig.label"
               :projectIds="selectedProjectIds"
               :eventType="selectedEventType || undefined"
+              :totalEvents="totalEvents"
+              :totalGroups="count.count"
           />
 
             <div class="issues-table">
