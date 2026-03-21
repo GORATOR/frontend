@@ -20,6 +20,8 @@ interface Envelope {
     exception_type?: string
     exception_value?: string
     exception_data?: string
+    message?: string
+    level?: string
 }
 
 interface EnvelopeEventExtra {
