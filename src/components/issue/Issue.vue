@@ -7,58 +7,75 @@ import {router} from "../../router.ts";
 const props = defineProps<{
     envelope: Envelope
     count?: number
+    eventType?: 'exception' | 'message'
 }>()
 
-const exceptionValue = computed(() => {
-    if (props.envelope.exception_type && props.envelope.exception_value) {
-        return {
-            type: props.envelope.exception_type,
-            value: props.envelope.exception_value
-        }
-    }
+const isMessage = computed(() => props.eventType === 'message')
 
+const displayTitle = computed(() => {
+    if (isMessage.value) {
+        return props.envelope.level || 'message'
+    }
+    if (props.envelope.exception_type) {
+        return props.envelope.exception_type
+    }
     try {
         if (props.envelope.EnvelopeEventExtras && props.envelope.EnvelopeEventExtras.length > 1) {
-            const envelopeException = JSON.parse(props.envelope.EnvelopeEventExtras[1].Data)
-
-            if (Array.isArray(envelopeException.exception)) {
-                return envelopeException.exception[0]
-            } else if (envelopeException.exception?.values?.[0]) {
-                return envelopeException.exception.values[0]
-            }
+            const parsed = JSON.parse(props.envelope.EnvelopeEventExtras[1].Data)
+            if (Array.isArray(parsed.exception)) return parsed.exception[0]?.type ?? null
+            if (parsed.exception?.values?.[0]) return parsed.exception.values[0].type ?? null
         }
     } catch (e) {
         console.error('Error parsing envelope exception:', e)
     }
-
     return null
 })
 
-const issueUrl = computed(() => {
-    return `/issue/${props.envelope.ID}`
+const displayValue = computed(() => {
+    if (isMessage.value) {
+        return props.envelope.message || ''
+    }
+    if (props.envelope.exception_value) {
+        return props.envelope.exception_value
+    }
+    try {
+        if (props.envelope.EnvelopeEventExtras && props.envelope.EnvelopeEventExtras.length > 1) {
+            const parsed = JSON.parse(props.envelope.EnvelopeEventExtras[1].Data)
+            if (Array.isArray(parsed.exception)) return parsed.exception[0]?.value ?? ''
+            if (parsed.exception?.values?.[0]) return parsed.exception.values[0].value ?? ''
+        }
+    } catch (e) {
+        console.error('Error parsing envelope exception:', e)
+    }
+    return ''
 })
 
-function onIssueUrlClick(issueUrl: string) {
-  router.push({path: issueUrl});
+const issueUrl = computed(() => `/issue/${props.envelope.ID}`)
+
+function onIssueUrlClick(url: string) {
+    router.push({ path: url })
 }
 </script>
 
 <template>
-    <div class="envelope-container" v-if="exceptionValue">
+    <div class="envelope-container" v-if="displayTitle">
         <div class="issue-content">
+            <div class="event-type-badge" :class="eventType">
+                {{ eventType ?? 'exception' }}
+            </div>
             <div class="issue-info">
                 <div>
-                    <a @click.prevent="onIssueUrlClick(issueUrl)" :href="issueUrl">{{ exceptionValue.type }}</a>
+                    <a @click.prevent="onIssueUrlClick(issueUrl)" :href="issueUrl">{{ displayTitle }}</a>
                 </div>
                 <div class="description">
-                    <i>{{ exceptionValue.value }}</i>
+                    <i>{{ displayValue }}</i>
                 </div>
             </div>
             <div class="issue-count" v-if="count">
                 <IssueMiniChart
-                    v-if="exceptionValue"
-                    :exceptionType="exceptionValue.type"
-                    :exceptionValue="exceptionValue.value"
+                    v-if="!isMessage"
+                    :exceptionType="envelope.exception_type ?? ''"
+                    :exceptionValue="envelope.exception_value ?? ''"
                     :days="7"
                 />
                 <span class="count-badge">{{ count }}</span>
@@ -74,9 +91,29 @@ function onIssueUrlClick(issueUrl: string) {
 
 .issue-content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+}
+
+.event-type-badge {
+    flex: 0 0 90px;
+    text-align: center;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.exception {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: rgb(185, 28, 28);
+    }
+
+    &.message {
+        background-color: rgba(13, 148, 136, 0.1);
+        color: rgb(15, 118, 110);
+    }
 }
 
 .issue-info {
