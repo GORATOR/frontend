@@ -78,6 +78,7 @@ export async function loadIssues(
 export interface AggregatedIssue {
     envelope: Envelope;
     count: number;
+    event_type: 'exception' | 'message';
 }
 
 export async function loadIssuesAggregated(
@@ -87,7 +88,8 @@ export async function loadIssuesAggregated(
     sortBy?: string,
     sortOrder?: string,
     projectIds?: string[],
-    createdAtFrom?: string): Promise<AggregatedIssue[]> {
+    createdAtFrom?: string,
+    eventType?: string): Promise<AggregatedIssue[]> {
     const search = [];
 
     if (sortBy) {
@@ -101,6 +103,9 @@ export async function loadIssuesAggregated(
     }
     if (createdAtFrom) {
         search.push(`createdAtFrom=${encodeURIComponent(createdAtFrom)}`);
+    }
+    if (eventType) {
+        search.push(`eventType=${encodeURIComponent(eventType)}`);
     }
 
     loaded.value = false;

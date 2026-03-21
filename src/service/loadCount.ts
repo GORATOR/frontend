@@ -13,7 +13,7 @@ export default async function loadCount(entity: string): Promise<EntityCount> {
     return <EntityCount>{count: 0, entity: entity};
 }
 
-export async function loadAggregatedIssuesCount(projectIds?: string[], createdAtFrom?: string): Promise<EntityCount> {
+export async function loadAggregatedIssuesCount(projectIds?: string[], createdAtFrom?: string, eventType?: string): Promise<EntityCount> {
     try {
         const params = [];
         if (projectIds && projectIds.length > 0) {
@@ -21,6 +21,9 @@ export async function loadAggregatedIssuesCount(projectIds?: string[], createdAt
         }
         if (createdAtFrom) {
             params.push(`createdAtFrom=${encodeURIComponent(createdAtFrom)}`);
+        }
+        if (eventType) {
+            params.push(`eventType=${encodeURIComponent(eventType)}`);
         }
 
         let url = '/issues-aggregated/count';

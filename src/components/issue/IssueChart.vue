@@ -7,6 +7,7 @@ const props = defineProps<{
     periods?: number
     label?: string
     projectIds?: string[]
+    eventType?: string
 }>()
 
 const stats = ref<IssueStatEntry[]>([])
@@ -82,12 +83,13 @@ async function loadData() {
     stats.value = await loadIssuesStats(
         intervalType.value,
         periodsCount.value,
-        projectIdsFilter.value.length > 0 ? projectIdsFilter.value : undefined
+        projectIdsFilter.value.length > 0 ? projectIdsFilter.value : undefined,
+        props.eventType || undefined
     )
 }
 
 // Watch for prop changes and reload data
-watch([intervalType, periodsCount, projectIdsFilter], () => {
+watch([intervalType, periodsCount, projectIdsFilter, () => props.eventType], () => {
     loadData()
 }, { deep: true })
 
