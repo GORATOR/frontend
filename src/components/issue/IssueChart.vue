@@ -7,6 +7,9 @@ const props = defineProps<{
     periods?: number
     label?: string
     projectIds?: string[]
+    eventType?: string
+    totalEvents?: number
+    totalGroups?: number
 }>()
 
 const stats = ref<IssueStatEntry[]>([])
@@ -22,6 +25,9 @@ const maxCount = computed(() => {
 })
 
 const totalCount = computed(() => {
+    if (props.totalEvents !== undefined) {
+        return props.totalEvents
+    }
     return stats.value.reduce((sum, s) => sum + s.count, 0)
 })
 
@@ -82,12 +88,13 @@ async function loadData() {
     stats.value = await loadIssuesStats(
         intervalType.value,
         periodsCount.value,
-        projectIdsFilter.value.length > 0 ? projectIdsFilter.value : undefined
+        projectIdsFilter.value.length > 0 ? projectIdsFilter.value : undefined,
+        props.eventType || undefined
     )
 }
 
 // Watch for prop changes and reload data
-watch([intervalType, periodsCount, projectIdsFilter], () => {
+watch([intervalType, periodsCount, projectIdsFilter, () => props.eventType], () => {
     loadData()
 }, { deep: true })
 
@@ -103,9 +110,15 @@ onMounted(() => {
                 <h3>Event Activity</h3>
                 <div class="chart-subtitle">{{ chartLabel }}</div>
             </div>
-            <div class="chart-total">
-                <div class="total-label">Total Events</div>
-                <div class="total-value">{{ totalCount }}</div>
+            <div class="chart-totals">
+                <div class="chart-total">
+                    <div class="total-label">Total Events</div>
+                    <div class="total-value">{{ totalCount }}</div>
+                </div>
+                <div class="chart-total" v-if="totalGroups !== undefined">
+                    <div class="total-label">Total Groups</div>
+                    <div class="total-value total-value-secondary">{{ totalGroups }}</div>
+                </div>
             </div>
         </div>
 
@@ -185,6 +198,11 @@ onMounted(() => {
     color: #6b7280;
 }
 
+.chart-totals {
+    display: flex;
+    gap: 24px;
+}
+
 .chart-total {
     text-align: right;
 }
@@ -201,6 +219,11 @@ onMounted(() => {
     font-size: 28px;
     font-weight: 700;
     color: rgb(0, 106, 255);
+
+    &.total-value-secondary {
+        font-size: 22px;
+        color: #6b7280;
+    }
 }
 
 .chart-body {

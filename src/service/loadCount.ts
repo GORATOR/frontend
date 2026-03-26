@@ -13,22 +13,41 @@ export default async function loadCount(entity: string): Promise<EntityCount> {
     return <EntityCount>{count: 0, entity: entity};
 }
 
-export async function loadAggregatedIssuesCount(projectIds?: string[], createdAtFrom?: string): Promise<EntityCount> {
+function buildCountUrl(type: string, projectIds?: string[], createdAtFrom?: string, eventType?: string): string {
+    const params = [];
+    if (projectIds && projectIds.length > 0) {
+        params.push(`projectIds=${projectIds.map(id => encodeURIComponent(id)).join(',')}`);
+    }
+    if (createdAtFrom) {
+        params.push(`createdAtFrom=${encodeURIComponent(createdAtFrom)}`);
+    }
+    if (eventType) {
+        params.push(`eventType=${encodeURIComponent(eventType)}`);
+    }
+
+    let url = `/${type}/count`;
+    if (params.length > 0) {
+        url += `?${params.join('&')}`;
+    }
+    return url;
+}
+
+export async function loadTotalEventsCount(projectIds?: string[], createdAtFrom?: string, eventType?: string): Promise<number> {
     try {
-        const params = [];
-        if (projectIds && projectIds.length > 0) {
-            params.push(`projectIds=${projectIds.map(id => encodeURIComponent(id)).join(',')}`);
+        const response = await sendGet(buildCountUrl('envelopes', projectIds, createdAtFrom, eventType));
+        if (response.status == 200) {
+            const data: EntityCount = await response.json();
+            return data.count;
         }
-        if (createdAtFrom) {
-            params.push(`createdAtFrom=${encodeURIComponent(createdAtFrom)}`);
-        }
+    } catch (err) {
+        console.error('Error loading total events count:', err);
+    }
+    return 0;
+}
 
-        let url = '/issues-aggregated/count';
-        if (params.length > 0) {
-            url += `?${params.join('&')}`;
-        }
-
-        const response = await sendGet(url);
+export async function loadAggregatedIssuesCount(projectIds?: string[], createdAtFrom?: string, eventType?: string): Promise<EntityCount> {
+    try {
+        const response = await sendGet(buildCountUrl('issues-aggregated', projectIds, createdAtFrom, eventType));
         if (response.status == 200) {
             return await response.json();
         }

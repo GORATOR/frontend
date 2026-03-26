@@ -8,7 +8,7 @@ import {PageSelectEvent} from '../../models/pagingPageSelect.ts'
 import IssueChart from '../../components/issue/IssueChart.vue'
 import {MenuItem} from '../../models/sidebarMenuItem.ts'
 import {loadIssuesAggregated, AggregatedIssue, loadProjects} from "../../service/loadList.ts";
-import {loadAggregatedIssuesCount} from "../../service/loadCount.ts";
+import {loadAggregatedIssuesCount, loadTotalEventsCount} from "../../service/loadCount.ts";
 import MultiSelectBox from '../../components/MultiSelectBox.vue'
 import SelectBox from '../../components/SelectBox.vue'
 import {SelectBoxOption} from '../../models/SelectBoxOption.ts'
@@ -19,6 +19,7 @@ const list = ref<AggregatedIssue[]>([])
 const loaded = ref(false)
 
 const count = ref<EntityCount>({ count: 0, entity: EntityName.Envelope })
+const totalEvents = ref(0)
 const page = ref(1)
 const offset = ref(0)
 const sortBy = ref<string>('count')
@@ -34,6 +35,15 @@ const hasMoreProjects = ref(true)
 
 // Time filter state
 const selectedTimeRange = ref<string>('14d')
+
+// Event type filter state
+const selectedEventType = ref<string>('')
+
+const eventTypeOptions = computed<SelectBoxOption[]>(() => [
+    { value: '', label: 'All types' },
+    { value: 'exception', label: 'Exception' },
+    { value: 'message', label: 'Message' },
+])
 
 // Generate time range options from config
 const timeRangeOptions = computed<SelectBoxOption[]>(() => {
@@ -104,57 +114,59 @@ async function searchProjects(query: string) {
     projectsLoading.value = false;
 }
 
-async function onProjectFilterChange() {
-    offset.value = 0;
-    page.value = 1;
-    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
-    count.value = await loadAggregatedIssuesCount(
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
-        createdAtFrom
-    );
+function currentFilters() {
+    return {
+        projectIds: selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
+        createdAtFrom: getCreatedAtFrom(selectedTimeRange.value),
+        eventType: selectedEventType.value || undefined,
+    }
+}
+
+async function reloadCount() {
+    const { projectIds, createdAtFrom, eventType } = currentFilters()
+    count.value = await loadAggregatedIssuesCount(projectIds, createdAtFrom, eventType)
+    totalEvents.value = await loadTotalEventsCount(projectIds, createdAtFrom, eventType)
+}
+
+async function reloadList(off = offset.value) {
+    const { projectIds, createdAtFrom, eventType } = currentFilters()
     list.value = await loadIssuesAggregated(
         loaded,
-        offset.value,
+        off,
         10,
         sortBy.value === 'first_id' ? undefined : sortBy.value,
         sortBy.value === 'first_id' ? undefined : sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
-        createdAtFrom
-    );
+        projectIds,
+        createdAtFrom,
+        eventType
+    )
+}
+
+async function onProjectFilterChange() {
+    offset.value = 0
+    page.value = 1
+    await reloadCount()
+    await reloadList(0)
 }
 
 async function onTimeRangeChange() {
-    offset.value = 0;
-    page.value = 1;
-    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
-    count.value = await loadAggregatedIssuesCount(
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
-        createdAtFrom
-    );
-    list.value = await loadIssuesAggregated(
-        loaded,
-        offset.value,
-        10,
-        sortBy.value === 'first_id' ? undefined : sortBy.value,
-        sortBy.value === 'first_id' ? undefined : sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
-        createdAtFrom
-    );
+    offset.value = 0
+    page.value = 1
+    await reloadCount()
+    await reloadList(0)
+}
+
+async function onEventTypeFilterChange() {
+    offset.value = 0
+    page.value = 1
+    await reloadCount()
+    await reloadList(0)
 }
 
 async function pageSelect(e: PageSelectEvent) {
     page.value = e.page
     offset.value = e.offset
-    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
-    list.value = await loadIssuesAggregated(
-        loaded,
-        offset.value,
-        10,
-        sortBy.value === 'first_id' ? undefined : sortBy.value,
-        sortBy.value === 'first_id' ? undefined : sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
-        createdAtFrom
-    );
+    await reloadList(e.offset)
 }
 
 async function toggleSort() {
@@ -171,34 +183,24 @@ async function toggleSort() {
 
     offset.value = 0;
     page.value = 1;
-    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
-    list.value = await loadIssuesAggregated(
-        loaded,
-        offset.value,
-        10,
-        sortBy.value === 'first_id' ? undefined : sortBy.value,
-        sortBy.value === 'first_id' ? undefined : sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
-        createdAtFrom
-    );
+    await reloadList(0)
 }
 
 async function initLoad() {
-    const createdAtFrom = getCreatedAtFrom(selectedTimeRange.value);
-    count.value = await loadAggregatedIssuesCount(
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
-        createdAtFrom
-    );
+    const { projectIds, createdAtFrom, eventType } = currentFilters()
+    count.value = await loadAggregatedIssuesCount(projectIds, createdAtFrom, eventType)
+    totalEvents.value = await loadTotalEventsCount(projectIds, createdAtFrom, eventType)
     list.value = await loadIssuesAggregated(
         loaded,
         offset.value,
         10,
         sortBy.value,
         sortOrder.value,
-        selectedProjectIds.value.length > 0 ? selectedProjectIds.value : undefined,
-        createdAtFrom
-    );
-    await loadProjectsData(true);
+        projectIds,
+        createdAtFrom,
+        eventType
+    )
+    await loadProjectsData(true)
 }
 
 initLoad()
@@ -228,6 +230,12 @@ initLoad()
                         @loadMore="loadMoreProjects"
                         @search="searchProjects"
                     />
+                    <SelectBox
+                        label="Event Type"
+                        :options="eventTypeOptions"
+                        v-model="selectedEventType"
+                        @changed="onEventTypeFilterChange"
+                    />
                 </div>
             </div>
 
@@ -236,12 +244,16 @@ initLoad()
               :periods="chartConfig.periods"
               :label="chartConfig.label"
               :projectIds="selectedProjectIds"
+              :eventType="selectedEventType || undefined"
+              :totalEvents="totalEvents"
+              :totalGroups="count.count"
           />
 
             <div class="issues-table">
                 <div class="table-header">
-                    <div class="header-cell issue-type">Exception Type</div>
-                    <div class="header-cell issue-value">Exception Value</div>
+                    <div class="header-cell issue-event-type">Event Type</div>
+                    <div class="header-cell issue-type">Title</div>
+                    <div class="header-cell issue-value">Description</div>
                     <div class="header-cell issue-chart">Chart (7 days)</div>
                     <div class="header-cell issue-count sortable" @click="toggleSort">
                         {{ sortLabel }}
@@ -249,7 +261,7 @@ initLoad()
                 </div>
                 <div class="issue-container">
                     <div v-for="item in list" class="issue">
-                        <Issue :envelope="item.envelope" :count="item.count" />
+                        <Issue :envelope="item.envelope" :count="item.count" :eventType="item.event_type" />
                     </div>
                 </div>
             </div>
@@ -304,6 +316,10 @@ initLoad()
 
 .header-cell {
     padding: 0 5px;
+
+    &.issue-event-type {
+        flex: 0 0 102px;
+    }
 
     &.issue-type {
         flex: 0 0 150px;
