@@ -12,3 +12,39 @@ docker build -t sh-frontend:latest .
 ```
 
 VITE_BACKEND_URL - адрес бекенда
+
+# nginx config example
+
+```
+server {
+    server_name domain;
+
+    location / {
+          proxy_pass http://localhost:3000;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_intercept_errors on;
+          error_page 404 = @spa_fallback;
+    }
+
+    location @spa_fallback {
+          rewrite ^.*$ /index.html break;
+          proxy_pass http://localhost:3000;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location /api/ {
+	proxy_pass http://localhost:8080/;
+	proxy_set_header Host $host;
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+
+    ...ssl settings here...
+
+}
+```
