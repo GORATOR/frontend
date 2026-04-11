@@ -2,15 +2,54 @@
 import {MenuItem} from "../../models/sidebarMenuItem.ts";
 import Sidebar from "../../components/Sidebar.vue";
 import CollapsibleSection from "../../components/CollapsibleSection.vue";
+import IssueChart from "../../components/issue/IssueChart.vue";
+import Paging from "../../components/paging/Paging.vue";
+import SelectBox from "../../components/SelectBox.vue";
 import {ref, computed} from "vue";
 import {EntityName} from "../../models/count.ts";
 import {Envelope} from "../../models/envelope.ts";
 import {getEntityId, readEntity, generateEntityRecordUrl} from "../../service/readEntity.ts";
 import {EnvelopeException} from "../../models/envelopeException.ts";
+import {loadIssueEvents} from "../../service/loadList.ts";
+import {loadIssueEventsCount} from "../../service/loadCount.ts";
+import {loadIssueEventsStats, IssueStatEntry} from "../../service/loadStats.ts";
+import {PageSelectEvent} from "../../models/pagingPageSelect.ts";
+import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
+import {TIME_RANGE_CONFIGS, getTimeRangeConfig} from "../../config/timeRangeConfig.ts";
+import {router} from "../../router.ts";
+
+const issueId = getEntityId(EntityName.Envelope);
 
 const loaded = ref(false);
+const eventsLoaded = ref(true);
 const envelope = ref<Envelope>({} as Envelope);
 const envelopeException = ref<EnvelopeException | null>(null);
+const selectedEventId = ref<number>(
+    parseInt(new URLSearchParams(window.location.search).get('event_id') || '', 10) || issueId
+);
+
+const events = ref<Envelope[]>([]);
+const eventsCount = ref(0);
+const eventsPage = ref(1);
+const eventsOffset = ref(0);
+const eventsStats = ref<IssueStatEntry[]>([]);
+const selectedTimeRange = ref<string>('14d');
+
+const timeRangeOptions = computed<SelectBoxOption[]>(() => {
+    return Object.values(TIME_RANGE_CONFIGS).map(config => ({
+        value: config.value,
+        label: config.label
+    }))
+})
+
+const chartConfig = computed(() => {
+    const config = getTimeRangeConfig(selectedTimeRange.value)
+    return {
+        interval: config.interval,
+        periods: config.periods,
+        label: config.label
+    }
+})
 
 const projectUrl = computed(() => {
   return envelope.value.project ? generateEntityRecordUrl(EntityName.Project, envelope.value.project.ID) : '#';
@@ -19,7 +58,6 @@ const projectUrl = computed(() => {
 const exceptionValue = computed(() => {
   if (!envelopeException.value) return null
 
-  // Handle both formats: { values: [...] } and [...]
   if (Array.isArray(envelopeException.value.exception)) {
     return envelopeException.value.exception[0]
   } else if (envelopeException.value.exception?.values?.[0]) {
@@ -32,13 +70,49 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString();
 };
 
+async function navigateToEvent(eventId: number) {
+    selectedEventId.value = eventId;
+    router.replace({ path: `/issue/${issueId}`, query: { event_id: eventId.toString() } });
+    await loadEventDetails(eventId);
+}
+
+async function loadStats() {
+    eventsStats.value = await loadIssueEventsStats(
+        issueId,
+        chartConfig.value.interval,
+        chartConfig.value.periods
+    )
+}
+
+async function loadEvents(off = eventsOffset.value) {
+    events.value = await loadIssueEvents(eventsLoaded, issueId, off);
+}
+
+async function onTimeRangeChange() {
+    await loadStats()
+}
+
+async function eventsPageSelect(e: PageSelectEvent) {
+    eventsPage.value = e.page
+    eventsOffset.value = e.offset
+    await loadEvents(e.offset)
+}
+
+async function loadEventDetails(eventId: number) {
+    envelope.value = await readEntity(EntityName.Envelope, eventId);
+    envelopeException.value = null;
+    if (envelope.value.EnvelopeEventExtras && envelope.value.EnvelopeEventExtras.length > 1) {
+        envelopeException.value = JSON.parse(envelope.value.EnvelopeEventExtras[1].Data);
+    }
+}
+
 async function initLoad() {
   try {
-    envelope.value = await readEntity(EntityName.Envelope, getEntityId(EntityName.Envelope));
+    await loadEventDetails(selectedEventId.value);
 
-    if (envelope.value.EnvelopeEventExtras && envelope.value.EnvelopeEventExtras.length > 1) {
-      envelopeException.value = JSON.parse(envelope.value.EnvelopeEventExtras[1].Data);
-    }
+    eventsCount.value = await loadIssueEventsCount(issueId);
+    await loadStats();
+    await loadEvents(0);
 
     loaded.value = true;
   } catch (e) {
@@ -55,6 +129,52 @@ initLoad();
       <h2>Issue Details</h2>
 
       <div class="issue-details">
+        <!-- Event Activity Chart -->
+        <div class="chart-section">
+          <div class="chart-time-filter">
+            <SelectBox
+                label="Time Range"
+                :options="timeRangeOptions"
+                v-model="selectedTimeRange"
+                @changed="onTimeRangeChange"
+            />
+          </div>
+          <IssueChart
+              :interval="chartConfig.interval"
+              :periods="chartConfig.periods"
+              :label="chartConfig.label"
+              :totalEvents="eventsCount"
+              :externalStats="eventsStats"
+          />
+        </div>
+
+        <!-- All Occurrences -->
+        <CollapsibleSection title="All Occurrences" :defaultExpanded="true" v-if="eventsCount > 0">
+          <div class="occurrences-table">
+            <div class="occurrences-header">
+              <div class="occ-cell occ-id">Event ID</div>
+              <div class="occ-cell occ-date">Date</div>
+              <div class="occ-cell occ-exception">Exception Value</div>
+              <div class="occ-cell occ-sdk">SDK</div>
+            </div>
+            <div
+                v-for="event in events"
+                :key="event.ID"
+                class="occurrences-row"
+                :class="{ 'current-event': event.ID === selectedEventId }"
+                @click="navigateToEvent(event.ID)"
+            >
+              <div class="occ-cell occ-id">
+                <span class="monospace">{{ event.event_id?.substring(0, 12) }}...</span>
+              </div>
+              <div class="occ-cell occ-date">{{ formatDate(event.CreatedAt) }}</div>
+              <div class="occ-cell occ-exception">{{ event.exception_value || event.message || '-' }}</div>
+              <div class="occ-cell occ-sdk">{{ event.sdk ? `${event.sdk.name} ${event.sdk.version}` : '-' }}</div>
+            </div>
+          </div>
+          <Paging :page="eventsPage" :limit="10" :count="eventsCount" v-on:page-select="eventsPageSelect" />
+        </CollapsibleSection>
+
         <!-- General Information -->
         <CollapsibleSection title="General Information" :defaultExpanded="true">
           <div class="detail-field">
@@ -236,6 +356,77 @@ initLoad();
 
 <style scoped lang="scss">
 @use '../../assets/variables' as *;
+
+.chart-section {
+  margin-bottom: 24px;
+
+  .chart-time-filter {
+    max-width: 250px;
+    margin-bottom: 12px;
+  }
+}
+
+.occurrences-table {
+  border: 1px solid $main_theme_border_color;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.occurrences-header {
+  display: flex;
+  background-color: $main_theme_border_color_lighter1;
+  color: $main_theme_border_color_darker1;
+  padding: 10px;
+  font-weight: bold;
+  border-bottom: 1px solid $main_theme_border_color;
+}
+
+.occurrences-row {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid $main_theme_border_color;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:first-child {
+    border-top: none;
+  }
+
+  &:hover {
+    background-color: rgba(0, 106, 255, 0.05);
+  }
+
+  &.current-event {
+    background-color: rgba(0, 106, 255, 0.08);
+    font-weight: 500;
+  }
+}
+
+.occ-cell {
+  padding: 0 5px;
+
+  &.occ-id {
+    flex: 0 0 160px;
+  }
+
+  &.occ-date {
+    flex: 0 0 200px;
+  }
+
+  &.occ-exception {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &.occ-sdk {
+    flex: 0 0 180px;
+    text-align: right;
+  }
+}
 
 .issue-details {
   margin-top: 20px;

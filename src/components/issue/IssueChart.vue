@@ -10,6 +10,7 @@ const props = defineProps<{
     eventType?: string
     totalEvents?: number
     totalGroups?: number
+    externalStats?: IssueStatEntry[]
 }>()
 
 const stats = ref<IssueStatEntry[]>([])
@@ -85,6 +86,10 @@ function formatDateFull(dateStr: string): string {
 }
 
 async function loadData() {
+    if (props.externalStats) {
+        stats.value = props.externalStats
+        return
+    }
     stats.value = await loadIssuesStats(
         intervalType.value,
         periodsCount.value,
@@ -94,7 +99,7 @@ async function loadData() {
 }
 
 // Watch for prop changes and reload data
-watch([intervalType, periodsCount, projectIdsFilter, () => props.eventType], () => {
+watch([intervalType, periodsCount, projectIdsFilter, () => props.eventType, () => props.externalStats], () => {
     loadData()
 }, { deep: true })
 
