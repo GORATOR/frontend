@@ -33,7 +33,7 @@ const eventsCount = ref(0);
 const eventsPage = ref(1);
 const eventsOffset = ref(0);
 const eventsStats = ref<IssueStatEntry[]>([]);
-const selectedTimeRange = ref<string>('14d');
+const selectedTimeRange = ref<string>('all');
 
 const timeRangeOptions = computed<SelectBoxOption[]>(() => {
     return Object.values(TIME_RANGE_CONFIGS).map(config => ({
