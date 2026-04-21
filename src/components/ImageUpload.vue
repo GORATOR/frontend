@@ -182,8 +182,8 @@ function clearImage() {
       gap: 15px;
 
       .preview-image {
-        max-width: 300px;
-        max-height: 300px;
+        max-width: 128px;
+        max-height: 128px;
         border-radius: 8px;
         border: 1px solid $main_theme_background_lighter1;
         object-fit: contain;
