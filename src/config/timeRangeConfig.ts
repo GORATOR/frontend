@@ -64,7 +64,7 @@ export const TIME_RANGE_CONFIGS: Record<string, TimeRangeConfig> = {
 
 // Helper function to get config for a time range
 export function getTimeRangeConfig(value: string): TimeRangeConfig {
-    return TIME_RANGE_CONFIGS[value] || TIME_RANGE_CONFIGS['14d'];
+    return TIME_RANGE_CONFIGS[value] || TIME_RANGE_CONFIGS['all'];
 }
 
 // Helper function to calculate createdAtFrom date

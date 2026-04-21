@@ -13,7 +13,7 @@ const props = defineProps<{
 @use '../../assets/variables' as *;
 
 .page-button {
-    display: inline-block;
+    display: grid;
     border: 1px solid $main_theme_border_color;
     border-radius: 5px;
     color: $main_theme_border_color_darker1;
@@ -21,6 +21,7 @@ const props = defineProps<{
     height: 30px;
     text-align: center;
     align-content: center;
+    justify-content: center;
     cursor: pointer;
 
     &.selected {

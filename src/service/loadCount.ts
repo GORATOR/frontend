@@ -45,6 +45,19 @@ export async function loadTotalEventsCount(projectIds?: string[], createdAtFrom?
     return 0;
 }
 
+export async function loadIssueEventsCount(issueId: number): Promise<number> {
+    try {
+        const response = await sendGet(`/issue/${issueId}/events/count`);
+        if (response.status == 200) {
+            const data: EntityCount = await response.json();
+            return data.count;
+        }
+    } catch (err) {
+        console.error('Error loading issue events count:', err);
+    }
+    return 0;
+}
+
 export async function loadAggregatedIssuesCount(projectIds?: string[], createdAtFrom?: string, eventType?: string): Promise<EntityCount> {
     try {
         const response = await sendGet(buildCountUrl('issues-aggregated', projectIds, createdAtFrom, eventType));

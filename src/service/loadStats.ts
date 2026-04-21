@@ -30,3 +30,20 @@ export async function loadIssuesStats(
     }
     return [];
 }
+
+export async function loadIssueEventsStats(
+    issueId: number,
+    interval: 'minute' | 'hour' | 'day' | 'week' = 'day',
+    periods: number = 14
+): Promise<IssueStatEntry[]> {
+    try {
+        const params = [`interval=${interval}`, `periods=${periods}`];
+        const response = await sendGet(`/issue/${issueId}/events/stats?${params.join('&')}`);
+        if (response.status == 200) {
+            return await response.json();
+        }
+    } catch (err) {
+        console.error('Error loading issue events stats:', err);
+    }
+    return [];
+}

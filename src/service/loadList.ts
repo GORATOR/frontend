@@ -81,6 +81,31 @@ export interface AggregatedIssue {
     event_type: 'exception' | 'message';
 }
 
+export async function loadIssueEvents(
+    loaded: Ref<boolean, boolean>,
+    issueId: number,
+    offset: number,
+    limit = 10,
+    sortOrder?: string
+): Promise<Envelope[]> {
+    loaded.value = false;
+    try {
+        const params = [`limit=${limit}`, `offset=${offset}`];
+        if (sortOrder) {
+            params.push(`sortOrder=${encodeURIComponent(sortOrder)}`);
+        }
+        const response = await sendGet(`/issue/${issueId}/events?${params.join('&')}`);
+        if (response.status == 200) {
+            const data = await response.json();
+            loaded.value = true;
+            return data;
+        }
+    } catch (err) {
+        console.error('Error loading issue events:', err);
+    }
+    return [];
+}
+
 export async function loadIssuesAggregated(
     loaded:Ref<boolean, boolean>,
     offset: number,
