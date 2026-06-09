@@ -385,7 +385,7 @@ initLoad();
 
     .field-label {
       font-weight: 600;
-      min-width: 140px;
+      min-width: 166px;
       padding-top: 8px;
       color: #333;
     }
