@@ -11,6 +11,8 @@ const redirectUsersNew = () => router.push({ path: "/users/new" })
 const redirectProjectsList = () => router.push({ path: "/projects" })
 const redirectProjectsNew = () => router.push({ path: "/projects/new" })
 const redirectIssuesList = () => router.push({ path: "/issues" })
+const redirectTracesList = () => router.push({ path: "/traces" })
+const redirectTrace = (traceId: string) => router.push({ path: `/trace/${traceId}` })
 const redirectRolesList = () => router.push({ path: "/roles" })
 const redirectRolesNew = () => router.push({ path: "/roles/new" })
 const redirectUserProfile = () => {
@@ -36,6 +38,8 @@ export {
     redirectProjectsNew,
 
     redirectIssuesList,
+    redirectTracesList,
+    redirectTrace,
     redirectUserProfile,
 
     redirectRolesList,
