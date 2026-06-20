@@ -17,6 +17,9 @@ interface WaterfallNode {
   isTransaction: boolean
   children: WaterfallNode[]
   depth: number
+  /** Pre-normalization timestamp — used as the reference when computing
+   *  relative offsets for child nodes that are in a different clock frame. */
+  originalStartTs: number
 }
 
 function parseTs(s: string): number {
@@ -54,36 +57,27 @@ const tree = computed<WaterfallNode | null>(() => {
 
   for (const tx of txs) {
     if (!tx.span_id) continue
+    const txStart = parseTs(tx.start_timestamp)
+    const txEnd = parseTs(tx.end_timestamp)
     const node: WaterfallNode = {
       id: tx.span_id,
       parentId: tx.parent_span_id || '',
       label: tx.name || tx.op || 'transaction',
       op: tx.op || 'http.server',
-      startTs: parseTs(tx.start_timestamp),
-      endTs: parseTs(tx.end_timestamp),
-      durationMs: 0,
+      startTs: txStart,
+      endTs: txEnd,
+      durationMs: (txEnd - txStart) * 1000,
       isTransaction: true,
       children: [],
       depth: 0,
+      originalStartTs: txStart,
     }
-    node.durationMs = (node.endTs - node.startTs) * 1000
     nodeMap.set(tx.span_id, node)
 
     for (const span of tx.spans || []) {
       if (!span.span_id) continue
-      let spanStart = parseTs(span.start_timestamp)
-      let spanEnd = parseTs(span.end_timestamp)
-
-      // Sentry Node.js SDK (and some others) store span timestamps as seconds
-      // RELATIVE to the parent transaction start, while the transaction itself
-      // uses absolute Unix seconds. Detect this by checking that the tx timestamp
-      // is a large Unix value (> 1e6) but the span timestamp is tiny (< 1e6).
-      // In that case, convert span timestamps to absolute by adding tx start.
-      if (node.startTs > 1e6 && spanEnd > 0 && spanEnd < 1e6) {
-        spanStart = node.startTs + spanStart   // spanStart may be 0 → lands at tx start
-        spanEnd = node.startTs + spanEnd
-      }
-
+      const spanStart = parseTs(span.start_timestamp)
+      const spanEnd = parseTs(span.end_timestamp)
       const spanNode: WaterfallNode = {
         id: span.span_id,
         parentId: span.parent_span_id || '',
@@ -95,6 +89,7 @@ const tree = computed<WaterfallNode | null>(() => {
         isTransaction: false,
         children: [],
         depth: 0,
+        originalStartTs: spanStart,
       }
       nodeMap.set(span.span_id, spanNode)
     }
@@ -122,6 +117,37 @@ const tree = computed<WaterfallNode | null>(() => {
 
   function setDepth(node: WaterfallNode, depth: number) {
     node.depth = depth
+
+    // Distributed services each have their own clock reference frame.
+    // A child is "out of frame" when:
+    //   (a) its timestamps are tiny relative values (< 1e6, i.e. not Unix seconds), OR
+    //   (b) its timestamps are absolute Unix but from a completely different epoch
+    //       (e.g. different request batch in a demo, or an unsynchronised clock).
+    //
+    // We fix this by translating the child into the parent's reference frame using
+    // the offset between their ORIGINAL (pre-normalization) timestamps.
+    // If the offset is huge (> 1000 s), the clocks are unrelated — position the child
+    // at the parent's start and use the child's duration to set its end.
+    for (const child of node.children) {
+      if (child.endTs <= 0) continue
+
+      const childIsRelative = child.endTs > 0 && child.endTs < 1e6
+      const childAcrossEras = !childIsRelative && child.startTs > node.endTs + 1000
+
+      if (childIsRelative || childAcrossEras) {
+        // rawOffset: how far into parent's ORIGINAL clock the child started.
+        // node.originalStartTs is the parent's timestamp in its own service's clock
+        // (set in tree builder, and preserved across earlier normalizations).
+        const rawOffset = child.startTs - node.originalStartTs
+        const offset = Math.abs(rawOffset) < 1000 ? Math.max(0, rawOffset) : 0
+
+        // Save original before overwriting so child's OWN children can use it.
+        child.originalStartTs = child.startTs
+        child.startTs = node.startTs + offset
+        child.endTs = child.startTs + child.durationMs / 1000
+      }
+    }
+
     node.children.sort((a, b) => a.startTs - b.startTs)
     for (const child of node.children) {
       setDepth(child, depth + 1)
