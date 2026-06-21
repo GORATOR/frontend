@@ -11,6 +11,11 @@ interface WaterfallNode {
   parentId: string
   label: string
   op: string
+  description: string
+  status: string
+  parsedData: Record<string, unknown> | null
+  parsedTags: Record<string, unknown> | null
+  parsedContexts: Record<string, unknown> | null
   startTs: number
   endTs: number
   durationMs: number
@@ -20,6 +25,16 @@ interface WaterfallNode {
   /** Pre-normalization timestamp — used as the reference when computing
    *  relative offsets for child nodes that are in a different clock frame. */
   originalStartTs: number
+}
+
+function tryParseJson(s: string | null | undefined): Record<string, unknown> | null {
+  if (!s) return null
+  try {
+    const parsed = JSON.parse(s)
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null
+  } catch {
+    return null
+  }
 }
 
 function parseTs(s: string): number {
@@ -64,6 +79,11 @@ const tree = computed<WaterfallNode | null>(() => {
       parentId: tx.parent_span_id || '',
       label: tx.name || tx.op || 'transaction',
       op: tx.op || 'http.server',
+      description: tx.name || '',
+      status: tx.status || '',
+      parsedData: null,
+      parsedTags: tryParseJson(tx.tags),
+      parsedContexts: tryParseJson(tx.contexts),
       startTs: txStart,
       endTs: txEnd,
       durationMs: (txEnd - txStart) * 1000,
@@ -83,6 +103,11 @@ const tree = computed<WaterfallNode | null>(() => {
         parentId: span.parent_span_id || '',
         label: span.description || span.op || 'span',
         op: span.op || '',
+        description: span.description || '',
+        status: span.status || '',
+        parsedData: tryParseJson(span.data),
+        parsedTags: null,
+        parsedContexts: null,
         startTs: spanStart,
         endTs: spanEnd,
         durationMs: (spanEnd - spanStart) * 1000,
@@ -307,90 +332,133 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 </script>
 
 <template>
-  <div class="waterfall" v-if="tree">
-    <div class="waterfall-layout">
-      <!-- Main table -->
-      <div class="waterfall-table" :class="{ 'with-panel': selectedNode }">
-        <!-- Header -->
-        <div class="waterfall-header">
-          <div class="col-label">Span</div>
-          <div class="col-bar">
-            <div class="ruler">
-              <div
-                v-for="mark in rulerMarks"
-                :key="mark.percent"
-                class="ruler-mark"
-                :style="{ left: `${mark.percent}%` }"
-              >
-                {{ mark.label }}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Rows -->
-        <div
-          v-for="row in flatRows"
-          :key="row.id"
-          class="waterfall-row"
-          :class="{
-            'is-transaction': row.isTransaction,
-            'is-selected': selectedNodeId === row.id,
-          }"
-          @click="selectNode(row.id)"
-        >
-          <div class="col-label" :style="{ paddingLeft: `${row.depth * 16 + 8}px` }">
-            <span
-              class="toggle"
-              v-if="row.children.length > 0"
-              @click.stop="toggleCollapse(row.id)"
+  <div class="waterfall-wrap" v-if="tree">
+    <!-- Waterfall table -->
+    <div class="waterfall">
+      <div class="waterfall-header">
+        <div class="col-label">Span</div>
+        <div class="col-bar">
+          <div class="ruler">
+            <div
+              v-for="mark in rulerMarks"
+              :key="mark.percent"
+              class="ruler-mark"
+              :style="{ left: `${mark.percent}%` }"
             >
-              {{ collapsed[row.id] ? '▶' : '▼' }}
-            </span>
-            <span v-else class="toggle-spacer"></span>
-            <span class="op-tag" :style="{ backgroundColor: getOpColor(row.op) }">
-              {{ row.op || '—' }}
-            </span>
-            <span class="row-name">{{ row.label }}</span>
-          </div>
-
-          <div class="col-bar">
-            <div class="bar-track">
-              <div class="bar" :style="barStyle(row)"></div>
+              {{ mark.label }}
             </div>
-            <span class="dur-label">{{ formatDuration(row.durationMs) }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Detail panel -->
-      <div class="detail-panel" v-if="selectedNode">
-        <div class="panel-header">
-          <span class="panel-title">{{ selectedNode.label }}</span>
-          <button class="panel-close" @click="selectedNodeId = null">✕</button>
+      <div
+        v-for="row in flatRows"
+        :key="row.id"
+        class="waterfall-row"
+        :class="{
+          'is-transaction': row.isTransaction,
+          'is-selected': selectedNodeId === row.id,
+        }"
+        @click="selectNode(row.id)"
+      >
+        <div class="col-label" :style="{ paddingLeft: `${row.depth * 16 + 8}px` }">
+          <span
+            class="toggle"
+            v-if="row.children.length > 0"
+            @click.stop="toggleCollapse(row.id)"
+          >
+            {{ collapsed[row.id] ? '▶' : '▼' }}
+          </span>
+          <span v-else class="toggle-spacer"></span>
+          <span class="op-tag" :style="{ backgroundColor: getOpColor(row.op) }">
+            {{ row.op || '—' }}
+          </span>
+          <span class="row-name">{{ row.label }}</span>
         </div>
-        <div class="panel-body">
-          <div class="detail-row">
-            <span class="detail-key">Op</span>
+
+        <div class="col-bar">
+          <div class="bar-track">
+            <div class="bar" :style="barStyle(row)"></div>
+          </div>
+          <span class="dur-label">{{ formatDuration(row.durationMs) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Span detail block below waterfall -->
+    <div class="span-detail" v-if="selectedNode">
+      <div class="span-detail-header">
+        <span class="span-detail-title">{{ selectedNode.label }}</span>
+        <button class="span-detail-close" @click="selectedNodeId = null">✕</button>
+      </div>
+
+      <div class="span-detail-body">
+        <!-- Meta chips row -->
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Op</span>
             <span class="op-tag" :style="{ backgroundColor: getOpColor(selectedNode.op) }">
               {{ selectedNode.op || '—' }}
             </span>
           </div>
-          <div class="detail-row">
-            <span class="detail-key">Duration</span>
-            <span class="detail-val">{{ formatDuration(selectedNode.durationMs) }}</span>
+          <div class="meta-item">
+            <span class="meta-label">Duration</span>
+            <span class="meta-value">{{ formatDuration(selectedNode.durationMs) }}</span>
           </div>
-          <div class="detail-row">
-            <span class="detail-key">Type</span>
-            <span class="detail-val">{{ selectedNode.isTransaction ? 'Transaction' : 'Span' }}</span>
+          <div class="meta-item">
+            <span class="meta-label">Type</span>
+            <span class="meta-value">{{ selectedNode.isTransaction ? 'Transaction' : 'Span' }}</span>
           </div>
-          <div class="detail-row">
-            <span class="detail-key">Span ID</span>
-            <span class="detail-val mono">{{ selectedNode.id }}</span>
+          <div class="meta-item" v-if="selectedNode.status">
+            <span class="meta-label">Status</span>
+            <span class="meta-value">{{ selectedNode.status }}</span>
           </div>
-          <div class="detail-row" v-if="selectedNode.parentId">
-            <span class="detail-key">Parent ID</span>
-            <span class="detail-val mono">{{ selectedNode.parentId }}</span>
+          <div class="meta-item">
+            <span class="meta-label">Span ID</span>
+            <span class="meta-value mono">{{ selectedNode.id }}</span>
+          </div>
+          <div class="meta-item" v-if="selectedNode.parentId">
+            <span class="meta-label">Parent ID</span>
+            <span class="meta-value mono">{{ selectedNode.parentId }}</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="detail-section" v-if="selectedNode.description">
+          <span class="detail-section-title">Description</span>
+          <pre class="detail-pre">{{ selectedNode.description }}</pre>
+        </div>
+
+        <!-- Data -->
+        <div class="detail-section" v-if="selectedNode.parsedData">
+          <span class="detail-section-title">Data</span>
+          <div class="kv-grid">
+            <template v-for="(val, key) in selectedNode.parsedData" :key="String(key)">
+              <span class="kv-key">{{ key }}</span>
+              <span class="kv-val">{{ typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val) }}</span>
+            </template>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="detail-section" v-if="selectedNode.parsedTags">
+          <span class="detail-section-title">Tags</span>
+          <div class="kv-grid">
+            <template v-for="(val, key) in selectedNode.parsedTags" :key="String(key)">
+              <span class="kv-key">{{ key }}</span>
+              <span class="kv-val">{{ typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val) }}</span>
+            </template>
+          </div>
+        </div>
+
+        <!-- Contexts -->
+        <div class="detail-section" v-if="selectedNode.parsedContexts">
+          <span class="detail-section-title">Contexts</span>
+          <div class="kv-grid">
+            <template v-for="(val, key) in selectedNode.parsedContexts" :key="String(key)">
+              <span class="kv-key">{{ key }}</span>
+              <pre class="kv-val">{{ typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val) }}</pre>
+            </template>
           </div>
         </div>
       </div>
@@ -405,25 +473,17 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 <style scoped lang="scss">
 @use '../../assets/_variables' as *;
 
+.waterfall-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .waterfall {
   font-size: 12px;
   border: 1px solid $main_theme_border_color;
   border-radius: 6px;
   overflow: hidden;
-}
-
-.waterfall-layout {
-  display: flex;
-}
-
-.waterfall-table {
-  flex: 1;
-  overflow-x: auto;
-  min-width: 0;
-
-  &.with-panel {
-    flex: 0 0 65%;
-  }
 }
 
 .waterfall-header {
@@ -568,77 +628,155 @@ const selectedNode = computed<WaterfallNode | null>(() => {
   color: #333;
 }
 
-/* Detail panel */
-.detail-panel {
-  flex: 0 0 35%;
-  border-left: 2px solid $main_theme_border_color;
-  background: #fff;
-  min-width: 220px;
+/* Span detail block */
+.span-detail {
+  border: 1px solid $main_theme_border_color;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 12px;
 }
 
-.panel-header {
+.span-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 8px 16px;
   background: $main_theme_border_color_lighter1;
   border-bottom: 1px solid $main_theme_border_color;
+}
+
+.span-detail-title {
   font-weight: 600;
-  font-size: 12px;
-}
-
-.panel-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 13px;
   color: $main_theme_border_color_darker1;
+  font-family: monospace;
+  word-break: break-all;
 }
 
-.panel-close {
+.span-detail-close {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   color: #888;
   padding: 0 4px;
   flex-shrink: 0;
+  margin-left: 12px;
 
   &:hover {
     color: #333;
   }
 }
 
-.panel-body {
-  padding: 10px 12px;
+.span-detail-body {
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
-.detail-row {
+/* Meta chips */
+.meta-grid {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 12px 16px;
+  background: $main_theme_border_color_lighter1;
+  border: 1px solid $main_theme_border_color;
+  border-radius: 6px;
 }
 
-.detail-key {
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.meta-label {
+  font-size: 10px;
   font-weight: 600;
-  color: #666;
-  width: 70px;
-  flex-shrink: 0;
-  font-size: 11px;
-  padding-top: 2px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.detail-val {
-  color: #333;
-  font-size: 12px;
-  word-break: break-all;
+.meta-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: $main_theme_border_color_darker1;
 
   &.mono {
     font-family: monospace;
     font-size: 11px;
   }
+}
+
+/* Sections */
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-pre {
+  margin: 0;
+  font-family: monospace;
+  font-size: 12px;
+  color: #222;
+  background: $main_theme_border_color_lighter1;
+  border: 1px solid $main_theme_border_color;
+  border-radius: 4px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.6;
+}
+
+/* Key-value grid */
+.kv-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) 1fr;
+  gap: 0;
+  border: 1px solid $main_theme_border_color;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.kv-key,
+.kv-val {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-bottom: 1px solid $main_theme_border_color;
+  word-break: break-all;
+
+  &:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+}
+
+.kv-key {
+  font-family: monospace;
+  font-weight: 600;
+  color: #555;
+  background: $main_theme_border_color_lighter1;
+  border-right: 1px solid $main_theme_border_color;
+  white-space: nowrap;
+}
+
+.kv-val {
+  font-family: monospace;
+  color: #222;
+  background: #fff;
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 .empty-state {
