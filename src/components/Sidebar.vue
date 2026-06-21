@@ -8,6 +8,7 @@ import {
     redirectUsersList,
     redirectProjectsList,
     redirectIssuesList,
+    redirectTracesList,
     redirectUserProfile,
     redirectRolesList
 } from '../utils/redirects.ts'
@@ -54,6 +55,11 @@ function handleLogout() {
                     :class="{ 'menu-item': true, 'active': props.active == MenuItem.Issues }"
                     @click="redirectIssuesList">
                     Issues
+                </button>
+                <button
+                    :class="{ 'menu-item': true, 'active': props.active == MenuItem.Traces }"
+                    @click="redirectTracesList">
+                    Traces
                 </button>
                 <button
                     v-if="store.isAdmin"
