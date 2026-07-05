@@ -20,6 +20,8 @@ import user from './pages/users/read.vue'
 import roles from './pages/roles/list.vue'
 import roleCreate from './pages/roles/create.vue'
 import role from './pages/roles/read.vue'
+import traces from './pages/traces/list.vue'
+import trace from './pages/traces/read.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -43,6 +45,8 @@ export const router = createRouter({
     { path: '/roles', component: roles },
     { path: '/roles/new', component: roleCreate },
     { path: '/role/:id', component: role },
+    { path: '/traces', component: traces },
+    { path: '/trace/:trace_id', component: trace },
   ]
 })
 

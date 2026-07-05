@@ -1,6 +1,7 @@
 enum MenuItem {
     Profile,
     Issues,
+    Traces,
     Users,
     Teams,
     Orgs,

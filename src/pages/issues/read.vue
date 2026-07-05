@@ -17,6 +17,8 @@ import {PageSelectEvent} from "../../models/pagingPageSelect.ts";
 import {SelectBoxOption} from "../../models/SelectBoxOption.ts";
 import {TIME_RANGE_CONFIGS, getTimeRangeConfig} from "../../config/timeRangeConfig.ts";
 import {router} from "../../router.ts";
+import CopyIcon from "../../icons/CopyIcon.vue";
+import CheckIcon from "../../icons/CheckIcon.vue";
 
 const issueId = getEntityId(EntityName.Envelope);
 
@@ -34,6 +36,7 @@ const eventsPage = ref(1);
 const eventsOffset = ref(0);
 const eventsStats = ref<IssueStatEntry[]>([]);
 const selectedTimeRange = ref<string>('all');
+const labelUnknown = 'unknown';
 
 const timeRangeOptions = computed<SelectBoxOption[]>(() => {
     return Object.values(TIME_RANGE_CONFIGS).map(config => ({
@@ -66,9 +69,75 @@ const exceptionValue = computed(() => {
   return null
 })
 
-const formatDate = (dateString: string) => {
+const copiedKey = ref<string | number | null>(null);
+
+function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleString();
-};
+}
+
+function isCopied(key: string | number): boolean {
+  return copiedKey.value === key;
+}
+
+function copyBtnTitle(key: string | number): string {
+  return isCopied(key) ? 'Скопировано!' : 'Копировать';
+}
+
+function levelClass(): string {
+  return `level-${envelopeException.value?.level || labelUnknown}`;
+}
+
+function levelLabel(): string {
+  return envelopeException.value?.level || labelUnknown;
+}
+
+function formattedTimestamp(): string {
+  return envelopeException.value?.timestamp
+    ? formatDate(envelopeException.value.timestamp)
+    : 'N/A';
+}
+
+function returnLabelHandled(flag: boolean | undefined): string {
+  return flag ? 'handled' : 'unhandled';
+}
+
+function mechanismClass(): string {
+  return returnLabelHandled(exceptionValue.value?.mechanism?.handled);
+}
+
+function mechanismLabel(): string {
+  return returnLabelHandled(exceptionValue.value?.mechanism?.handled);
+}
+
+function isCurrentEvent(event: Envelope): boolean {
+  return event.ID === selectedEventId.value;
+}
+
+function shortEventId(event: Envelope): string {
+  return event.event_id?.substring(0, 12) ?? '';
+}
+
+function eventExceptionLabel(event: Envelope): string {
+  return event.exception_value || event.message || '-';
+}
+
+function eventSdkLabel(event: Envelope): string {
+  return event.sdk ? `${event.sdk.name} ${event.sdk.version}` : '-';
+}
+
+function hasExtraInfo(): boolean {
+  return !!(envelopeException.value?.extra && Object.keys(envelopeException.value.extra).length > 0);
+}
+
+function preContextLineNumber(frame: { lineno: number; pre_context?: string[] }, i: number): number {
+  return frame.lineno - (frame.pre_context?.length ?? 0) + i;
+}
+
+function copyExtra(key: string | number, value: unknown): void {
+  navigator.clipboard.writeText(JSON.stringify(value, null, 2));
+  copiedKey.value = key;
+  setTimeout(() => { copiedKey.value = null; }, 2000);
+}
 
 async function navigateToEvent(eventId: number) {
     selectedEventId.value = eventId;
@@ -161,15 +230,15 @@ initLoad();
                 v-for="event in events"
                 :key="event.ID"
                 class="occurrences-row"
-                :class="{ 'current-event': event.ID === selectedEventId }"
+                :class="{ 'current-event': isCurrentEvent(event) }"
                 @click="navigateToEvent(event.ID)"
             >
               <div class="occ-cell occ-id">
-                <span class="monospace">{{ event.event_id?.substring(0, 12) }}...</span>
+                <span class="monospace">{{ shortEventId(event) }}...</span>
               </div>
               <div class="occ-cell occ-date">{{ formatDate(event.CreatedAt) }}</div>
-              <div class="occ-cell occ-exception">{{ event.exception_value || event.message || '-' }}</div>
-              <div class="occ-cell occ-sdk">{{ event.sdk ? `${event.sdk.name} ${event.sdk.version}` : '-' }}</div>
+              <div class="occ-cell occ-exception">{{ eventExceptionLabel(event) }}</div>
+              <div class="occ-cell occ-sdk">{{ eventSdkLabel(event) }}</div>
             </div>
           </div>
           <Paging :page="eventsPage" :limit="10" :count="eventsCount" v-on:page-select="eventsPageSelect" />
@@ -187,8 +256,8 @@ initLoad();
           <div class="detail-field">
             <label class="field-label">Level:</label>
             <div class="field-value">
-              <p class="level-badge" :class="`level-${envelopeException?.level || 'unknown'}`">
-                {{ envelopeException?.level || 'unknown' }}
+              <p class="level-badge" :class="levelClass()">
+                {{ levelLabel() }}
               </p>
             </div>
           </div>
@@ -196,7 +265,7 @@ initLoad();
           <div class="detail-field">
             <label class="field-label">Timestamp:</label>
             <div class="field-value">
-              <p>{{ envelopeException?.timestamp ? formatDate(envelopeException.timestamp) : 'N/A' }}</p>
+              <p>{{ formattedTimestamp() }}</p>
             </div>
           </div>
 
@@ -256,8 +325,8 @@ initLoad();
             <label class="field-label">Mechanism:</label>
             <div class="field-value">
               <p>{{ exceptionValue.mechanism.type }}
-                <span class="badge" :class="exceptionValue.mechanism.handled ? 'handled' : 'unhandled'">
-                  {{ exceptionValue.mechanism.handled ? 'handled' : 'unhandled' }}
+                <span class="badge" :class="mechanismClass()">
+                  {{ mechanismLabel() }}
                 </span>
               </p>
             </div>
@@ -280,7 +349,7 @@ initLoad();
               <div class="frame-code" v-if="frame.context_line">
                 <div v-if="frame.pre_context" class="pre-context">
                   <div v-for="(line, i) in frame.pre_context" :key="i" class="code-line">
-                    <span class="line-number">{{ frame.lineno - frame.pre_context.length + i }}</span>
+                    <span class="line-number">{{ preContextLineNumber(frame, i) }}</span>
                     <span class="line-code">{{ line }}</span>
                   </div>
                 </div>
@@ -341,11 +410,22 @@ initLoad();
         </CollapsibleSection>
 
         <!-- Extra Information -->
-        <CollapsibleSection title="Extra Information" :defaultExpanded="false" v-if="envelopeException?.extra && Object.keys(envelopeException.extra).length > 0">
-          <div class="detail-field" v-for="(value, key) in envelopeException.extra" :key="key">
+        <CollapsibleSection title="Extra Information" :defaultExpanded="false" v-if="hasExtraInfo()">
+          <div class="detail-field" v-for="(value, key) in envelopeException?.extra" :key="key">
             <label class="field-label">{{ key }}:</label>
             <div class="field-value">
-              <pre class="extra-value">{{ JSON.stringify(value, null, 2) }}</pre>
+              <div class="extra-value-wrapper">
+                <span
+                  class="copy-btn"
+                  :class="{ copied: isCopied(key) }"
+                  @click="copyExtra(key, value)"
+                  :title="copyBtnTitle(key)"
+                >
+                  <CopyIcon v-if="!isCopied(key)" />
+                  <CheckIcon v-else />
+                </span>
+                <pre class="extra-value">{{ JSON.stringify(value, null, 2) }}</pre>
+              </div>
             </div>
           </div>
         </CollapsibleSection>
@@ -508,6 +588,8 @@ initLoad();
         font-style: italic;
         color: #d32f2f;
         font-weight: 500;
+        word-break: break-word;
+        overflow-wrap: break-word;
       }
 
       .badge {
@@ -529,16 +611,54 @@ initLoad();
         }
       }
 
+      .extra-value-wrapper {
+        position: relative;
+
+        &:hover .copy-btn {
+          opacity: 1;
+        }
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 4px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.15s, background 0.15s, color 0.15s;
+        background: #e0e0e0;
+        color: #555;
+        z-index: 1;
+
+        &:hover {
+          background: #bdbdbd;
+          color: #222;
+        }
+
+        &.copied {
+          opacity: 1;
+          background: #e8f5e9;
+          color: #2e7d32;
+        }
+      }
+
       .extra-value {
         background: #f5f5f5;
         border: 1px solid $main_theme_background_lighter1;
         border-radius: 6px;
         padding: 12px;
-        overflow-x: auto;
         font-family: 'Courier New', monospace;
         font-size: 12px;
         color: #333;
         margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
       }
     }
   }
