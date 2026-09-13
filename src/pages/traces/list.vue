@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Sidebar from '../../components/Sidebar.vue'
+import Paging from '../../components/paging/Paging.vue'
 import { MenuItem } from '../../models/sidebarMenuItem.ts'
+import { PageSelectEvent } from '../../models/pagingPageSelect.ts'
 import { Transaction } from '../../models/trace.ts'
-import { loadTraces } from '../../service/loadTrace.ts'
+import { loadTraces, loadTracesCount } from '../../service/loadTrace.ts'
 import { redirectTrace } from '../../utils/redirects.ts'
 import { Project } from '../../models/project.ts'
 import { loadProjects } from '../../service/loadList.ts'
@@ -13,6 +15,11 @@ import { SelectBoxOption } from '../../models/SelectBoxOption.ts'
 const loaded = ref(false)
 const transactions = ref<Transaction[]>([])
 const selectedProjectId = ref<string>('')
+
+const count = ref(0)
+const page = ref(1)
+const offset = ref(0)
+const limit = 10
 
 const projectsLoaded = ref(false)
 const projects = ref<Project[]>([])
@@ -81,17 +88,30 @@ const projectOptions = computed<SelectBoxOption[]>(() => {
   return opts
 })
 
-async function reload() {
-  transactions.value = await loadTraces(loaded, selectedProjectId.value || undefined)
+async function reload(off = offset.value) {
+  transactions.value = await loadTraces(loaded, off, limit, selectedProjectId.value || undefined)
+}
+
+async function reloadCount() {
+  count.value = await loadTracesCount(selectedProjectId.value || undefined)
 }
 
 async function onProjectChange() {
-  await reload()
+  offset.value = 0
+  page.value = 1
+  await Promise.all([reload(0), reloadCount()])
+}
+
+async function pageSelect(e: PageSelectEvent) {
+  page.value = e.page
+  offset.value = e.offset
+  await reload(e.offset)
 }
 
 async function init() {
-  const [, projs] = await Promise.all([
+  const [, , projs] = await Promise.all([
     reload(),
+    reloadCount(),
     loadProjects(projectsLoaded, 0, 100),
   ])
   projects.value = projs
@@ -155,6 +175,8 @@ init()
           <div class="d-cell h-time">{{ formatDate(row.startTime) }}</div>
         </div>
       </div>
+
+      <Paging :page="page" :limit="limit" :count="count" v-on:page-select="pageSelect" />
     </template>
 
     <template v-else>

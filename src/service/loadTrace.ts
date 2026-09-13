@@ -2,11 +2,11 @@ import { Ref } from 'vue'
 import { sendGet } from '../utils/requests.ts'
 import { Transaction, TraceDetail } from '../models/trace.ts'
 
-export async function loadTraces(loaded: Ref<boolean>, projectId?: string): Promise<Transaction[]> {
+export async function loadTraces(loaded: Ref<boolean>, offset: number, limit = 10, projectId?: string): Promise<Transaction[]> {
   loaded.value = false
   try {
-    let url = '/traces'
-    if (projectId) url += `?projectId=${encodeURIComponent(projectId)}`
+    let url = `/traces?limit=${limit}&offset=${offset}`
+    if (projectId) url += `&projectId=${encodeURIComponent(projectId)}`
     const response = await sendGet(url)
     if (response.status === 200) {
       const data = await response.json()
