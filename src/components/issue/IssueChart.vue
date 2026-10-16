@@ -175,11 +175,12 @@ onMounted(() => {
 @use '../../assets/variables' as *;
 
 .chart-container {
-    background: white;
-    border: 1px solid $main_theme_border_color;
-    border-radius: 8px;
-    padding: 20px;
+    background: $card_background;
+    border: 1px solid $border_color;
+    border-radius: $radius_lg;
+    padding: 20px 24px;
     margin-bottom: 24px;
+    box-shadow: $shadow_sm;
 }
 
 .chart-header {
@@ -192,20 +193,20 @@ onMounted(() => {
 .chart-title {
     h3 {
         margin: 0 0 4px 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #1f2937;
+        font-size: 16px;
+        font-weight: 700;
+        color: $main_theme_background;
     }
 }
 
 .chart-subtitle {
     font-size: 13px;
-    color: #6b7280;
+    color: $text_secondary;
 }
 
 .chart-totals {
     display: flex;
-    gap: 24px;
+    gap: 32px;
 }
 
 .chart-total {
@@ -213,21 +214,22 @@ onMounted(() => {
 }
 
 .total-label {
-    font-size: 12px;
-    color: #6b7280;
+    font-size: 11px;
+    color: $text_muted;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
 }
 
 .total-value {
+    font-family: $font_heading;
     font-size: 28px;
     font-weight: 700;
-    color: rgb(0, 106, 255);
+    color: $main_theme_active_color;
 
     &.total-value-secondary {
         font-size: 22px;
-        color: #6b7280;
+        color: $text_secondary;
     }
 }
 
@@ -242,16 +244,16 @@ onMounted(() => {
 }
 
 .bar {
-    fill: rgba(0, 106, 255, 0.7);
+    fill: rgba($main_theme_active_color, 0.65);
     transition: fill 0.2s ease;
     cursor: pointer;
 
     &:hover {
-        fill: rgb(0, 106, 255);
+        fill: $main_theme_active_color;
     }
 
     &.bar-empty {
-        fill: rgba(0, 106, 255, 0.1);
+        fill: rgba($main_theme_active_color, 0.08);
     }
 }
 
@@ -259,13 +261,13 @@ onMounted(() => {
     display: flex;
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid $border_color;
 }
 
 .label {
     text-align: center;
     font-size: 11px;
-    color: #6b7280;
+    color: $text_muted;
 }
 
 .label-text {
@@ -276,13 +278,13 @@ onMounted(() => {
     position: absolute;
     bottom: 140px;
     transform: translateX(-50%);
-    background: #1f2937;
+    background: $main_theme_background;
     color: white;
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: $radius_md;
     pointer-events: none;
     white-space: nowrap;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: $shadow_md;
     z-index: 10;
 
     &::after {
@@ -295,7 +297,7 @@ onMounted(() => {
         height: 0;
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
-        border-top: 4px solid #1f2937;
+        border-top: 4px solid $main_theme_background;
     }
 }
 

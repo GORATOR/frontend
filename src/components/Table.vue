@@ -49,38 +49,52 @@ function onItemClick(url: string) {
 .table {
   display: table;
   width: 100%;
-  border: 1px solid $main_theme_border_color;
-  border-radius: 5px;
+  border: 1px solid $border_color;
+  border-radius: $radius_lg;
   overflow: hidden;
+  background: $card_background;
+  box-shadow: $shadow_sm;
 
   .row {
     display: table-row;
 
     &.header {
-      color: $main_theme_border_color_darker1;
-      background-color: $main_theme_border_color_lighter1;
+      background-color: $surface_subtle;
 
       .cell {
         display: table-cell;
         border-top: none;
-        padding: 15px 10px;
+        padding: 12px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: $text_secondary;
 
         &.sortable {
           cursor: pointer;
           user-select: none;
 
           &:hover {
-            background-color: $main_theme_border_color;
+            color: $main_theme_active_color;
           }
         }
       }
     }
 
-    &.data .cell {
-      display: table-cell;
-      border-top: 1px solid $main_theme_border_color;
-      padding: 10px;
-      font-weight: normal;
+    &.data {
+      transition: background-color 0.12s ease;
+
+      &:hover .cell {
+        background-color: $surface_subtle;
+      }
+
+      .cell {
+        display: table-cell;
+        border-top: 1px solid $border_color;
+        padding: 12px 16px;
+        font-weight: normal;
+      }
     }
   }
 }

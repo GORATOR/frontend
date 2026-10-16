@@ -76,10 +76,10 @@ onMounted(() => {
 }
 
 .mini-bar {
-    fill: rgba(0, 106, 255, 0.6);
+    fill: rgba(22, 109, 224, 0.55);
 
     &.mini-bar-empty {
-        fill: rgba(0, 106, 255, 0.1);
+        fill: rgba(22, 109, 224, 0.08);
     }
 }
 </style>

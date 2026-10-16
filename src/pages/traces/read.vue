@@ -142,11 +142,12 @@ init()
   gap: 6px;
   font-size: 13px;
   margin-bottom: 16px;
-  color: #888;
+  color: $text_muted;
 }
 
 .breadcrumb-link {
   color: $main_theme_active_color;
+  font-weight: 500;
   cursor: pointer;
 
   &:hover {
@@ -155,13 +156,14 @@ init()
 }
 
 .breadcrumb-sep {
-  color: #ccc;
+  color: $border_color_strong;
 }
 
 .breadcrumb-current {
-  font-family: monospace;
+  font-family: $font_mono;
   font-size: 12px;
-  color: #555;
+  color: $text_secondary;
+  word-break: break-all;
 }
 
 .trace-header {
@@ -176,10 +178,10 @@ init()
 }
 
 h2.trace-id {
-  font-family: monospace;
+  font-family: $font_mono;
   font-size: 18px;
   font-weight: 600;
-  color: $main_theme_border_color_darker1;
+  color: $text_primary;
   margin: 0;
   word-break: break-all;
 }
@@ -187,37 +189,39 @@ h2.trace-id {
 .trace-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 12px 16px;
-  background: $main_theme_border_color_lighter1;
-  border: 1px solid $main_theme_border_color;
-  border-radius: 6px;
+  gap: 24px;
+  padding: 16px 20px;
+  background: $card_background;
+  border: 1px solid $border_color;
+  border-radius: $radius_lg;
+  box-shadow: $shadow_sm;
 }
 
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .meta-label {
   font-size: 11px;
-  color: #888;
+  color: $text_muted;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
 }
 
 .meta-value {
   font-size: 14px;
   font-weight: 600;
-  color: $main_theme_border_color_darker1;
+  color: $text_primary;
+  font-variant-numeric: tabular-nums;
 }
 
 .empty-state,
 .loading {
   text-align: center;
   padding: 60px;
-  color: #888;
+  color: $text_muted;
 }
 </style>

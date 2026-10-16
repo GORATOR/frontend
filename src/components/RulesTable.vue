@@ -113,18 +113,24 @@ watch(() => props.modelValue, () => {
 
 .quick-actions {
     margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
 
     .quick-btn {
-        padding: 5px 10px;
-        border: 1px solid $main_theme_border_color;
-        border-radius: 5px;
-        background-color: $main_theme_border_color_lighter1;
-        color: $main_theme_border_color_darker1;
+        padding: 6px 14px;
+        border: 1px solid $border_color_strong;
+        border-radius: $radius_md;
+        background-color: $card_background;
+        color: $text_secondary;
         cursor: pointer;
         font-size: 13px;
+        font-weight: 500;
+        transition: all 0.15s ease;
 
         &:hover {
-            background-color: $main_theme_border_color;
+            border-color: $main_theme_active_color;
+            color: $main_theme_active_color;
+            background-color: rgba($main_theme_active_color, 0.06);
         }
     }
 }
@@ -132,23 +138,28 @@ watch(() => props.modelValue, () => {
 .rules-table {
     display: table;
     width: 100%;
-    border: 1px solid $main_theme_border_color;
-    border-radius: 5px;
+    border: 1px solid $border_color;
+    border-radius: $radius_lg;
     overflow: hidden;
+    background: $card_background;
 
     .row {
         display: table-row;
 
         &.header {
-            color: $main_theme_border_color_darker1;
-            background-color: $main_theme_border_color_lighter1;
+            background-color: $surface_subtle;
             text-transform: capitalize;
 
             .cell {
                 display: table-cell;
                 border-top: none;
-                padding: 15px 10px;
+                padding: 12px 16px;
                 text-align: center;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: $text_secondary;
 
                 &.entity-header {
                     text-align: left;
@@ -156,23 +167,31 @@ watch(() => props.modelValue, () => {
             }
         }
 
-        &.data .cell {
-            display: table-cell;
-            border-top: 1px solid $main_theme_border_color;
-            padding: 10px;
-            font-weight: normal;
-            text-align: center;
+        &.data {
+            transition: background-color 0.12s ease;
 
-            &.entity-name {
-                text-align: left;
+            &:hover .cell {
+                background-color: $surface_subtle;
             }
 
-            &.checkbox-cell {
-                input[type="checkbox"] {
-                    width: 18px;
-                    height: 18px;
-                    cursor: pointer;
-                    accent-color: $main_theme_active_color;
+            .cell {
+                display: table-cell;
+                border-top: 1px solid $border_color;
+                padding: 10px 16px;
+                font-weight: normal;
+                text-align: center;
+
+                &.entity-name {
+                    text-align: left;
+                }
+
+                &.checkbox-cell {
+                    input[type="checkbox"] {
+                        width: 18px;
+                        height: 18px;
+                        cursor: pointer;
+                        accent-color: $main_theme_active_color;
+                    }
                 }
             }
         }

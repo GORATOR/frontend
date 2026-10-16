@@ -19,12 +19,12 @@ async function create() {
 
 <template>
     <Sidebar :active=MenuItem.Roles>
-        <h1>Create new Role</h1>
-        <div>
+        <h2>Create new Role</h2>
+        <div class="create-form">
             <TextBox label="Name" v-model="name" />
             <h3>Permissions</h3>
             <RulesTable v-model="rules" />
-            <div class="padding-small">
+            <div class="form-actions">
                 <Button v-if="loading" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
             </div>
@@ -33,12 +33,26 @@ async function create() {
 </template>
 
 <style scoped lang="scss">
-h3 {
-    margin-top: 20px;
-    margin-bottom: 10px;
+h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
 }
 
-.padding-small {
-    padding-top: 14px;
+.create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 600px;
+
+    h3 {
+        margin: 8px 0 0;
+        font-size: 15px;
+    }
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
 }
 </style>

@@ -23,6 +23,9 @@ const props = defineProps<{
 const model = defineModel<string>();
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement>();
+const selectBoxRef = ref<HTMLElement>();
+const opensUp = ref(false);
+const DROPDOWN_HEIGHT = 240; // matches .dropdown height in styles
 const selectedOption = ref<SelectBoxOption | null>(null);
 const searchQuery = ref('');
 const searchInputRef = ref<HTMLInputElement>();
@@ -62,9 +65,17 @@ watch(filteredOptions, (newFilteredOptions) => {
   }
 }, { immediate: false });
 
+function updateDirection() {
+  const rect = selectBoxRef.value?.getBoundingClientRect();
+  if (!rect) return;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  opensUp.value = spaceBelow < DROPDOWN_HEIGHT + 8 && rect.top > spaceBelow;
+}
+
 function toggleDropdown() {
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
+    updateDirection();
     nextTick(() => {
       searchInputRef.value?.focus();
     });
@@ -131,14 +142,20 @@ watch(isOpen, (open) => {
 <template>
   <div class="textbox-container" ref="dropdownRef">
     <label class="label">{{ props.label }}</label>
-    <div class="select-box" @click="toggleDropdown">
-      <div class="select-value">
-        {{ selectedOption?.label || 'Select an option' }}
+    <div class="select-wrap">
+      <div
+        class="select-box"
+        ref="selectBoxRef"
+        :class="{ 'select-box--open': isOpen && !opensUp, 'select-box--open-up': isOpen && opensUp }"
+        @click="toggleDropdown"
+      >
+        <div class="select-value" :class="{ 'select-value--placeholder': !selectedOption }">
+          {{ selectedOption?.label || 'Select an option' }}
+        </div>
+        <div class="select-arrow" :class="{ 'select-arrow--open': isOpen }">▼</div>
       </div>
-      <div class="select-arrow" :class="{ 'select-arrow--open': isOpen }">▼</div>
-    </div>
-    
-    <div v-if="isOpen" class="dropdown">
+
+      <div v-if="isOpen" class="dropdown" :class="{ 'dropdown--up': opensUp }">
       <div class="search-container">
         <input 
           ref="searchInputRef"
@@ -173,6 +190,7 @@ watch(isOpen, (open) => {
           No more items
         </div>
       </div>
+      </div>
     </div>
   </div>
 </template>
@@ -185,7 +203,14 @@ watch(isOpen, (open) => {
 
   .label {
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $text_secondary;
+  }
+
+  .select-wrap {
+    position: relative;
   }
 
   .select-box {
@@ -193,14 +218,34 @@ watch(isOpen, (open) => {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 7px;
-    border-radius: 7px;
-    border: 1px solid $main_theme_background_lighter1;
+    padding: 9px 12px;
+    border-radius: $radius_md;
+    border: 1px solid $border_color_strong;
     cursor: pointer;
-    background: white;
-    
+    background: $card_background;
+    font-size: 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
     &:hover {
+      border-color: $text_muted;
+    }
+
+    &--open {
       border-color: $main_theme_active_color;
+      border-radius: $radius_md $radius_md 0 0;
+
+      &:hover {
+        border-color: $main_theme_active_color;
+      }
+    }
+
+    &--open-up {
+      border-color: $main_theme_active_color;
+      border-radius: 0 0 $radius_md $radius_md;
+
+      &:hover {
+        border-color: $main_theme_active_color;
+      }
     }
 
     .select-value {
@@ -208,14 +253,19 @@ watch(isOpen, (open) => {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      color: $text_primary;
+
+      &--placeholder {
+        color: $text_muted;
+      }
     }
 
     .select-arrow {
       margin-left: 8px;
       transition: transform 0.3s ease;
-      font-size: 12px;
-      color: #666;
-      
+      font-size: 10px;
+      color: $text_muted;
+
       &--open {
         transform: rotate(180deg);
       }
@@ -227,60 +277,65 @@ watch(isOpen, (open) => {
     top: 100%;
     left: 0;
     right: 0;
-    background: white;
-    border: 1px solid $main_theme_background_lighter1;
-    border-top: none;
-    border-radius: 0 0 7px 7px;
-    height: 200px;
+    background: $card_background;
+    border: 1px solid $border_color;
+    border-radius: 0 0 $radius_lg $radius_lg;
+    height: 240px;
     z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow_lg;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+
+    &--up {
+      top: auto;
+      bottom: 100%;
+      border-radius: $radius_lg $radius_lg 0 0;
+    }
 
     .search-container {
       padding: 8px;
-      border-bottom: 1px solid #f0f0f0;
-      
+      border-bottom: 1px solid $border_color;
+
       .search-input {
         width: 100%;
-        padding: 6px 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        
+        padding: 7px 10px;
+        border: 1px solid $border_color_strong;
+        border-radius: $radius_sm;
+        font-size: 13px;
+
         &:focus {
           outline: none;
           border-color: $main_theme_active_color;
-          box-shadow: 0 0 0 2px rgba($main_theme_active_color, 0.2);
+          box-shadow: $focus_ring;
         }
       }
     }
 
     .dropdown-list {
       flex: 1;
-      overflow-y: scroll;
+      overflow-y: auto;
+      padding: 4px;
     }
 
     .dropdown-item {
-      padding: 8px;
+      padding: 8px 10px;
+      border-radius: $radius_sm;
       cursor: pointer;
-      border-bottom: 1px solid #f0f0f0;
-      
+      font-size: 14px;
+
       &:hover {
-        background-color: #f5f5f5;
+        background-color: $surface_hover;
       }
-      
+
       &--selected {
-        background-color: $main_theme_active_color;
-        color: white;
-        
+        background-color: rgba($main_theme_active_color, 0.1);
+        color: $main_theme_active_color;
+        font-weight: 600;
+
         &:hover {
-          background-color: $main_theme_active_color;
+          background-color: rgba($main_theme_active_color, 0.16);
         }
-      }
-      
-      &:last-child {
-        border-bottom: none;
       }
     }
 
@@ -289,10 +344,11 @@ watch(isOpen, (open) => {
     .dropdown-no-results {
       padding: 8px;
       text-align: center;
-      color: #666;
+      color: $text_muted;
+      font-size: 13px;
       font-style: italic;
       cursor: default;
-      
+
       &:hover {
         background-color: transparent !important;
       }

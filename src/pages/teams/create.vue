@@ -207,8 +207,8 @@ loadProjectsData(true)
 
 <template>
     <Sidebar :active=MenuItem.Teams>
-        <h1>Create new Team</h1>
-        <div>
+        <h2>Create new Team</h2>
+        <div class="create-form">
             <SelectBox
                 :options="options"
                 :label="'Select organization'"
@@ -248,7 +248,7 @@ loadProjectsData(true)
                 v-model="selectedProjectIds"
             />
 
-            <div class="padding-small">
+            <div class="form-actions">
                 <Button v-if="!isFormValid" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
             </div>
@@ -257,7 +257,21 @@ loadProjectsData(true)
 </template>
 
 <style scoped lang="scss">
-.padding-small {
-    padding-top: 14px;
+h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+}
+
+.create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 600px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
 }
 </style>
