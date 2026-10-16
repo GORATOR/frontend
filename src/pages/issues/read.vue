@@ -437,6 +437,11 @@ initLoad();
 <style scoped lang="scss">
 @use '../../assets/variables' as *;
 
+h2 {
+  margin: 0 0 20px;
+  font-size: 22px;
+}
+
 .chart-section {
   margin-bottom: 24px;
 
@@ -447,44 +452,61 @@ initLoad();
 }
 
 .occurrences-table {
-  border: 1px solid $main_theme_border_color;
-  border-radius: 5px;
+  background: $card_background;
+  border: 1px solid $border_color;
+  border-radius: $radius_md;
   overflow: hidden;
   margin-bottom: 16px;
 }
 
 .occurrences-header {
   display: flex;
-  background-color: $main_theme_border_color_lighter1;
-  color: $main_theme_border_color_darker1;
-  padding: 10px;
-  font-weight: bold;
-  border-bottom: 1px solid $main_theme_border_color;
+  align-items: center;
+  background-color: $surface_subtle;
+  color: $text_secondary;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid $border_color;
 }
 
 .occurrences-row {
   display: flex;
-  padding: 10px;
-  border-top: 1px solid $main_theme_border_color;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid $border_color;
+  color: $text_primary;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.12s ease;
 
   &:first-child {
     border-top: none;
   }
 
   &:hover {
-    background-color: rgba(0, 106, 255, 0.05);
+    background-color: $surface_subtle;
   }
 
   &.current-event {
-    background-color: rgba(0, 106, 255, 0.08);
+    background-color: rgba($main_theme_active_color, 0.06);
     font-weight: 500;
+
+    &:hover {
+      background-color: rgba($main_theme_active_color, 0.1);
+    }
   }
 }
 
 .occ-cell {
-  padding: 0 5px;
+  padding: 0 8px;
+
+  .monospace {
+    font-family: $font_mono;
+    font-size: 13px;
+    color: $text_secondary;
+  }
 
   &.occ-id {
     flex: 0 0 160px;
@@ -492,6 +514,7 @@ initLoad();
 
   &.occ-date {
     flex: 0 0 200px;
+    color: $text_secondary;
   }
 
   &.occ-exception {
@@ -505,6 +528,7 @@ initLoad();
   &.occ-sdk {
     flex: 0 0 180px;
     text-align: right;
+    color: $text_secondary;
   }
 }
 
@@ -513,7 +537,7 @@ initLoad();
 
   .detail-field {
     display: flex;
-    margin-bottom: 15px;
+    margin-bottom: 14px;
     align-items: flex-start;
 
     &:last-child {
@@ -521,10 +545,11 @@ initLoad();
     }
 
     .field-label {
+      font-size: 13px;
       font-weight: 600;
       min-width: 180px;
       padding-top: 8px;
-      color: #333;
+      color: $text_secondary;
     }
 
     .field-value {
@@ -533,60 +558,52 @@ initLoad();
       p {
         margin: 0;
         padding: 8px 0;
-        color: #666;
+        color: $text_primary;
       }
 
       .monospace {
-        font-family: 'Courier New', monospace;
+        font-family: $font_mono;
         font-size: 13px;
-      }
-
-      .link {
-        color: $main_theme_active_color;
-        text-decoration: none;
-
-        &:hover {
-          text-decoration: underline;
-        }
+        color: $text_secondary;
       }
 
       .level-badge {
         display: inline-block;
         padding: 4px 12px;
-        border-radius: 4px;
+        border-radius: 999px;
         font-weight: 600;
         text-transform: uppercase;
-        font-size: 12px;
+        font-size: 11px;
+        letter-spacing: 0.04em;
 
         &.level-error {
-          background: #ffebee;
-          color: #c62828;
+          background: $color_danger_soft;
+          color: $color_danger;
         }
 
         &.level-warning {
-          background: #fff3e0;
-          color: #ef6c00;
+          background: $color_warning_soft;
+          color: $color_warning;
         }
 
         &.level-info {
-          background: #e3f2fd;
-          color: #1565c0;
+          background: rgba($main_theme_active_color, 0.1);
+          color: $main_theme_active_color;
         }
 
         &.level-unknown {
-          background: #f5f5f5;
-          color: #666;
+          background: $surface_hover;
+          color: $text_secondary;
         }
       }
 
       .exception-type {
         font-weight: 600;
-        color: #c62828;
+        color: $color_danger;
       }
 
       .exception-message {
-        font-style: italic;
-        color: #d32f2f;
+        color: $color_danger;
         font-weight: 500;
         word-break: break-word;
         overflow-wrap: break-word;
@@ -594,20 +611,21 @@ initLoad();
 
       .badge {
         display: inline-block;
-        padding: 2px 8px;
-        border-radius: 3px;
+        padding: 3px 10px;
+        border-radius: 999px;
         font-size: 11px;
         font-weight: 600;
+        letter-spacing: 0.04em;
         margin-left: 8px;
 
         &.handled {
-          background: #e8f5e9;
-          color: #2e7d32;
+          background: $color_success_soft;
+          color: $color_success;
         }
 
         &.unhandled {
-          background: #ffebee;
-          color: #c62828;
+          background: $color_danger_soft;
+          color: $color_danger;
         }
       }
 
@@ -628,34 +646,34 @@ initLoad();
         justify-content: center;
         width: 26px;
         height: 26px;
-        border-radius: 4px;
+        border-radius: $radius_sm;
         cursor: pointer;
         opacity: 0;
-        transition: opacity 0.15s, background 0.15s, color 0.15s;
-        background: #e0e0e0;
-        color: #555;
+        transition: opacity 0.15s, background-color 0.15s, color 0.15s;
+        background: $surface_hover;
+        color: $text_secondary;
         z-index: 1;
 
         &:hover {
-          background: #bdbdbd;
-          color: #222;
+          background: $border_color_strong;
+          color: $text_primary;
         }
 
         &.copied {
           opacity: 1;
-          background: #e8f5e9;
-          color: #2e7d32;
+          background: $color_success_soft;
+          color: $color_success;
         }
       }
 
       .extra-value {
-        background: #f5f5f5;
-        border: 1px solid $main_theme_background_lighter1;
-        border-radius: 6px;
+        background: $surface_subtle;
+        border: 1px solid $border_color;
+        border-radius: $radius_md;
         padding: 12px;
-        font-family: 'Courier New', monospace;
+        font-family: $font_mono;
         font-size: 12px;
-        color: #333;
+        color: $text_primary;
         margin: 0;
         white-space: pre-wrap;
         word-break: break-all;
@@ -665,15 +683,15 @@ initLoad();
 
   .stacktrace-container {
     .stack-frame {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 6px;
-      padding: 12px;
+      background: $surface_subtle;
+      border: 1px solid $border_color;
+      border-radius: $radius_md;
+      padding: 12px 14px;
       margin-bottom: 12px;
 
       &.in-app {
-        background: #fff8e1;
-        border-color: #ffb74d;
+        background: $color_warning_soft;
+        border-color: rgba($color_warning, 0.35);
       }
 
       &:last-child {
@@ -684,54 +702,73 @@ initLoad();
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 4px;
+        gap: 12px;
+        margin: -4px -6px 4px;
+        padding: 4px 6px;
+        border-radius: $radius_sm;
+        transition: background-color 0.12s ease;
+
+        &:hover {
+          background-color: $surface_hover;
+        }
 
         .frame-function {
           font-weight: 600;
-          color: #1976d2;
-          font-family: 'Courier New', monospace;
+          color: $main_theme_active_color;
+          font-family: $font_mono;
+          font-size: 13px;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .frame-location {
-          color: #666;
+          color: $text_muted;
           font-size: 12px;
-          font-family: 'Courier New', monospace;
+          font-family: $font_mono;
+          white-space: nowrap;
         }
       }
 
+      &.in-app .frame-header:hover {
+        background-color: rgba($color_warning, 0.12);
+      }
+
       .frame-path {
-        color: #888;
-        font-size: 11px;
+        color: $text_muted;
+        font-size: 12px;
         margin-bottom: 8px;
-        font-family: 'Courier New', monospace;
+        font-family: $font_mono;
+        word-break: break-all;
       }
 
       .frame-code {
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 4px;
+        background: $card_background;
+        border: 1px solid $border_color;
+        border-radius: $radius_sm;
         overflow-x: auto;
         margin-top: 8px;
 
         .code-line {
           display: flex;
-          font-family: 'Courier New', monospace;
-          font-size: 12px;
+          font-family: $font_mono;
+          font-size: 12.5px;
           line-height: 1.5;
+          color: $text_primary;
 
           .line-number {
             display: inline-block;
-            min-width: 40px;
-            padding: 2px 8px;
-            background: #f5f5f5;
-            color: #999;
+            min-width: 44px;
+            padding: 2px 10px;
+            background: $surface_subtle;
+            color: $text_muted;
             text-align: right;
             user-select: none;
-            border-right: 1px solid #e0e0e0;
+            border-right: 1px solid $border_color;
           }
 
           .line-code {
-            padding: 2px 8px;
+            padding: 2px 10px;
             flex: 1;
             white-space: pre;
           }
@@ -739,25 +776,26 @@ initLoad();
 
         .context-line {
           display: flex;
-          background: #fff9c4;
-          font-family: 'Courier New', monospace;
-          font-size: 12px;
+          background: rgba($color_warning, 0.18);
+          font-family: $font_mono;
+          font-size: 12.5px;
           line-height: 1.5;
+          color: $text_primary;
 
           .line-number {
             display: inline-block;
-            min-width: 40px;
-            padding: 2px 8px;
-            background: #fff59d;
-            color: #666;
+            min-width: 44px;
+            padding: 2px 10px;
+            background: rgba($color_warning, 0.22);
+            color: $text_secondary;
             text-align: right;
             user-select: none;
-            border-right: 1px solid #fdd835;
+            border-right: 1px solid rgba($color_warning, 0.35);
             font-weight: 600;
           }
 
           .line-code {
-            padding: 2px 8px;
+            padding: 2px 10px;
             flex: 1;
             white-space: pre;
             font-weight: 500;

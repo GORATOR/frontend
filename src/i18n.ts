@@ -8,14 +8,16 @@ const i18n = createI18n({
             login: {
                 login_field: 'Логин',
                 password_field: 'Пароль',
-                submit: 'Войти'
+                submit: 'Войти',
+                subtitle: 'Войдите в свою учётную запись'
             }
         },
         en: {
             login: {
                 login_field: 'Login',
                 password_field: 'Password',
-                submit: 'Login'
+                submit: 'Login',
+                subtitle: 'Sign in to your account'
             }
         },
     }

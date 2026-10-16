@@ -126,8 +126,10 @@ function clearImage() {
 
   .label {
     display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $text_secondary;
   }
 
   .upload-area {
@@ -138,40 +140,39 @@ function clearImage() {
     }
 
     .upload-placeholder {
-      border: 2px dashed $main_theme_background_lighter1;
-      border-radius: 8px;
+      border: 2px dashed $border_color_strong;
+      border-radius: $radius_lg;
       padding: 40px 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s ease;
-      background: #fafafa;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+      background: $surface_subtle;
 
       &:hover {
         border-color: $main_theme_active_color;
-        background: #f5f5f5;
+        background: rgba($main_theme_active_color, 0.04);
       }
 
       &.dragging {
         border-color: $main_theme_active_color;
-        background: #e8f4fd;
-        transform: scale(1.02);
+        background: rgba($main_theme_active_color, 0.08);
       }
 
       .upload-icon {
-        font-size: 48px;
+        font-size: 40px;
         margin-bottom: 10px;
       }
 
       .upload-text {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 500;
-        color: #333;
+        color: $text_primary;
         margin-bottom: 5px;
       }
 
       .upload-hint {
         font-size: 12px;
-        color: #999;
+        color: $text_muted;
       }
     }
 
@@ -184,8 +185,9 @@ function clearImage() {
       .preview-image {
         max-width: 128px;
         max-height: 128px;
-        border-radius: 8px;
-        border: 1px solid $main_theme_background_lighter1;
+        border-radius: $radius_md;
+        border: 1px solid $border_color;
+        box-shadow: $shadow_sm;
         object-fit: contain;
       }
 
@@ -194,32 +196,33 @@ function clearImage() {
         gap: 10px;
 
         button {
-          padding: 8px 16px;
-          border-radius: 6px;
-          border: 1px solid $main_theme_background_lighter1;
+          padding: 7px 16px;
+          border-radius: $radius_md;
+          border: 1px solid $border_color_strong;
+          background: $card_background;
           cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          transition: all 0.2s ease;
+          font-size: 13px;
+          font-weight: 600;
+          transition: all 0.15s ease;
 
           &.btn-change {
-            background: white;
             color: $main_theme_active_color;
-            border-color: $main_theme_active_color;
+            border-color: rgba($main_theme_active_color, 0.5);
 
             &:hover {
               background: $main_theme_active_color;
+              border-color: $main_theme_active_color;
               color: white;
             }
           }
 
           &.btn-remove {
-            background: white;
-            color: #dc3545;
-            border-color: #dc3545;
+            color: $color_danger;
+            border-color: rgba($color_danger, 0.4);
 
             &:hover {
-              background: #dc3545;
+              background: $color_danger;
+              border-color: $color_danger;
               color: white;
             }
           }

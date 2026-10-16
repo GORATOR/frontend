@@ -278,18 +278,24 @@ initLoad()
     padding-top: 14px;
 }
 
+h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+}
+
 .filters-block {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid $main_theme_border_color;
+    margin: 0 0 20px;
+    padding: 18px 20px;
+    background-color: $card_background;
+    border-radius: $radius_lg;
+    border: 1px solid $border_color;
+    box-shadow: $shadow_sm;
 
     h3 {
         margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 18px;
-        color: $main_theme_border_color_darker1;
+        margin-bottom: 12px;
+        font-size: 15px;
+        color: $main_theme_background;
     }
 
     .filters-container {
@@ -300,22 +306,28 @@ initLoad()
 }
 
 .issues-table {
-    border: 1px solid $main_theme_border_color;
-    border-radius: 5px;
+    border: 1px solid $border_color;
+    border-radius: $radius_lg;
     overflow: hidden;
+    background: $card_background;
+    box-shadow: $shadow_sm;
 }
 
 .table-header {
     display: flex;
-    background-color: $main_theme_border_color_lighter1;
-    color: $main_theme_border_color_darker1;
-    padding: 15px 10px;
-    font-weight: bold;
-    border-bottom: 1px solid $main_theme_border_color;
+    align-items: center;
+    background-color: $surface_subtle;
+    padding: 12px 16px;
+    border-bottom: 1px solid $border_color;
 }
 
 .header-cell {
     padding: 0 5px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $text_secondary;
 
     &.issue-event-type {
         flex: 0 0 102px;
@@ -342,15 +354,16 @@ initLoad()
     &.sortable {
         cursor: pointer;
         user-select: none;
+        transition: color 0.15s ease;
 
         &:hover {
-            color: rgb(0, 106, 255);
+            color: $main_theme_active_color;
         }
     }
 }
 
 .issue {
-    border-top: 1px solid $main_theme_border_color;
+    border-top: 1px solid $border_color;
 
     &:first-child {
         border-top: none;

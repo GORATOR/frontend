@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import Button from "./Button.vue";
+import CopyIcon from "../icons/CopyIcon.vue";
+import CheckIcon from "../icons/CheckIcon.vue";
 import {computed, ref} from "vue";
 const show = ref<boolean>(false);
 
@@ -37,15 +38,15 @@ async function copyToClipboard() {
         @focus="show = true"
         @blur="show = false"
     />
-    <Button
+    <button
         @click="copyToClipboard"
         class="copy-button"
         :class="{ 'copied': copy }"
         type="button"
         title="Copy to clipboard">
-      <span v-if="!copy">📋</span>
-      <span v-else>✓</span>
-    </Button>
+      <CheckIcon v-if="copy" />
+      <CopyIcon v-else />
+    </button>
   </div>
 </template>
 
@@ -54,49 +55,52 @@ async function copyToClipboard() {
 .masked-input-container {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: stretch;
 
   .masked-input {
     flex: 1;
-    padding: 8px 12px;
-    border: 1px solid $main_theme_background_lighter1;
-    border-radius: 6px;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    background: #f8f9fa;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid $border_color;
+    border-radius: $radius_md;
+    font-family: $font_mono;
+    font-size: 13px;
+    color: $text_secondary;
+    background: $surface_subtle;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 
     &:focus {
       outline: none;
       border-color: $main_theme_active_color;
-      background: white;
-      box-shadow: 0 0 0 2px rgba($main_theme_active_color, 0.1);
+      background: $card_background;
+      color: $text_primary;
+      box-shadow: $focus_ring;
     }
   }
 
   .copy-button {
-    padding: 8px 12px;
-    border: 1px solid $main_theme_background_lighter1;
-    border-radius: 6px;
-    background: white;
-    cursor: pointer;
-    font-size: 18px;
-    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px;
+    min-width: 38px;
+    padding: 0 10px;
+    border: 1px solid $border_color_strong;
+    border-radius: $radius_md;
+    background: $card_background;
+    color: $text_secondary;
+    cursor: pointer;
+    transition: all 0.15s ease;
 
     &:hover {
-      background: $main_theme_active_color;
       border-color: $main_theme_active_color;
-      transform: scale(1.05);
+      color: $main_theme_active_color;
+      background: rgba($main_theme_active_color, 0.06);
     }
 
     &.copied {
-      background: #28a745;
-      border-color: #28a745;
+      border-color: $color_success;
+      background: $color_success;
       color: white;
     }
   }

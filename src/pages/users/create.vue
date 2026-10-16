@@ -208,8 +208,8 @@ loadRolesData(true);
 
 <template>
     <Sidebar :active=MenuItem.Users>
-        <h1>Create new User</h1>
-        <div>
+        <h2>Create new User</h2>
+        <div class="create-form">
             <TextBox label="Name" v-model="user.Username" />
             <TextBox label="Email" v-model="user.Email" />
             <TextBox label="Password" v-model="user.Password" />
@@ -247,7 +247,7 @@ loadRolesData(true);
                 v-model="selectedRoleIds"
             />
 
-            <div class="padding-small">
+            <div class="form-actions">
                 <Button v-if="!isFormValid" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
             </div>
@@ -256,19 +256,21 @@ loadRolesData(true);
 </template>
 
 <style scoped lang="scss">
-.padding-small {
-    padding-top: 14px;
+h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
 }
-.chip-group {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  .chip-el {
-    margin-left: 8px;
-    border-radius: 5px;
-    height: 32px;
-    padding-left: 4px;
-    padding-right: 4px;
-  }
+
+.create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 600px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
 }
 </style>

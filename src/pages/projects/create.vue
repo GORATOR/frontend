@@ -40,8 +40,8 @@ loadList();
 
 <template>
     <Sidebar :active=MenuItem.Projects>
-        <h1>Create new Project</h1>
-        <div>
+        <h2>Create new Project</h2>
+        <div class="create-form">
             <TextBox label="Name" v-model="name" />
             <SelectBox
                 :options="options"
@@ -49,7 +49,7 @@ loadList();
                 v-model="teamId"
             ></SelectBox>
             <ImageUpload label="Project Avatar" v-model="avatar" />
-            <div class="padding-small">
+            <div class="form-actions">
                 <Button v-if="loading" disabled>SUBMIT</Button>
                 <Button v-else @click="create">SUBMIT</Button>
             </div>
@@ -58,7 +58,21 @@ loadList();
 </template>
 
 <style scoped lang="scss">
-.padding-small {
-    padding-top: 14px;
+h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+}
+
+.create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 600px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
 }
 </style>
