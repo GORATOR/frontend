@@ -53,7 +53,12 @@ initLoad()
 </template>
 
 <style scoped lang="scss">
+h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+}
+
 .padding-small {
-    padding-top: 14px;
+    padding-top: 16px;
 }
 </style>

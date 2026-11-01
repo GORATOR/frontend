@@ -59,16 +59,16 @@ function pageSelect(page: number) {
 @use '../../assets/variables' as *;
 
 .paging-content {
-    padding-top: 10px;
+    padding-top: 14px;
     display: flex;
-    gap: 5px;
+    gap: 6px;
 }
 
 .paging-dots {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     display: grid;
     place-content: center;
-    color: $main_theme_border_color_darker1;
+    color: $text_muted;
 }
 </style>

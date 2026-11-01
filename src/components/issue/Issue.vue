@@ -85,8 +85,15 @@ function onIssueUrlClick(url: string) {
 </template>
 
 <style scoped lang="scss">
+@use '../../assets/variables' as *;
+
 .envelope-container {
-    padding: 10px;
+    padding: 12px 16px;
+    transition: background-color 0.12s ease;
+
+    &:hover {
+        background-color: $surface_subtle;
+    }
 }
 
 .issue-content {
@@ -99,15 +106,15 @@ function onIssueUrlClick(url: string) {
     flex: 0 0 90px;
     text-align: center;
     padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 12px;
+    border-radius: 999px;
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 
     &.exception {
-        background-color: rgba(220, 53, 69, 0.1);
-        color: rgb(185, 28, 28);
+        background-color: $color_danger_soft;
+        color: $color_danger;
     }
 
     &.message {
@@ -119,6 +126,14 @@ function onIssueUrlClick(url: string) {
 .issue-info {
     flex: 1;
     min-width: 0;
+
+    .description {
+        color: $text_secondary;
+        font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 .issue-count {
@@ -129,21 +144,23 @@ function onIssueUrlClick(url: string) {
 }
 
 .count-badge {
-    background-color: rgba(0, 106, 255, 0.1);
-    color: rgb(0, 106, 255);
-    padding: 4px 12px;
-    border-radius: 12px;
+    background-color: rgba($main_theme_active_color, 0.08);
+    color: $main_theme_active_color;
+    padding: 3px 10px;
+    border-radius: 999px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
+    min-width: 32px;
+    text-align: center;
 }
 
 a {
-    color: rgb(0, 106, 255);
-    font-weight: bold;
+    color: $main_theme_active_color;
+    font-weight: 600;
     text-decoration: none;
 
     &:visited {
-        color: rgb(0, 106, 255);
+        color: $main_theme_active_color;
     }
 }
 </style>

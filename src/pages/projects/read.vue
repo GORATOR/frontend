@@ -146,7 +146,7 @@ initLoad();
 
       <div class="action-buttons">
         <Button @click="actionButtonClick">{{editor.getButtonCaption()}}</Button>
-        <Button v-if="editor.isEditing.value" @click="editor.cancelEdit">CANCEL</Button>
+        <Button v-if="editor.isEditing.value" variant="secondary" @click="editor.cancelEdit">CANCEL</Button>
       </div>
 
       <div v-if="editor.saveError.value" class="error-banner">
@@ -178,7 +178,7 @@ initLoad();
             <label class="field-label">Team:</label>
             <div class="field-value">
               <p v-if="!editor.isEditing.value && team">
-                <a :href="teamUrl" class="team-link">{{ team.Name }}</a>
+                <a :href="teamUrl">{{ team.Name }}</a>
               </p>
               <p v-if="!editor.isEditing.value && !team">No team assigned</p>
               <SelectBox
@@ -212,44 +212,51 @@ initLoad();
 <style scoped lang="scss">
 @use '../../assets/variables' as *;
 
+h2 {
+  margin: 0 0 20px;
+  font-size: 22px;
+}
+
 .action-buttons {
-  margin: 20px 0;
+  margin: 16px 0 20px;
   display: flex;
   gap: 10px;
 }
 
 .error-banner {
-  background-color: #ffebee;
-  border: 1px solid #f44336;
-  color: #c62828;
+  background-color: $color_danger_soft;
+  border: 1px solid rgba($color_danger, 0.35);
+  color: $color_danger;
   padding: 12px 16px;
-  border-radius: 4px;
-  margin: 10px 0;
-  font-size: 0.9rem;
+  border-radius: $radius_md;
+  margin: 12px 0;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .project-details {
   margin-top: 20px;
 
   .detail-section {
-    background: white;
-    border: 1px solid $main_theme_background_lighter1;
-    border-radius: 8px;
+    background: $card_background;
+    border: 1px solid $border_color;
+    border-radius: $radius_lg;
+    box-shadow: $shadow_sm;
     padding: 20px;
     margin-bottom: 20px;
 
     h3 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      color: $main_theme_active_color;
-      font-size: 18px;
-      border-bottom: 2px solid $main_theme_background_lighter1;
-      padding-bottom: 10px;
+      margin: 0 0 20px;
+      color: $main_theme_background;
+      font-size: 15px;
+      font-weight: 700;
+      border-bottom: 1px solid $border_color;
+      padding-bottom: 12px;
     }
 
     .detail-field {
       display: flex;
-      margin-bottom: 15px;
+      margin-bottom: 16px;
       align-items: flex-start;
 
       &:last-child {
@@ -257,10 +264,11 @@ initLoad();
       }
 
       .field-label {
+        font-size: 13px;
         font-weight: 600;
-        min-width: 140px;
-        padding-top: 8px;
-        color: #333;
+        min-width: 160px;
+        padding-top: 10px;
+        color: $text_secondary;
       }
 
       .field-value {
@@ -268,29 +276,21 @@ initLoad();
 
         p {
           margin: 0;
-          padding: 8px 0;
-          color: #666;
-        }
-
-        .team-link {
-          color: $main_theme_active_color;
-          text-decoration: none;
-
-          &:hover {
-            text-decoration: underline;
-          }
+          padding: 9px 0;
+          color: $text_primary;
         }
 
         .avatar-display {
-          max-width: 200px;
-          max-height: 200px;
-          border-radius: 8px;
-          border: 1px solid $main_theme_background_lighter1;
+          max-width: 160px;
+          max-height: 160px;
+          border-radius: $radius_lg;
+          border: 1px solid $border_color;
+          box-shadow: $shadow_sm;
           object-fit: contain;
         }
 
         .no-avatar {
-          color: #999;
+          color: $text_muted;
           font-style: italic;
         }
       }

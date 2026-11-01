@@ -126,12 +126,15 @@ init()
       <h2>Traces</h2>
 
       <div class="filters-block">
-        <SelectBox
-          label="Project"
-          :options="projectOptions"
-          v-model="selectedProjectId"
-          @changed="onProjectChange"
-        />
+        <h3>Filters</h3>
+        <div class="filters-container">
+          <SelectBox
+            label="Project"
+            :options="projectOptions"
+            v-model="selectedProjectId"
+            @changed="onProjectChange"
+          />
+        </div>
       </div>
 
       <div v-if="traceRows.length === 0" class="empty-state">
@@ -189,53 +192,86 @@ init()
 @use '../../assets/_variables' as *;
 
 h2 {
-  margin-bottom: 16px;
+  margin: 0 0 20px;
+  font-size: 22px;
 }
 
 .filters-block {
-  margin-bottom: 20px;
-  max-width: 280px;
+  margin: 0 0 20px;
+  padding: 18px 20px;
+  background-color: $card_background;
+  border: 1px solid $border_color;
+  border-radius: $radius_lg;
+  box-shadow: $shadow_sm;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: $main_theme_background;
+  }
+
+  .filters-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 320px));
+    gap: 15px;
+  }
 }
 
 .empty-state,
 .loading {
   text-align: center;
   padding: 60px;
-  color: #888;
+  color: $text_muted;
 }
 
 .traces-table {
-  border: 1px solid $main_theme_border_color;
-  border-radius: 6px;
+  border: 1px solid $border_color;
+  border-radius: $radius_lg;
   overflow: hidden;
+  background: $card_background;
+  box-shadow: $shadow_sm;
   font-size: 13px;
 }
 
 .table-header {
   display: flex;
-  background: $main_theme_border_color_lighter1;
-  padding: 10px 12px;
-  font-weight: 600;
-  font-size: 12px;
-  color: $main_theme_border_color_darker1;
-  border-bottom: 1px solid $main_theme_border_color;
+  align-items: center;
+  background-color: $surface_subtle;
+  padding: 12px 16px;
+  border-bottom: 1px solid $border_color;
+
+  .h-cell {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $text_secondary;
+  }
 }
 
 .trace-row {
   display: flex;
   align-items: center;
-  padding: 9px 12px;
-  border-top: 1px solid $main_theme_border_color;
+  padding: 10px 16px;
+  border-top: 1px solid $border_color;
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background-color 0.12s ease;
 
   &:hover {
-    background: $main_theme_active_color_lighter4;
+    background-color: $surface_subtle;
   }
 
-  &:first-child {
-    border-top: none;
+  .h-duration,
+  .h-time {
+    font-family: $font_mono;
+    font-size: 12px;
+    color: $text_secondary;
   }
+}
+
+.table-header + .trace-row {
+  border-top: none;
 }
 
 .h-cell,
@@ -252,43 +288,46 @@ h2 {
 .h-txs       { flex: 0 0 50px; text-align: center; }
 .h-duration  { flex: 0 0 80px; text-align: right; font-variant-numeric: tabular-nums; }
 .h-project   { flex: 0 0 110px; }
-.h-time      { flex: 0 0 160px; color: #666; }
+.h-time      { flex: 0 0 160px; }
 
 .trace-id-badge {
-  font-family: monospace;
+  font-family: $font_mono;
   font-size: 12px;
-  background: $main_theme_active_color_lighter4;
+  background: rgba($main_theme_active_color, 0.08);
   color: $main_theme_active_color;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 8px;
+  border-radius: $radius_sm;
 }
 
 .op-tag {
   font-size: 10px;
+  font-weight: 600;
   color: white;
-  padding: 2px 5px;
-  border-radius: 3px;
+  padding: 2px 6px;
+  border-radius: $radius_sm;
   flex-shrink: 0;
   white-space: nowrap;
 
-  &.op-http  { background: #7B5EA7; }
-  &.op-db    { background: #1D6FBF; }
-  &.op-cache { background: #28A745; }
-  &.op-function { background: #8E44AD; }
+  &.op-http     { background: rgba($main_theme_active_color, 0.9); }
+  &.op-db       { background: rgba($main_theme_active_color, 0.65); }
+  &.op-cache    { background: rgba($main_theme_background, 0.7); }
+  &.op-function { background: rgba($main_theme_background, 0.85); }
 }
 
 .root-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: $text_primary;
+  font-weight: 500;
 }
 
 .service-chip {
   font-size: 11px;
-  background: $main_theme_border_color;
-  color: $main_theme_border_color_darker1;
-  padding: 1px 6px;
-  border-radius: 10px;
+  background: $surface_hover;
+  color: $text_secondary;
+  padding: 1px 8px;
+  border-radius: $radius_lg;
   white-space: nowrap;
 }
 </style>

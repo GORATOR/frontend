@@ -29,33 +29,36 @@ const toggleExpanded = () => {
 @use '../assets/variables' as *;
 
 .detail-section {
-  background: white;
-  border: 1px solid $main_theme_background_lighter1;
-  border-radius: 8px;
+  background: $card_background;
+  border: 1px solid $border_color;
+  border-radius: $radius_lg;
   margin-bottom: 20px;
+  box-shadow: $shadow_sm;
 
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 16px 20px;
+    border-radius: $radius_lg;
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.2s;
+    transition: background-color 0.15s ease;
 
     &:hover {
-      background-color: #f8f9fa;
+      background-color: $surface_subtle;
     }
 
     h3 {
       margin: 0;
-      color: $main_theme_active_color;
-      font-size: 18px;
+      color: $main_theme_background;
+      font-size: 15px;
+      font-weight: 700;
     }
 
     .toggle-icon {
-      font-size: 12px;
-      color: #666;
+      font-size: 10px;
+      color: $text_muted;
       transition: transform 0.3s ease;
 
       &.expanded {
@@ -69,8 +72,8 @@ const toggleExpanded = () => {
   }
 
   .section-content {
-    padding: 0 20px 20px 20px;
-    border-top: 2px solid $main_theme_background_lighter1;
+    padding: 4px 20px 20px 20px;
+    border-top: 1px solid $border_color;
   }
 }
 </style>

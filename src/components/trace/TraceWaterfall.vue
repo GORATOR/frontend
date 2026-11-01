@@ -45,23 +45,33 @@ function parseTs(s: string): number {
   return isNaN(n) ? (Date.parse(s) / 1000 || 0) : n
 }
 
+// These colors mirror the SCSS design tokens (not importable in TS):
+// accent blue $main_theme_active_color #166de0, navy $main_theme_background
+// #1e325c, gray $text_secondary #64748b, danger $color_danger #dc2626.
 const OP_COLOR_MAP: Record<string, string> = {
-  'http.server': '#7B5EA7',
-  'http.client': '#E8592A',
-  'db.query': '#1D6FBF',
-  'db': '#1D6FBF',
-  'cache.get': '#20843A',
-  'cache.set': '#28A745',
-  'cache': '#28A745',
-  'function': '#8E44AD',
-  'task': '#E67E22',
+  'http.server': 'rgba(22, 109, 224, 0.9)',
+  'http.client': 'rgba(22, 109, 224, 0.75)',
+  'db.query': 'rgba(22, 109, 224, 0.6)',
+  'db': 'rgba(22, 109, 224, 0.6)',
+  'cache.get': 'rgba(30, 50, 92, 0.7)',
+  'cache.set': 'rgba(30, 50, 92, 0.7)',
+  'cache': 'rgba(30, 50, 92, 0.7)',
+  'function': 'rgba(30, 50, 92, 0.85)',
+  'task': 'rgba(22, 109, 224, 0.5)',
 }
 
+const DEFAULT_OP_COLOR = 'rgba(100, 116, 139, 0.65)'
+const ERROR_BAR_COLOR = 'rgba(220, 38, 38, 0.85)'
+
 function getOpColor(op: string): string {
-  if (!op) return '#6C757D'
+  if (!op) return DEFAULT_OP_COLOR
   if (OP_COLOR_MAP[op]) return OP_COLOR_MAP[op]
   const base = op.split('.')[0]
-  return OP_COLOR_MAP[base] || '#6C757D'
+  return OP_COLOR_MAP[base] || DEFAULT_OP_COLOR
+}
+
+function isErrorStatus(status: string): boolean {
+  return status !== '' && status !== 'ok'
 }
 
 const tree = computed<WaterfallNode | null>(() => {
@@ -291,7 +301,7 @@ function barStyle(node: WaterfallNode): Record<string, string> {
   return {
     left: `${clampedLeft}%`,
     width: `${width}%`,
-    backgroundColor: getOpColor(node.op),
+    backgroundColor: isErrorStatus(node.status) ? ERROR_BAR_COLOR : getOpColor(node.op),
   }
 }
 
@@ -476,24 +486,29 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 .waterfall-wrap {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .waterfall {
-  font-size: 12px;
-  border: 1px solid $main_theme_border_color;
-  border-radius: 6px;
+  font-size: 13px;
+  border: 1px solid $border_color;
+  border-radius: $radius_lg;
   overflow: hidden;
+  background: $card_background;
+  box-shadow: $shadow_sm;
 }
 
 .waterfall-header {
   display: flex;
-  background: $main_theme_border_color_lighter1;
-  border-bottom: 2px solid $main_theme_border_color;
-  padding: 6px 0;
+  align-items: center;
+  background-color: $surface_subtle;
+  border-bottom: 1px solid $border_color;
+  padding: 8px 0;
   font-weight: 600;
-  font-size: 11px;
-  color: $main_theme_border_color_darker1;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text_secondary;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -501,43 +516,48 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 
 .waterfall-row {
   display: flex;
-  border-top: 1px solid $main_theme_border_color;
+  border-top: 1px solid $border_color;
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background-color 0.12s ease;
 
   &:hover {
-    background: $main_theme_active_color_lighter4;
+    background-color: $surface_hover;
   }
 
   &.is-transaction {
-    background: #fafafa;
+    background-color: $surface_subtle;
 
     &:hover {
-      background: $main_theme_active_color_lighter4;
+      background-color: $surface_hover;
     }
   }
 
-  &.is-selected {
-    background: $main_theme_active_color_lighter3;
+  &.is-selected,
+  &.is-selected:hover {
+    background-color: rgba($main_theme_active_color, 0.08);
   }
+}
+
+.waterfall-header + .waterfall-row {
+  border-top: none;
 }
 
 .col-label {
   flex: 0 0 42%;
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 8px;
+  gap: 6px;
+  padding: 6px 10px;
   overflow: hidden;
-  border-right: 1px solid $main_theme_border_color;
+  border-right: 1px solid $border_color;
 }
 
 .col-bar {
   flex: 1;
   display: flex;
   align-items: center;
-  padding: 4px 8px;
-  gap: 6px;
+  padding: 5px 10px;
+  gap: 8px;
   position: relative;
   min-width: 0;
 }
@@ -550,8 +570,12 @@ const selectedNode = computed<WaterfallNode | null>(() => {
   .ruler-mark {
     position: absolute;
     transform: translateX(-50%);
-    font-size: 10px;
-    color: #888;
+    font-family: $font_mono;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+    color: $text_muted;
     white-space: nowrap;
     user-select: none;
 
@@ -574,7 +598,7 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 .bar {
   position: absolute;
   height: 100%;
-  border-radius: 2px;
+  border-radius: $radius_sm;
   min-width: 2px;
   opacity: 0.85;
   transition: opacity 0.1s;
@@ -586,17 +610,18 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 
 .dur-label {
   flex-shrink: 0;
-  font-size: 11px;
-  color: #555;
+  font-family: $font_mono;
+  font-size: 12px;
+  color: $text_secondary;
   white-space: nowrap;
-  min-width: 52px;
+  min-width: 56px;
   text-align: right;
 }
 
 .toggle {
   cursor: pointer;
   font-size: 9px;
-  color: #666;
+  color: $text_muted;
   user-select: none;
   width: 12px;
   flex-shrink: 0;
@@ -615,8 +640,9 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 .op-tag {
   color: white;
   font-size: 10px;
-  padding: 1px 5px;
-  border-radius: 3px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: $radius_sm;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -625,31 +651,33 @@ const selectedNode = computed<WaterfallNode | null>(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #333;
+  color: $text_primary;
 }
 
 /* Span detail block */
 .span-detail {
-  border: 1px solid $main_theme_border_color;
-  border-radius: 6px;
+  border: 1px solid $border_color;
+  border-radius: $radius_lg;
   overflow: hidden;
-  font-size: 12px;
+  background: $card_background;
+  box-shadow: $shadow_sm;
+  font-size: 13px;
 }
 
 .span-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 16px;
-  background: $main_theme_border_color_lighter1;
-  border-bottom: 1px solid $main_theme_border_color;
+  padding: 12px 18px;
+  background: $surface_subtle;
+  border-bottom: 1px solid $border_color;
 }
 
 .span-detail-title {
   font-weight: 600;
   font-size: 13px;
-  color: $main_theme_border_color_darker1;
-  font-family: monospace;
+  color: $text_primary;
+  font-family: $font_mono;
   word-break: break-all;
 }
 
@@ -658,18 +686,19 @@ const selectedNode = computed<WaterfallNode | null>(() => {
   border: none;
   cursor: pointer;
   font-size: 14px;
-  color: #888;
+  color: $text_muted;
   padding: 0 4px;
   flex-shrink: 0;
   margin-left: 12px;
+  transition: color 0.12s ease;
 
   &:hover {
-    color: #333;
+    color: $text_primary;
   }
 }
 
 .span-detail-body {
-  padding: 16px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -679,11 +708,11 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 .meta-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 12px 16px;
-  background: $main_theme_border_color_lighter1;
-  border: 1px solid $main_theme_border_color;
-  border-radius: 6px;
+  gap: 24px;
+  padding: 14px 18px;
+  background: $surface_subtle;
+  border: 1px solid $border_color;
+  border-radius: $radius_md;
 }
 
 .meta-item {
@@ -693,21 +722,21 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 }
 
 .meta-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  color: #888;
+  color: $text_muted;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .meta-value {
   font-size: 13px;
-  font-weight: 500;
-  color: $main_theme_border_color_darker1;
+  font-weight: 600;
+  color: $text_primary;
 
   &.mono {
-    font-family: monospace;
-    font-size: 11px;
+    font-family: $font_mono;
+    font-size: 12px;
   }
 }
 
@@ -719,22 +748,22 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 }
 
 .detail-section-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: #888;
+  color: $text_secondary;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .detail-pre {
   margin: 0;
-  font-family: monospace;
+  font-family: $font_mono;
   font-size: 12px;
-  color: #222;
-  background: $main_theme_border_color_lighter1;
-  border: 1px solid $main_theme_border_color;
-  border-radius: 4px;
-  padding: 10px 12px;
+  color: $text_primary;
+  background: $surface_subtle;
+  border: 1px solid $border_color;
+  border-radius: $radius_md;
+  padding: 12px 14px;
   white-space: pre-wrap;
   word-break: break-all;
   line-height: 1.6;
@@ -745,16 +774,16 @@ const selectedNode = computed<WaterfallNode | null>(() => {
   display: grid;
   grid-template-columns: minmax(120px, max-content) 1fr;
   gap: 0;
-  border: 1px solid $main_theme_border_color;
-  border-radius: 4px;
+  border: 1px solid $border_color;
+  border-radius: $radius_md;
   overflow: hidden;
 }
 
 .kv-key,
 .kv-val {
-  padding: 6px 10px;
+  padding: 7px 12px;
   font-size: 12px;
-  border-bottom: 1px solid $main_theme_border_color;
+  border-bottom: 1px solid $border_color;
   word-break: break-all;
 
   &:nth-last-child(-n+2) {
@@ -763,18 +792,18 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 }
 
 .kv-key {
-  font-family: monospace;
+  font-family: $font_mono;
   font-weight: 600;
-  color: #555;
-  background: $main_theme_border_color_lighter1;
-  border-right: 1px solid $main_theme_border_color;
+  color: $text_secondary;
+  background: $surface_subtle;
+  border-right: 1px solid $border_color;
   white-space: nowrap;
 }
 
 .kv-val {
-  font-family: monospace;
-  color: #222;
-  background: #fff;
+  font-family: $font_mono;
+  color: $text_primary;
+  background: $card_background;
   margin: 0;
   white-space: pre-wrap;
 }
@@ -782,6 +811,6 @@ const selectedNode = computed<WaterfallNode | null>(() => {
 .empty-state {
   text-align: center;
   padding: 40px;
-  color: #888;
+  color: $text_muted;
 }
 </style>
