@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import type { Rule, RuleAction, RuleTable } from '../models/role'
-import { RULE_ACTIONS, RULE_TABLES } from '../models/role'
+import { RULE_ACTIONS, RULE_TABLES, getTableActions, getTableLabel } from '../models/role'
 
 const props = withDefaults(defineProps<{
     modelValue: Rule[],
@@ -21,7 +21,7 @@ function initMatrix() {
     const matrix = {} as Record<RuleTable, Record<RuleAction, boolean>>
     for (const table of RULE_TABLES) {
         matrix[table] = {} as Record<RuleAction, boolean>
-        for (const action of RULE_ACTIONS) {
+        for (const action of getTableActions(table)) {
             matrix[table][action] = false
         }
     }
@@ -39,7 +39,7 @@ function initMatrix() {
 function updateRules() {
     const rules: Rule[] = []
     for (const table of RULE_TABLES) {
-        for (const action of RULE_ACTIONS) {
+        for (const action of getTableActions(table)) {
             if (rulesMatrix.value[table][action]) {
                 rules.push({
                     Table: table,
@@ -57,8 +57,12 @@ function toggleRule(table: RuleTable, action: RuleAction) {
     updateRules()
 }
 
-function formatTableName(table: string): string {
-    return table.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+function isActionAvailable(table: RuleTable, action: RuleAction): boolean {
+    return getTableActions(table).includes(action)
+}
+
+function formatTableName(table: RuleTable): string {
+    return getTableLabel(table) ?? table.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
 function setReadOnly() {
@@ -93,6 +97,7 @@ watch(() => props.modelValue, () => {
                 <div class="cell entity-name">{{ formatTableName(table) }}</div>
                 <div class="cell checkbox-cell" v-for="action in RULE_ACTIONS" :key="action">
                     <input
+                        v-if="isActionAvailable(table, action)"
                         type="checkbox"
                         :checked="rulesMatrix[table]?.[action] ?? false"
                         :disabled="readonly"
